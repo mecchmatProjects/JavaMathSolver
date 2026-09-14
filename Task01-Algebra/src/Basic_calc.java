@@ -9,12 +9,16 @@ public class Basic_calc {
         return a - b;
     }
 
-    public static double mult(double a, double b){
+    public static double mul(double a, double b){
         return a * b;
     }
 
-    //TODO: перевірити поведінку різних типів
-    public static double div(double a, double b){
+    public static double divDouble(double a, double b) {
+        return a / b;
+    }
+
+    // ALG-04 — Цілочисельне ділення (int)
+    public static int divInt(int a, int b) {
         return a / b;
     }
 
@@ -22,7 +26,6 @@ public class Basic_calc {
         return Math.pow(a, b);
     }
 
-    //TODO: test
     public static double abs(double a){
         return Math.abs(a);
     }
@@ -57,14 +60,35 @@ public class Basic_calc {
                 System.out.print("Введіть 2 числа: ");
                 double a = scanner.nextDouble();
                 double b = scanner.nextDouble();
-                System.out.println(Basic_calc.mult(a, b));
+                System.out.println(Basic_calc.mul(a, b));
 
             } else if (op.equals("div")) {
                 System.out.print("Введіть 2 числа: ");
-                double a = scanner.nextDouble();
-                double b = scanner.nextDouble();
-                System.out.println(Basic_calc.div(a, b));
+                // read like a text
+                String inputA = scanner.next();
+                String inputB = scanner.next();
 
+                // is there is a dot - double
+                boolean isFloatingPoint = inputA.contains(".") || inputA.contains(",")
+                        || inputB.contains(".") || inputB.contains(",");
+
+                if (isFloatingPoint) {
+                    // change coma into a dot
+                    double a = Double.parseDouble(inputA.replace(',', '.'));
+                    double b = Double.parseDouble(inputB.replace(',', '.'));
+
+                    System.out.println("Дійсний результат: " + divDouble(a, b));
+                } else {
+                    // both without dot - int
+                    int a = Integer.parseInt(inputA);
+                    int b = Integer.parseInt(inputB);
+
+                    if (b == 0) {
+                        System.out.println("Помилка: ділення на цілочисельний нуль неможливе (ArithmeticException)!");
+                    } else {
+                        System.out.println("Цілочисельний результат: " + divInt(a, b));
+                    }
+                }
             } else if (op.equals("pow")) {
                 System.out.print("Введіть 2 числа: ");
                 double a = scanner.nextDouble();
