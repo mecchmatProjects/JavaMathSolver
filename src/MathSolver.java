@@ -9,6 +9,29 @@ public class MathSolver {
 
         // CORE-01: Визначення назви операції з args[0]
         String command = args[0];
+
+        boolean known = 
+            command.equals("add") ||
+            command.equals("sub") ||
+            command.equals("mul") ||
+            command.equals("div") ||
+            command.equals("pow") ||
+            command.equals("sqrt") ||
+            command.equals("abs") ||
+            command.equals("distance") ||
+            command.equals("circle-area") ||
+            command.equals("circle-circumference") ||
+            command.equals("rectangle-area") ||
+            command.equals("rectangle-perimeter") ||
+            command.equals("origin-distance") ||
+            command.equals("help");
+
+        if (!known) {
+            System.out.println("Unknown command: " + command);
+            System.out.println("Use 'help' to see available commands.");
+            return;
+        }
+
         System.out.println("Command received: " + command);
     }
 }
