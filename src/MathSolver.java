@@ -20,14 +20,14 @@ public class MathSolver {
                 return;
             }
             else if(args.length>3){
-                    System.out.println("Error: Too many arguments");
-                    System.out.println("Use only 2 numbers!");
-                    return;
+                System.out.println("Error: Too many arguments");
+                System.out.println("Use only 2 numbers!");
+                return;
             }
         }
         if(command.equals("abs") || command.equals("sqrt") || command.equals("circle-area") || command.equals("circle-circumference")){
             if(args.length<2){
-                System.out.println("Error: Too many arguments");
+                System.out.println("Error: Not enough arguments");
                 System.out.println("Use a number!");
                 return;
             }
