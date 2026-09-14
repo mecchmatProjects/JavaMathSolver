@@ -27,11 +27,13 @@ public class MathSolver {
         System.out.println("mul a b");
         System.out.println("div a b");
         System.out.println("pow a b");
-        System.out.println("sqrt x\n");
+        System.out.println("sqrt x");
+        System.out.println("abs x\n");
         System.out.println("distance x1 y1 x2 y2");
         System.out.println("circle-area r");
         System.out.println("circle-circumference r");
         System.out.println("rectangle-area a b");
+        System.out.println("rectangle-perimeter a b");
         System.out.println("origin-distance x y");
     }
 }
