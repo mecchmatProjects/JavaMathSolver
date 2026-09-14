@@ -33,5 +33,28 @@ public class MathSolver {
         }
 
         System.out.println("Command received: " + command);
+
+        // CORE-03: Перетворення текстових аргументів зі String у double.
+        // Команда help не приймає числових аргументів, тому її не парсимо.
+        if (command.equals("help")) {
+            return;
+        }
+
+        double[] values = new double[args.length - 1];
+
+        for (int i = 1; i < args.length; i++) {
+            try {
+                values[i - 1] = Double.parseDouble(args[i]);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid number: " + args[i]);
+                System.out.println("Arguments must be numeric, for example: 10, -5, 3.14");
+                return;
+            }
+        }
+
+        System.out.println("Parsed " + values.length + " numeric argument(s):");
+        for (int i = 0; i < values.length; i++) {
+            System.out.println("  args[" + (i + 1) + "] = " + values[i]);
+        }
     }
 }
