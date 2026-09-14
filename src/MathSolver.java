@@ -16,7 +16,7 @@ public class MathSolver {
                 || command.equals("origin-distance") || command.equals("rectangle-area") || command.equals("rectangle-perimeter")){
             if(args.length<3) {
                 System.out.println("Error: Not enough arguments");
-                System.out.println("Use one more number!");
+                System.out.println("Use 2 numbers!");
                 return;
             }
             else if(args.length>3){
