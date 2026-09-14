@@ -12,8 +12,14 @@ public class MathSolver {
         System.out.println("Command received: " + command);
 
         // CORE-02 перевірка потрібної кількості аргументів
-        if(command.equals("add") || command.equals("sub") || command.equals("mul") || command.equals("div") || command.equals("pow")
-                || command.equals("origin-distance") || command.equals("rectangle-area") || command.equals("rectangle-perimeter")){
+        if(command.equals("add") ||
+           command.equals("sub") ||
+           command.equals("mul") ||
+           command.equals("div") ||
+           command.equals("pow") ||
+           command.equals("origin-distance") ||
+           command.equals("rectangle-area") ||
+           command.equals("rectangle-perimeter")){
             if(args.length<3) {
                 System.out.println("Error: Not enough arguments");
                 System.out.println("Use 2 numbers!");
@@ -25,7 +31,10 @@ public class MathSolver {
                 return;
             }
         }
-        if(command.equals("abs") || command.equals("sqrt") || command.equals("circle-area") || command.equals("circle-circumference")){
+        if(command.equals("abs") ||
+           command.equals("sqrt") ||
+           command.equals("circle-area") ||
+           command.equals("circle-circumference")){
             if(args.length<2){
                 System.out.println("Error: Not enough arguments");
                 System.out.println("Use a number!");
