@@ -35,5 +35,26 @@ public class MathSolver {
         double c = 2 * Math.PI * r;
         System.out.println("circle circumference = " + c);
     }
+    
+    // GEO-04: Rectangle area  
+    public static void calculateRectangleArea(String[] args) {  
+        double a = Double.parseDouble(args[1]);  
+        double b = Double.parseDouble(args[2]);  
+        if (a < 0 || b < 0) {  
+            System.out.println("Error: side lengths cannot be negative");  
+            return;  
+        }  
+        double s = a * b;  
+        System.out.println("rectangle area = " + s);  
+    }
+
+    // GEO-06: Euclidean distance from origin  
+    public static void calculateOriginDistance(String[] args) {  
+        double x = Double.parseDouble(args[1]);  
+        double y = Double.parseDouble(args[2]);
+
+        double d = Math.sqrt(x * x + y * y);  
+        System.out.println("origin distance = " + d);  
+    }
 
 }
