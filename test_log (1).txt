@@ -1,0 +1,98 @@
+### T1 нормальний сценарій
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: 5.0
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: 6.0
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: 28.0
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: 1024.0
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 1 число: 5.0
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Бувай!
+### T2 ALG-04 ділення
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: Цілочисельний результат: 5
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: Цілочисельний результат: 3
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: Дійсний результат: 5.0
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: Дійсний результат: Infinity
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: Дійсний результат: -Infinity
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: Дійсний результат: NaN
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: Помилка: ділення на цілочисельний нуль неможливе (ArithmeticException)!
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Бувай!
+### T3 текст замість числа
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: Exception in thread "main" java.util.InputMismatchException
+	at java.base/java.util.Scanner.throwFor(Scanner.java:947)
+	at java.base/java.util.Scanner.next(Scanner.java:1602)
+	at java.base/java.util.Scanner.nextDouble(Scanner.java:2573)
+	at Basic_calc.main(Basic_calc.java:49)
+### T4 EOF без exit
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: 3.0
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Exception in thread "main" java.util.NoSuchElementException
+	at java.base/java.util.Scanner.throwFor(Scanner.java:945)
+	at java.base/java.util.Scanner.next(Scanner.java:1486)
+	at Basic_calc.main(Basic_calc.java:38)
+### T5 невідома операція/регістр
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Ой! Невідома операція!
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Ой! Невідома операція!
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Ой! Невідома операція!
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Ой! Невідома операція!
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Бувай!
+### T6 текст у div
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: Exception in thread "main" java.lang.NumberFormatException: For input string: "abc"
+	at java.base/java.lang.NumberFormatException.forInputString(NumberFormatException.java:67)
+	at java.base/java.lang.Integer.parseInt(Integer.java:662)
+	at java.base/java.lang.Integer.parseInt(Integer.java:778)
+	at Basic_calc.main(Basic_calc.java:83)
+### T7 завелике ціле
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: Exception in thread "main" java.lang.NumberFormatException: For input string: "10000000000"
+	at java.base/java.lang.NumberFormatException.forInputString(NumberFormatException.java:67)
+	at java.base/java.lang.Integer.parseInt(Integer.java:662)
+	at java.base/java.lang.Integer.parseInt(Integer.java:778)
+	at Basic_calc.main(Basic_calc.java:83)
+### T8 наукова нотація у div
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: Exception in thread "main" java.lang.NumberFormatException: For input string: "1e5"
+	at java.base/java.lang.NumberFormatException.forInputString(NumberFormatException.java:67)
+	at java.base/java.lang.Integer.parseInt(Integer.java:662)
+	at java.base/java.lang.Integer.parseInt(Integer.java:778)
+	at Basic_calc.main(Basic_calc.java:83)
+### T9 кома у div
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: Дійсний результат: 1.25
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: Дійсний результат: 5.0
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Бувай!
+### T10 переповнення int
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: Цілочисельний результат: -2147483648
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: Цілочисельний результат: 2147483647
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Бувай!
+### T11 кома в add (POSIX)
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: Exception in thread "main" java.util.InputMismatchException
+	at java.base/java.util.Scanner.throwFor(Scanner.java:947)
+	at java.base/java.util.Scanner.next(Scanner.java:1602)
+	at java.base/java.util.Scanner.nextDouble(Scanner.java:2573)
+	at Basic_calc.main(Basic_calc.java:49)
+### T12 локаль uk_UA, крапка
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: Exception in thread "main" java.util.InputMismatchException
+	at java.base/java.util.Scanner.throwFor(Scanner.java:947)
+	at java.base/java.util.Scanner.next(Scanner.java:1602)
+	at java.base/java.util.Scanner.nextDouble(Scanner.java:2573)
+	at Basic_calc.main(Basic_calc.java:49)
+### T13 локаль uk_UA, кома
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: 4.140000000000001
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Бувай!
+### T14 математичні межі
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: 0.30000000000000004
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: 0.19999999999999998
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: 0.30000000000000004
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: Infinity
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: 1.4142135623730951
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: 1.0
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: NaN
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: 4.0
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 1 число: 0.0
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 1 число: 1.0E-5
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Бувай!
+### T15 exit замість числа
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: Exception in thread "main" java.util.InputMismatchException
+	at java.base/java.util.Scanner.throwFor(Scanner.java:947)
+	at java.base/java.util.Scanner.next(Scanner.java:1602)
+	at java.base/java.util.Scanner.nextDouble(Scanner.java:2573)
+	at Basic_calc.main(Basic_calc.java:49)
+### T16 зайві числа
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Введіть 2 числа: 3.0
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Ой! Невідома операція!
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Ой! Невідома операція!
+Введіть операцію (add, sub, mul, div, pow, abs або exit): Бувай!
