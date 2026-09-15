@@ -110,26 +110,27 @@ public class Basic_calc {
                 if (!scanner.nextLine().trim().isEmpty()) {
                     System.out.println("Помилка: потрібно ввести тільки 2 числа.");
                 } else {
+                    try {
+                        boolean isFloatingPoint =
+                                inputA.contains(".") || inputA.contains(",")
+                                        || inputB.contains(".") || inputB.contains(",");
 
-                    boolean isFloatingPoint =
-                            inputA.contains(".") || inputA.contains(",")
-                                    || inputB.contains(".") || inputB.contains(",");
-
-                    if (isFloatingPoint) {
-                        double a = Double.parseDouble(inputA.replace(',', '.'));
-                        double b = Double.parseDouble(inputB.replace(',', '.'));
-
-                        System.out.println("Дійсний результат: " + divDouble(a, b));
-
-                    } else {
-                        int a = Integer.parseInt(inputA);
-                        int b = Integer.parseInt(inputB);
-
-                        if (b == 0) {
-                            System.out.println("Помилка: ділення на цілочисельний нуль неможливе!");
+                        if (isFloatingPoint) {
+                            double a = Double.parseDouble(inputA.replace(',', '.'));
+                            double b = Double.parseDouble(inputB.replace(',', '.'));
+                            System.out.println("Дійсний результат: " + divDouble(a, b));
                         } else {
-                            System.out.println("Цілочисельний результат: " + divInt(a, b));
+                            int a = Integer.parseInt(inputA);
+                            int b = Integer.parseInt(inputB);
+
+                            if (b == 0) {
+                                System.out.println("Помилка: ділення на цілочисельний нуль неможливе!");
+                            } else {
+                                System.out.println("Цілочисельний результат: " + divInt(a, b));
+                            }
                         }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid number");
                     }
                 }
 
@@ -176,6 +177,8 @@ public class Basic_calc {
 
                     if (!scanner.nextLine().trim().isEmpty()) {
                         System.out.println("Помилка: потрібно ввести тільки 1 число.");
+                    } else if (x < 0) {
+                        System.out.println("Помилка: корінь з від'ємного числа не існує серед дійсних чисел.");
                     } else {
                         System.out.println(Basic_calc.sqrt(x));
                     }
