@@ -35,3 +35,5 @@ public class MathSolver {
         double c = 2 * Math.PI * r;
         System.out.println("circle circumference = " + c);
     }
+
+}
