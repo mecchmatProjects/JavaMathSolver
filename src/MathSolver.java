@@ -25,4 +25,13 @@ public class MathSolver {
         System.out.println("circle area = " + s);
     }
 
-}
+    // GEO-03: Circle circumference
+    public static void calculateCircleCircumference(String[] args) {
+        double r = Double.parseDouble(args[1]);
+        if (r < 0) {
+            System.out.println("Error: radius cannot be negative");
+            return;
+        }
+        double c = 2 * Math.PI * r;
+        System.out.println("circle circumference = " + c);
+    }
