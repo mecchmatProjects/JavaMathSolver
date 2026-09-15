@@ -47,6 +47,18 @@ public class MathSolver {
         double s = a * b;  
         System.out.println("rectangle area = " + s);  
     }
+    
+    // GEO-05: Rectangle perimeter
+    public static void calculateRectanglePerimeter(String[] args) {
+        double a = Double.parseDouble(args[1]);
+        double b = Double.parseDouble(args[2]);
+        if (a < 0 || b < 0) {
+            System.out.println("Error: side lengths cannot be negative");
+            return;
+        }
+        double p = 2 * (a + b);
+        System.out.println("rectangle perimeter = " + p);
+    }
 
     // GEO-06: Euclidean distance from origin  
     public static void calculateOriginDistance(String[] args) {  
