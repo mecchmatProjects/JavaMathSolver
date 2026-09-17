@@ -30,8 +30,7 @@ public class MathSolver {
                         command.equals("circle-circumference") ||
                         command.equals("rectangle-area") ||
                         command.equals("rectangle-perimeter") ||
-                        command.equals("origin-distance") ||
-                        command.equals("help");
+                        command.equals("origin-distance");
 
         if (!known) {
             System.out.println("Unknown command: " + command);
@@ -41,51 +40,10 @@ public class MathSolver {
 
         System.out.println("Command received: " + command);
 
-        // CORE-02: Перевірка потрібної кількості аргументів
-        if (command.equals("add") ||
-                command.equals("sub") ||
-                command.equals("mul") ||
-                command.equals("div") ||
-                command.equals("pow") ||
-                command.equals("origin-distance") ||
-                command.equals("rectangle-area") ||
-                command.equals("rectangle-perimeter")) {
-            if (args.length < 3) {
-                System.out.println("Error: Not enough arguments");
-                System.out.println("Use 2 numbers!");
-                return;
-            } else if (args.length > 3) {
-                System.out.println("Error: Too many arguments");
-                System.out.println("Use only 2 numbers!");
-                return;
-            }
-        }
-
-        if (command.equals("abs") ||
-                command.equals("sqrt") ||
-                command.equals("circle-area") ||
-                command.equals("circle-circumference")) {
-            if (args.length < 2) {
-                System.out.println("Error: Not enough arguments");
-                System.out.println("Use a number!");
-                return;
-            } else if (args.length > 2) {
-                System.out.println("Error: Too many arguments");
-                System.out.println("Use only one number!");
-                return;
-            }
-        }
-
-        if (command.equals("distance")) {
-            if (args.length < 5) {
-                System.out.println("Error: Not enough arguments");
-                System.out.println("Use 4 numbers!");
-                return;
-            } else if (args.length > 5) {
-                System.out.println("Error: Too many arguments");
-                System.out.println("Use only 4 numbers!");
-                return;
-            }
+        // CORE-12: Математична валідація кількості аргументів
+        int actualArgsCount = args.length - 1;
+        if (!validateArgs(command, actualArgsCount)) {
+            return;
         }
 
         // CORE-03: Перетворення текстових аргументів зі String у double
@@ -140,6 +98,59 @@ public class MathSolver {
             calculateRectanglePerimeter(args);
         } else if (command.equals("origin-distance")) {
             calculateOriginDistance(args);
+        }
+    }
+
+    // CORE-12: Декомпозиція перевірки кількості аргументів
+    public static int getExpectedArgsCount(String command) {
+        switch (command) {
+            case "abs":
+            case "sqrt":
+            case "circle-area":
+            case "circle-circumference":
+                return 1;
+
+            case "add":
+            case "sub":
+            case "mul":
+            case "div":
+            case "pow":
+            case "origin-distance":
+            case "rectangle-area":
+            case "rectangle-perimeter":
+                return 2;
+
+            case "distance":
+                return 4;
+
+            default:
+                return -1;
+        }
+    }
+
+    public static boolean validateArgs(String command, int actualCount) {
+        int expected = getExpectedArgsCount(command);
+        if (expected == -1) {
+            return true;
+        }
+
+        if (actualCount < expected) {
+            System.out.println("Error: Not enough arguments");
+            printExpectedCountHint(expected);
+            return false;
+        } else if (actualCount > expected) {
+            System.out.println("Error: Too many arguments");
+            printExpectedCountHint(expected);
+            return false;
+        }
+        return true;
+    }
+
+    public static void printExpectedCountHint(int expected) {
+        if (expected == 1) {
+            System.out.println("Use a number!");
+        } else {
+            System.out.println("Use " + expected + " numbers!");
         }
     }
 
