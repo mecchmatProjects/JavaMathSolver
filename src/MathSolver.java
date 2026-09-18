@@ -16,33 +16,22 @@ public class MathSolver {
             return;
         }
 
-        // CORE-05: Перевірка на невідому команду
-        boolean known =
-                command.equals("add") ||
-                        command.equals("sub") ||
-                        command.equals("mul") ||
-                        command.equals("div") ||
-                        command.equals("pow") ||
-                        command.equals("sqrt") ||
-                        command.equals("abs") ||
-                        command.equals("distance") ||
-                        command.equals("circle-area") ||
-                        command.equals("circle-circumference") ||
-                        command.equals("rectangle-area") ||
-                        command.equals("rectangle-perimeter") ||
-                        command.equals("origin-distance");
+        System.out.println("Command received: " + command);
 
-        if (!known) {
+        // CORE-12: Математична валідація кількості аргументів
+        int expected = getExpectedArgsCount(command);
+
+        // Якщо команда не знайдена у списку
+        if (expected == -1) {
             System.out.println("Unknown command: " + command);
             System.out.println("Use 'help' to see available commands.");
             return;
         }
 
-        System.out.println("Command received: " + command);
-
-        // CORE-12: Математична валідація кількості аргументів
         int actualArgsCount = args.length - 1;
-        if (!validateArgs(command, actualArgsCount)) {
+
+        // Перевіряємо арність
+        if (!validateArgs(actualArgsCount, expected)) {
             return;
         }
 
@@ -108,6 +97,8 @@ public class MathSolver {
             case "sqrt":
             case "circle-area":
             case "circle-circumference":
+            case "factorial":
+            case "fibonacci":
                 return 1;
 
             case "add":
@@ -118,22 +109,32 @@ public class MathSolver {
             case "origin-distance":
             case "rectangle-area":
             case "rectangle-perimeter":
+            case "solve-linear":
+            case "gcd":
+            case "quadrant":
                 return 2;
 
+            case "solve-quadratic":
+            case "max3":
+            case "triangle-area":
+            case "triangle-valid":
+                return 3;
+
             case "distance":
+            case "manhattan-distance":
+            case "midpoint":
                 return 4;
+
+            case "collinear":
+                return 6;
 
             default:
                 return -1;
         }
     }
 
-    public static boolean validateArgs(String command, int actualCount) {
-        int expected = getExpectedArgsCount(command);
-        if (expected == -1) {
-            return true;
-        }
-
+    // Оновлений метод валідації (приймає вже визначену очікувану кількість)
+    public static boolean validateArgs(int actualCount, int expected) {
         if (actualCount < expected) {
             System.out.println("Error: Not enough arguments");
             printExpectedCountHint(expected);
