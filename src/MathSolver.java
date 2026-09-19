@@ -1,3 +1,5 @@
+import java.util.Locale;
+
 public class MathSolver {
     public static void main(String[] args) {
         // Базовий захист від виклику без параметрів
@@ -15,8 +17,6 @@ public class MathSolver {
             printHelp();
             return;
         }
-
-        System.out.println("Command received: " + command);
 
         // CORE-12: Математична валідація кількості аргументів
         int expected = getExpectedArgsCount(command);
@@ -47,11 +47,6 @@ public class MathSolver {
             }
         }
 
-        System.out.println("Parsed " + values.length + " numeric argument(s):");
-        for (int i = 0; i < values.length; i++) {
-            System.out.println(" args[" + (i + 1) + "] = " + values[i]);
-        }
-
         // CORE-11: Диспетчеризація на основі switch(command)
         switch (command) {
             case "help":
@@ -60,28 +55,28 @@ public class MathSolver {
 
             // --- ALGEBRA (Lab 1) ---
             case "add":
-                System.out.println(values[0] + " + " + values[1] + " = " + add(values[0], values[1]));
+                printResult(add(values[0], values[1]));
                 break;
             case "sub":
-                System.out.println(values[0] + " - " + values[1] + " = " + sub(values[0], values[1]));
+                printResult(sub(values[0], values[1]));
                 break;
             case "mul":
-                System.out.println(values[0] + " * " + values[1] + " = " + mul(values[0], values[1]));
+                printResult(mul(values[0], values[1]));
                 break;
             case "div":
-                System.out.println(values[0] + " / " + values[1] + " = " + div(values[0], values[1]));
+                printResult(div(values[0], values[1]));
                 break;
             case "pow":
-                System.out.println(values[0] + " ^ " + values[1] + " = " + pow(values[0], values[1]));
+                printResult(pow(values[0], values[1]));
                 break;
             case "abs":
-                System.out.println("abs(" + values[0] + ") = " + abs(values[0]));
+                printResult(abs(values[0]));
                 break;
             case "sqrt":
                 if (values[0] < 0) {
                     System.out.println("Error: square root of negative number");
                 } else {
-                    System.out.println("sqrt(" + values[0] + ") = " + sqrt(values[0]));
+                    printResult(sqrt(values[0]));
                 }
                 break;
 
@@ -205,6 +200,12 @@ public class MathSolver {
         return true;
     }
 
+    // CORE-14: Єдиний формат числового виводу.
+    // Locale.ROOT потрібен, бо у локалях типу uk_UA %f друкує кому замість крапки
+    public static void printResult(double value) {
+        System.out.printf(Locale.ROOT, "Result: %f%n", value);
+    }
+
     // CORE-04: Довідка
     public static void printHelp() {
         System.out.println("JavaMathSolver\n");
@@ -302,7 +303,7 @@ public class MathSolver {
         double y2 = Double.parseDouble(args[4]);
 
         double d = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-        System.out.println("distance = " + d);
+        printResult(d);
     }
 
     public static void calculateCircleArea(String[] args) {
@@ -312,7 +313,7 @@ public class MathSolver {
             return;
         }
         double s = Math.PI * r * r;
-        System.out.println("circle area = " + s);
+        printResult(s);
     }
 
     public static void calculateCircleCircumference(String[] args) {
@@ -322,7 +323,7 @@ public class MathSolver {
             return;
         }
         double c = 2 * Math.PI * r;
-        System.out.println("circle circumference = " + c);
+        printResult(c);
     }
 
     public static void calculateRectangleArea(String[] args) {
@@ -333,7 +334,7 @@ public class MathSolver {
             return;
         }
         double s = a * b;
-        System.out.println("rectangle area = " + s);
+        printResult(s);
     }
 
     public static void calculateRectanglePerimeter(String[] args) {
@@ -344,7 +345,7 @@ public class MathSolver {
             return;
         }
         double p = 2 * (a + b);
-        System.out.println("rectangle perimeter = " + p);
+        printResult(p);
     }
 
     public static void calculateOriginDistance(String[] args) {
@@ -352,7 +353,7 @@ public class MathSolver {
         double y = Double.parseDouble(args[2]);
 
         double d = Math.sqrt(x * x + y * y);
-        System.out.println("origin distance = " + d);
+        printResult(d);
     }
 
     // --- Geometry Lab 2 Stubs ---
