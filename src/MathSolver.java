@@ -16,76 +16,23 @@ public class MathSolver {
             return;
         }
 
-        // CORE-05: Перевірка на невідому команду
-        boolean known =
-                command.equals("add") ||
-                        command.equals("sub") ||
-                        command.equals("mul") ||
-                        command.equals("div") ||
-                        command.equals("pow") ||
-                        command.equals("sqrt") ||
-                        command.equals("abs") ||
-                        command.equals("distance") ||
-                        command.equals("circle-area") ||
-                        command.equals("circle-circumference") ||
-                        command.equals("rectangle-area") ||
-                        command.equals("rectangle-perimeter") ||
-                        command.equals("origin-distance") ||
-                        command.equals("help");
+        System.out.println("Command received: " + command);
 
-        if (!known) {
+        // CORE-12: Математична валідація кількості аргументів
+        int expected = getExpectedArgsCount(command);
+
+        // Якщо команда не знайдена у списку
+        if (expected == -1) {
             System.out.println("Unknown command: " + command);
             System.out.println("Use 'help' to see available commands.");
             return;
         }
 
-        System.out.println("Command received: " + command);
+        int actualArgsCount = args.length - 1;
 
-        // CORE-02: Перевірка потрібної кількості аргументів
-        if (command.equals("add") ||
-                command.equals("sub") ||
-                command.equals("mul") ||
-                command.equals("div") ||
-                command.equals("pow") ||
-                command.equals("origin-distance") ||
-                command.equals("rectangle-area") ||
-                command.equals("rectangle-perimeter")) {
-            if (args.length < 3) {
-                System.out.println("Error: Not enough arguments");
-                System.out.println("Use 2 numbers!");
-                return;
-            } else if (args.length > 3) {
-                System.out.println("Error: Too many arguments");
-                System.out.println("Use only 2 numbers!");
-                return;
-            }
-        }
-
-        if (command.equals("abs") ||
-                command.equals("sqrt") ||
-                command.equals("circle-area") ||
-                command.equals("circle-circumference")) {
-            if (args.length < 2) {
-                System.out.println("Error: Not enough arguments");
-                System.out.println("Use a number!");
-                return;
-            } else if (args.length > 2) {
-                System.out.println("Error: Too many arguments");
-                System.out.println("Use only one number!");
-                return;
-            }
-        }
-
-        if (command.equals("distance")) {
-            if (args.length < 5) {
-                System.out.println("Error: Not enough arguments");
-                System.out.println("Use 4 numbers!");
-                return;
-            } else if (args.length > 5) {
-                System.out.println("Error: Too many arguments");
-                System.out.println("Use only 4 numbers!");
-                return;
-            }
+        // Перевіряємо арність
+        if (!validateArgs(actualArgsCount, expected)) {
+            return;
         }
 
         // CORE-03: Перетворення текстових аргументів зі String у double
@@ -140,6 +87,71 @@ public class MathSolver {
             calculateRectanglePerimeter(args);
         } else if (command.equals("origin-distance")) {
             calculateOriginDistance(args);
+        }
+    }
+
+    // CORE-12: Декомпозиція перевірки кількості аргументів
+    public static int getExpectedArgsCount(String command) {
+        switch (command) {
+            case "abs":
+            case "sqrt":
+            case "circle-area":
+            case "circle-circumference":
+            case "factorial":
+            case "fibonacci":
+                return 1;
+
+            case "add":
+            case "sub":
+            case "mul":
+            case "div":
+            case "pow":
+            case "origin-distance":
+            case "rectangle-area":
+            case "rectangle-perimeter":
+            case "solve-linear":
+            case "gcd":
+            case "quadrant":
+                return 2;
+
+            case "solve-quadratic":
+            case "max3":
+            case "triangle-area":
+            case "triangle-valid":
+                return 3;
+
+            case "distance":
+            case "manhattan-distance":
+            case "midpoint":
+                return 4;
+
+            case "collinear":
+                return 6;
+
+            default:
+                return -1;
+        }
+    }
+
+    // Оновлений метод валідації (приймає вже визначену очікувану кількість)
+    public static boolean validateArgs(int actualCount, int expected) {
+        if (actualCount < expected) {
+            System.out.println("Error: Not enough arguments");
+            printExpectedCountHint(expected);
+            return false;
+        } else if (actualCount > expected) {
+            System.out.println("Error: Too many arguments");
+            printExpectedCountHint(expected);
+            return false;
+        }
+        return true;
+    }
+
+    public static void printExpectedCountHint(int expected) {
+        if (expected == 1) {
+            System.out.println("Use a number!");
+        } else {
+            System.out.println("Use " + expected + " numbers!");
         }
     }
 
