@@ -34,8 +34,11 @@ public class MathSolver {
         if (!validateArgs(actualArgsCount, expected)) {
             return;
         }
+        //CORE-13 парсинг в один масив окремо long та double для тих кому треба
+        Number[] arguments = new Number[args.length-1];
+        if(!InputParsing(arguments, args)) return;
 
-        // CORE-03: Перетворення текстових аргументів зі String у double
+        //CORE-03: Перетворення текстових аргументів зі String у double
         double[] values = new double[args.length - 1];
 
         for (int i = 1; i < args.length; i++) {
@@ -194,6 +197,22 @@ public class MathSolver {
             default:
                 return -1;
         }
+    }
+    //заповнення масиву з числами
+    public static boolean InputParsing(Number[] arr, String[] args){
+        for(int i=0;i<args.length-1;i++){
+            try{
+                if(!args[i+1].contains(".") && !args[i+1].contains("e")){
+                    arr[i] = Long.parseLong(args[i+1]);
+                }
+                else{
+                    arr[i] = Double.parseDouble(args[i+1]);
+                }
+            } catch(NumberFormatException e){
+                return false;
+            }
+        }
+        return true;
     }
 
     // Оновлений метод валідації (приймає вже визначену очікувану кількість)
