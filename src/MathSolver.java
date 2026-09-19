@@ -23,7 +23,7 @@ public class MathSolver {
 
         // Якщо команда не знайдена у списку
         if (expected == -1) {
-            System.out.println("Unknown command: " + command);
+            System.out.println("Error: Unknown command: " + command);
             System.out.println("Use 'help' to see available commands.");
             return;
         }
@@ -42,8 +42,7 @@ public class MathSolver {
             try {
                 values[i - 1] = Double.parseDouble(args[i]);
             } catch (NumberFormatException e) {
-                System.out.println("Invalid number: " + args[i]);
-                System.out.println("Arguments must be numeric, for example: 10, -5, 3.14");
+                System.out.println("Error: Invalid number: " + args[i]);
                 return;
             }
         }
@@ -61,14 +60,18 @@ public class MathSolver {
         } else if (command.equals("mul")) {
             System.out.println(values[0] + " * " + values[1] + " = " + mul(values[0], values[1]));
         } else if (command.equals("div")) {
-            System.out.println(values[0] + " / " + values[1] + " = " + div(values[0], values[1]));
+            if (values[1] == 0) {
+                System.out.println("Error: Division by zero");
+            } else {
+                System.out.println(values[0] + " / " + values[1] + " = " + div(values[0], values[1]));
+            }
         } else if (command.equals("pow")) {
             System.out.println(values[0] + " ^ " + values[1] + " = " + pow(values[0], values[1]));
         } else if (command.equals("abs")) {
             System.out.println("abs(" + values[0] + ") = " + abs(values[0]));
         } else if (command.equals("sqrt")) {
             if (values[0] < 0) {
-                System.out.println("Error: square root of negative number");
+                System.out.println("Error: Invalid mathematical input");
             } else {
                 System.out.println("sqrt(" + values[0] + ") = " + sqrt(values[0]));
             }
@@ -135,24 +138,11 @@ public class MathSolver {
 
     // Оновлений метод валідації (приймає вже визначену очікувану кількість)
     public static boolean validateArgs(int actualCount, int expected) {
-        if (actualCount < expected) {
-            System.out.println("Error: Not enough arguments");
-            printExpectedCountHint(expected);
-            return false;
-        } else if (actualCount > expected) {
-            System.out.println("Error: Too many arguments");
-            printExpectedCountHint(expected);
+        if (actualCount != expected) {
+            System.out.println("Error: Wrong number of arguments");
             return false;
         }
         return true;
-    }
-
-    public static void printExpectedCountHint(int expected) {
-        if (expected == 1) {
-            System.out.println("Use a number!");
-        } else {
-            System.out.println("Use " + expected + " numbers!");
-        }
     }
 
     // CORE-04: Довідка
@@ -217,7 +207,7 @@ public class MathSolver {
     public static void calculateCircleArea(String[] args) {
         double r = Double.parseDouble(args[1]);
         if (r < 0) {
-            System.out.println("Error: radius cannot be negative");
+            System.out.println("Error: Invalid mathematical input");
             return;
         }
         double s = Math.PI * r * r;
@@ -227,7 +217,7 @@ public class MathSolver {
     public static void calculateCircleCircumference(String[] args) {
         double r = Double.parseDouble(args[1]);
         if (r < 0) {
-            System.out.println("Error: radius cannot be negative");
+            System.out.println("Error: Invalid mathematical input");
             return;
         }
         double c = 2 * Math.PI * r;
@@ -238,7 +228,7 @@ public class MathSolver {
         double a = Double.parseDouble(args[1]);
         double b = Double.parseDouble(args[2]);
         if (a < 0 || b < 0) {
-            System.out.println("Error: side lengths cannot be negative");
+            System.out.println("Error: Invalid mathematical input");
             return;
         }
         double s = a * b;
@@ -249,7 +239,7 @@ public class MathSolver {
         double a = Double.parseDouble(args[1]);
         double b = Double.parseDouble(args[2]);
         if (a < 0 || b < 0) {
-            System.out.println("Error: side lengths cannot be negative");
+            System.out.println("Error: Invalid mathematical input");
             return;
         }
         double p = 2 * (a + b);
