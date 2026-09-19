@@ -34,20 +34,11 @@ public class MathSolver {
         if (!validateArgs(actualArgsCount, expected)) {
             return;
         }
-        //CORE-13 парсинг в один масив окремо long та double для тих кому треба
-        Number[] arguments = new Number[args.length-1];
-        if(!InputParsing(arguments, args)) return;
 
-        //CORE-03: Перетворення текстових аргументів зі String у double
-        double[] values = new double[args.length - 1];
-
-        for (int i = 1; i < args.length; i++) {
-            try {
-                values[i - 1] = Double.parseDouble(args[i]);
-            } catch (NumberFormatException e) {
-                System.out.println("Error: Invalid number: " + args[i]);
-                return;
-            }
+        // CORE-13: Парсинг в один масив окремо Long та Double
+        Number[] arguments = new Number[args.length - 1];
+        if (!parseArguments(arguments, args)) {
+            return;
         }
 
         // CORE-11: Диспетчеризація на основі switch(command)
@@ -58,49 +49,53 @@ public class MathSolver {
 
             // --- ALGEBRA (Lab 1) ---
             case "add":
-                printResult(add(values[0], values[1]));
+                printResult(add(arguments[0].doubleValue(), arguments[1].doubleValue()));
                 break;
             case "sub":
-                printResult(sub(values[0], values[1]));
+                printResult(sub(arguments[0].doubleValue(), arguments[1].doubleValue()));
                 break;
             case "mul":
-                printResult(mul(values[0], values[1]));
+                printResult(mul(arguments[0].doubleValue(), arguments[1].doubleValue()));
                 break;
             case "div":
-                printResult(div(values[0], values[1]));
+                if (arguments[1].doubleValue() == 0) {
+                    System.out.println("Error: Division by zero");
+                } else {
+                    printResult(div(arguments[0].doubleValue(), arguments[1].doubleValue()));
+                }
                 break;
             case "pow":
-                printResult(pow(values[0], values[1]));
+                printResult(pow(arguments[0].doubleValue(), arguments[1].doubleValue()));
                 break;
             case "abs":
-                printResult(abs(values[0]));
+                printResult(abs(arguments[0].doubleValue()));
                 break;
             case "sqrt":
-                if (values[0] < 0) {
-                    System.out.println("Error: square root of negative number");
+                if (arguments[0].doubleValue() < 0) {
+                    System.out.println("Error: Invalid mathematical input");
                 } else {
-                    printResult(sqrt(values[0]));
+                    printResult(sqrt(arguments[0].doubleValue()));
                 }
                 break;
 
             // --- ALGEBRA (Lab 2 stubs) ---
             case "solve-linear":
-                solveLinear(values[0], values[1]);
+                solveLinear(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
             case "solve-quadratic":
-                solveQuadratic(values[0], values[1], values[2]);
+                solveQuadratic(arguments[0].doubleValue(), arguments[1].doubleValue(), arguments[2].doubleValue());
                 break;
             case "max3":
-                max3(values[0], values[1], values[2]);
+                max3(arguments[0].doubleValue(), arguments[1].doubleValue(), arguments[2].doubleValue());
                 break;
             case "gcd":
-                gcd((int) values[0], (int) values[1]);
+                gcd(arguments[0].intValue(), arguments[1].intValue());
                 break;
             case "factorial":
-                factorial((int) values[0]);
+                factorial(arguments[0].intValue());
                 break;
             case "fibonacci":
-                fibonacci((int) values[0]);
+                fibonacci(arguments[0].intValue());
                 break;
 
             // --- GEOMETRY (Lab 1) ---
@@ -141,12 +136,6 @@ public class MathSolver {
                 break;
             case "collinear":
                 calculateCollinear(args);
-                break;
-
-            // Завершення через default для невідомих команд
-            default:
-                System.out.println("Unknown command: " + command);
-                System.out.println("Use 'help' to see available commands.");
                 break;
         }
     }
@@ -193,24 +182,25 @@ public class MathSolver {
                 return -1;
         }
     }
-    //заповнення масиву з числами
-    public static boolean InputParsing(Number[] arr, String[] args){
-        for(int i=0;i<args.length-1;i++){
-            try{
-                if(!args[i+1].contains(".") && !args[i+1].contains("e")){
-                    arr[i] = Long.parseLong(args[i+1]);
+
+    // Заповнення масиву з числами
+    public static boolean parseArguments(Number[] arr, String[] args) {
+        for (int i = 0; i < args.length - 1; i++) {
+            try {
+                if (!args[i + 1].contains(".") && !args[i + 1].contains("e")) {
+                    arr[i] = Long.parseLong(args[i + 1]);
+                } else {
+                    arr[i] = Double.parseDouble(args[i + 1]);
                 }
-                else{
-                    arr[i] = Double.parseDouble(args[i+1]);
-                }
-            } catch(NumberFormatException e){
+            } catch (NumberFormatException e) {
+                System.out.println("Error: Invalid number: " + args[i + 1]);
                 return false;
             }
         }
         return true;
     }
 
-    // Оновлений метод валідації (приймає вже визначену очікувану кількість)
+    // Оновлений метод валідації
     public static boolean validateArgs(int actualCount, int expected) {
         if (actualCount != expected) {
             System.out.println("Error: Wrong number of arguments");
@@ -220,7 +210,6 @@ public class MathSolver {
     }
 
     // CORE-14: Єдиний формат числового виводу.
-    // Locale.ROOT потрібен, бо у локалях типу uk_UA %f друкує кому замість крапки
     public static void printResult(double value) {
         System.out.printf(Locale.ROOT, "Result: %f%n", value);
     }
@@ -229,8 +218,6 @@ public class MathSolver {
     public static void printHelp() {
         System.out.println("JavaMathSolver\n");
         System.out.println("Available commands:\n");
-
-        // --- Algebra ---
         System.out.println("add a b");
         System.out.println("sub a b");
         System.out.println("mul a b");
@@ -244,8 +231,6 @@ public class MathSolver {
         System.out.println("gcd a b");
         System.out.println("factorial n");
         System.out.println("fibonacci n\n");
-
-        // --- Geometry ---
         System.out.println("distance x1 y1 x2 y2");
         System.out.println("circle-area r");
         System.out.println("circle-circumference r");
@@ -261,58 +246,21 @@ public class MathSolver {
     }
 
     // ALGEBRA (ALG-01 ... ALG-06)
-    public static double add(double a, double b) {
-        return a + b;
-    }
-
-    public static double sub(double a, double b) {
-        return a - b;
-    }
-
-    public static double mul(double a, double b) {
-        return a * b;
-    }
-
-    public static double div(double a, double b) {
-        return a / b;
-    }
-
-    public static double pow(double a, double b) {
-        return Math.pow(a, b);
-    }
-
-    public static double abs(double a) {
-        return Math.abs(a);
-    }
-
-    public static double sqrt(double a) {
-        return Math.sqrt(a);
-    }
+    public static double add(double a, double b) { return a + b; }
+    public static double sub(double a, double b) { return a - b; }
+    public static double mul(double a, double b) { return a * b; }
+    public static double div(double a, double b) { return a / b; }
+    public static double pow(double a, double b) { return Math.pow(a, b); }
+    public static double abs(double a) { return Math.abs(a); }
+    public static double sqrt(double a) { return Math.sqrt(a); }
 
     // --- Algebra Lab 2 ---
-    public static void solveLinear(double a, double b) {
-        System.out.println("solve-linear is not implemented yet");
-    }
-
-    public static void solveQuadratic(double a, double b, double c) {
-        System.out.println("solve-quadratic is not implemented yet");
-    }
-
-    public static void max3(double a, double b, double c) {
-        System.out.println("max3 is not implemented yet");
-    }
-
-    public static void gcd(int a, int b) {
-        System.out.println("gcd is not implemented yet");
-    }
-
-    public static void factorial(int n) {
-        System.out.println("factorial is not implemented yet");
-    }
-
-    public static void fibonacci(int n) {
-        System.out.println("fibonacci is not implemented yet");
-    }
+    public static void solveLinear(double a, double b) { System.out.println("solve-linear is not implemented yet"); }
+    public static void solveQuadratic(double a, double b, double c) { System.out.println("solve-quadratic is not implemented yet"); }
+    public static void max3(double a, double b, double c) { System.out.println("max3 is not implemented yet"); }
+    public static void gcd(int a, int b) { System.out.println("gcd is not implemented yet"); }
+    public static void factorial(int n) { System.out.println("factorial is not implemented yet"); }
+    public static void fibonacci(int n) { System.out.println("fibonacci is not implemented yet"); }
 
     // GEOMETRY (GEO-01 ... GEO-06)
     public static void calculateDistance(String[] args) {
@@ -320,9 +268,7 @@ public class MathSolver {
         double y1 = Double.parseDouble(args[2]);
         double x2 = Double.parseDouble(args[3]);
         double y2 = Double.parseDouble(args[4]);
-
-        double d = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-        printResult(d);
+        printResult(Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)));
     }
 
     public static void calculateCircleArea(String[] args) {
@@ -331,8 +277,7 @@ public class MathSolver {
             System.out.println("Error: Invalid mathematical input");
             return;
         }
-        double s = Math.PI * r * r;
-        printResult(s);
+        printResult(Math.PI * r * r);
     }
 
     public static void calculateCircleCircumference(String[] args) {
@@ -341,8 +286,7 @@ public class MathSolver {
             System.out.println("Error: Invalid mathematical input");
             return;
         }
-        double c = 2 * Math.PI * r;
-        printResult(c);
+        printResult(2 * Math.PI * r);
     }
 
     public static void calculateRectangleArea(String[] args) {
@@ -352,8 +296,7 @@ public class MathSolver {
             System.out.println("Error: Invalid mathematical input");
             return;
         }
-        double s = a * b;
-        printResult(s);
+        printResult(a * b);
     }
 
     public static void calculateRectanglePerimeter(String[] args) {
@@ -363,40 +306,20 @@ public class MathSolver {
             System.out.println("Error: Invalid mathematical input");
             return;
         }
-        double p = 2 * (a + b);
-        printResult(p);
+        printResult(2 * (a + b));
     }
 
     public static void calculateOriginDistance(String[] args) {
         double x = Double.parseDouble(args[1]);
         double y = Double.parseDouble(args[2]);
-
-        double d = Math.sqrt(x * x + y * y);
-        printResult(d);
+        printResult(Math.sqrt(x * x + y * y));
     }
 
     // --- Geometry Lab 2 Stubs ---
-    public static void calculateTriangleArea(String[] args) {
-        System.out.println("triangle-area is not implemented yet");
-    }
-
-    public static void calculateTriangleValid(String[] args) {
-        System.out.println("triangle-valid is not implemented yet");
-    }
-
-    public static void calculateQuadrant(String[] args) {
-        System.out.println("quadrant is not implemented yet");
-    }
-
-    public static void calculateManhattanDistance(String[] args) {
-        System.out.println("manhattan-distance is not implemented yet");
-    }
-
-    public static void calculateMidpoint(String[] args) {
-        System.out.println("midpoint is not implemented yet");
-    }
-
-    public static void calculateCollinear(String[] args) {
-        System.out.println("collinear is not implemented yet");
-    }
+    public static void calculateTriangleArea(String[] args) { System.out.println("triangle-area is not implemented yet"); }
+    public static void calculateTriangleValid(String[] args) { System.out.println("triangle-valid is not implemented yet"); }
+    public static void calculateQuadrant(String[] args) { System.out.println("quadrant is not implemented yet"); }
+    public static void calculateManhattanDistance(String[] args) { System.out.println("manhattan-distance is not implemented yet"); }
+    public static void calculateMidpoint(String[] args) { System.out.println("midpoint is not implemented yet"); }
+    public static void calculateCollinear(String[] args) { System.out.println("collinear is not implemented yet"); }
 }
