@@ -67,21 +67,33 @@ java -cp src MathSolver hello 1 2
 
 ---
 
-## Таблиця команд (Milestone 0.1)
+## Таблиця команд
 
-| Команда | Аргументи | Опис операції | Приклад виклику |
-| :--- | :--- | :--- | :--- |
-| `help` | — | Показати перелік усіх доступних команд | `java -cp src MathSolver help` |
-| `add` | `a b` | Додавання двох чисел ($a + b$) | `java -cp src MathSolver add 10 25` |
-| `sub` | `a b` | Віднімання чисел ($a - b$) | `java -cp src MathSolver sub 10 4` |
-| `mul` | `a b` | Множення чисел ($a \cdot b$) | `java -cp src MathSolver mul 4 7` |
-| `div` | `a b` | Ділення чисел ($a / b$) | `java -cp src MathSolver div 10 2` |
-| `pow` | `a b` | Піднесення до степеня ($a^b$) | `java -cp src MathSolver pow 2 10` |
-| `sqrt` | `x` | Квадратний корінь ($\sqrt{x}$) | `java -cp src MathSolver sqrt 144` |
-| `abs` | `x` | Абсолютне значення ($\|x\|$) | `java -cp src MathSolver abs -5` |
-| `distance` | `x1 y1 x2 y2` | Евклідова відстань між точками | `java -cp src MathSolver distance 1 2 4 6` |
-| `origin-distance` | `x y` | Відстань точки від початку координат | `java -cp src MathSolver origin-distance 3 4` |
-| `circle-area` | `r` | Площа круга ($\pi r^2$) | `java -cp src MathSolver circle-area 5` |
-| `circle-circumference` | `r` | Довжина кола ($2\pi r$) | `java -cp src MathSolver circle-circumference 5` |
-| `rectangle-area` | `a b` | Площа прямокутника ($a \cdot b$) | `java -cp src MathSolver rectangle-area 3 4` |
-| `rectangle-perimeter` | `a b` | Периметр прямокутника ($2(a+b)$) | `java -cp src MathSolver rectangle-perimeter 3 4` |
+| Команда | Аргументи | Опис операції |
+| :--- | :--- | :--- |
+| `help` | — | Показати перелік усіх доступних команд |
+| `add` | `a b` | Додавання двох чисел ($a + b$) |
+| `sub` | `a b` | Віднімання чисел ($a - b$) |
+| `mul` | `a b` | Множення чисел ($a \cdot b$) |
+| `div` | `a b` | Ділення чисел ($a / b$) |
+| `pow` | `a b` | Піднесення до степеня ($a^b$) |
+| `sqrt` | `x` | Квадратний корінь ($\sqrt{x}$) |
+| `abs` | `x` | Абсолютне значення ($\|x\|$) |
+| `distance` | `x1 y1 x2 y2` | Евклідова відстань між точками |
+| `origin-distance` | `x y` | Відстань точки від початку координат |
+| `circle-area` | `r` | Площа круга ($\pi r^2$) |
+| `circle-circumference` | `r` | Довжина кола ($2\pi r$) |
+| `rectangle-area` | `a b` | Площа прямокутника ($a \cdot b$) |
+| `rectangle-perimeter` | `a b` | Периметр прямокутника ($2(a+b)$) |
+| `solve-linear` | `a b` | Розв'язання лінійного рівняння ($ax+b=0$) |
+| `solve-quadratic` | `a b c` | Розв'язання квадратного рівняння ($ax^2+bx+c=0$) |
+| `max3` | `a b c` | Максимальне з трьох чисел |
+| `gcd` | `a b` | Найбільший спільний дільник (алгоритм Евкліда) |
+| `factorial` | `n` | Факторіал числа ($n!$) |
+| `fibonacci` | `n` | N-те число Фібоначчі |
+| `triangle-area` | `a b c` | Площа трикутника за трьома сторонами (формула Герона) |
+| `triangle-valid` | `a b c` | Перевірка, чи існує трикутник із заданими сторонами |
+| `quadrant` | `x y` | Визначення чверті координатної площини для точки |
+| `manhattan-distance` | `x1 y1 x2 y2` | Манхеттенська відстань між точками |
+| `midpoint` | `x1 y1 x2 y2` | Середина відрізка |
+| `collinear` | `x1 y1 x2 y2 x3 y3` | Перевірка, чи лежать три точки на одній прямій |
