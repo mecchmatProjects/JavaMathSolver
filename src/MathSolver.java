@@ -23,7 +23,7 @@ public class MathSolver {
 
         // Якщо команда не знайдена у списку
         if (expected == -1) {
-            System.out.println("Unknown command: " + command);
+            System.out.println("Error: Unknown command: " + command);
             System.out.println("Use 'help' to see available commands.");
             return;
         }
@@ -42,7 +42,7 @@ public class MathSolver {
             try {
                 values[i - 1] = Double.parseDouble(args[i]);
             } catch (NumberFormatException e) {
-                System.out.println("Invalid number: " + args[i]);
+                System.out.println("Error: Invalid number: " + args[i]);
                 return;
             }
         }
@@ -61,7 +61,7 @@ public class MathSolver {
             System.out.println(values[0] + " * " + values[1] + " = " + mul(values[0], values[1]));
         } else if (command.equals("div")) {
             if (values[1] == 0) {
-                System.out.println("Division by zero");
+                System.out.println("Error: Division by zero");
             } else {
                 System.out.println(values[0] + " / " + values[1] + " = " + div(values[0], values[1]));
             }
@@ -71,7 +71,7 @@ public class MathSolver {
             System.out.println("abs(" + values[0] + ") = " + abs(values[0]));
         } else if (command.equals("sqrt")) {
             if (values[0] < 0) {
-                System.out.println("Invalid mathematical input");
+                System.out.println("Error: Invalid mathematical input");
             } else {
                 System.out.println("sqrt(" + values[0] + ") = " + sqrt(values[0]));
             }
@@ -139,7 +139,7 @@ public class MathSolver {
     // Оновлений метод валідації (приймає вже визначену очікувану кількість)
     public static boolean validateArgs(int actualCount, int expected) {
         if (actualCount != expected) {
-            System.out.println("Wrong number of arguments");
+            System.out.println("Error: Wrong number of arguments");
             return false;
         }
         return true;
@@ -207,7 +207,7 @@ public class MathSolver {
     public static void calculateCircleArea(String[] args) {
         double r = Double.parseDouble(args[1]);
         if (r < 0) {
-            System.out.println("Invalid mathematical input");
+            System.out.println("Error: Invalid mathematical input");
             return;
         }
         double s = Math.PI * r * r;
@@ -217,7 +217,7 @@ public class MathSolver {
     public static void calculateCircleCircumference(String[] args) {
         double r = Double.parseDouble(args[1]);
         if (r < 0) {
-            System.out.println("Invalid mathematical input");
+            System.out.println("Error: Invalid mathematical input");
             return;
         }
         double c = 2 * Math.PI * r;
@@ -228,7 +228,7 @@ public class MathSolver {
         double a = Double.parseDouble(args[1]);
         double b = Double.parseDouble(args[2]);
         if (a < 0 || b < 0) {
-            System.out.println("Invalid mathematical input");
+            System.out.println("Error: Invalid mathematical input");
             return;
         }
         double s = a * b;
@@ -239,7 +239,7 @@ public class MathSolver {
         double a = Double.parseDouble(args[1]);
         double b = Double.parseDouble(args[2]);
         if (a < 0 || b < 0) {
-            System.out.println("Invalid mathematical input");
+            System.out.println("Error: Invalid mathematical input");
             return;
         }
         double p = 2 * (a + b);
