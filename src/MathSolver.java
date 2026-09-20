@@ -43,10 +43,6 @@ public class MathSolver {
 
         // CORE-11: Диспетчеризація на основі switch(command)
         switch (command) {
-            case "help":
-                printHelp();
-                break;
-
             // --- ALGEBRA (Lab 1) ---
             case "add":
                 printResult(add(arguments[0].doubleValue(), arguments[1].doubleValue()));
@@ -100,42 +96,42 @@ public class MathSolver {
 
             // --- GEOMETRY (Lab 1) ---
             case "distance":
-                calculateDistance(args);
+                calculateDistance(arguments[0].doubleValue(), arguments[1].doubleValue(), arguments[2].doubleValue(), arguments[3].doubleValue());
                 break;
             case "circle-area":
-                calculateCircleArea(args);
+                calculateCircleArea(arguments[0].doubleValue());
                 break;
             case "circle-circumference":
-                calculateCircleCircumference(args);
+                calculateCircleCircumference(arguments[0].doubleValue());
                 break;
             case "rectangle-area":
-                calculateRectangleArea(args);
+                calculateRectangleArea(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
             case "rectangle-perimeter":
-                calculateRectanglePerimeter(args);
+                calculateRectanglePerimeter(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
             case "origin-distance":
-                calculateOriginDistance(args);
+                calculateOriginDistance(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
 
             // --- GEOMETRY (Lab 2 stubs) ---
             case "triangle-area":
-                calculateTriangleArea(args);
+                calculateTriangleArea(arguments[0].doubleValue(), arguments[1].doubleValue(), arguments[2].doubleValue());
                 break;
             case "triangle-valid":
-                calculateTriangleValid(args);
+                calculateTriangleValid(arguments[0].doubleValue(), arguments[1].doubleValue(), arguments[2].doubleValue());
                 break;
             case "quadrant":
-                calculateQuadrant(args);
+                calculateQuadrant(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
             case "manhattan-distance":
-                calculateManhattanDistance(args);
+                calculateManhattanDistance(arguments[0].doubleValue(), arguments[1].doubleValue(), arguments[2].doubleValue(), arguments[3].doubleValue());
                 break;
             case "midpoint":
-                calculateMidpoint(args);
+                calculateMidpoint(arguments[0].doubleValue(), arguments[1].doubleValue(), arguments[2].doubleValue(), arguments[3].doubleValue());
                 break;
             case "collinear":
-                calculateCollinear(args);
+                calculateCollinear(arguments[0].doubleValue(), arguments[1].doubleValue(), arguments[2].doubleValue(), arguments[3].doubleValue(), arguments[4].doubleValue(), arguments[5].doubleValue());
                 break;
         }
     }
@@ -187,7 +183,9 @@ public class MathSolver {
     public static boolean parseArguments(Number[] arr, String[] args) {
         for (int i = 0; i < args.length - 1; i++) {
             try {
-                if (!args[i + 1].contains(".") && !args[i + 1].contains("e")) {
+                // Приводимо до нижнього регістру, щоб охопити як "e", так і "E"
+                String argLower = args[i + 1].toLowerCase();
+                if (!argLower.contains(".") && !argLower.contains("e")) {
                     arr[i] = Long.parseLong(args[i + 1]);
                 } else {
                     arr[i] = Double.parseDouble(args[i + 1]);
@@ -263,16 +261,11 @@ public class MathSolver {
     public static void fibonacci(int n) { System.out.println("fibonacci is not implemented yet"); }
 
     // GEOMETRY (GEO-01 ... GEO-06)
-    public static void calculateDistance(String[] args) {
-        double x1 = Double.parseDouble(args[1]);
-        double y1 = Double.parseDouble(args[2]);
-        double x2 = Double.parseDouble(args[3]);
-        double y2 = Double.parseDouble(args[4]);
+    public static void calculateDistance(double x1, double y1, double x2, double y2) {
         printResult(Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)));
     }
 
-    public static void calculateCircleArea(String[] args) {
-        double r = Double.parseDouble(args[1]);
+    public static void calculateCircleArea(double r) {
         if (r < 0) {
             System.out.println("Error: Invalid mathematical input");
             return;
@@ -280,8 +273,7 @@ public class MathSolver {
         printResult(Math.PI * r * r);
     }
 
-    public static void calculateCircleCircumference(String[] args) {
-        double r = Double.parseDouble(args[1]);
+    public static void calculateCircleCircumference(double r) {
         if (r < 0) {
             System.out.println("Error: Invalid mathematical input");
             return;
@@ -289,9 +281,7 @@ public class MathSolver {
         printResult(2 * Math.PI * r);
     }
 
-    public static void calculateRectangleArea(String[] args) {
-        double a = Double.parseDouble(args[1]);
-        double b = Double.parseDouble(args[2]);
+    public static void calculateRectangleArea(double a, double b) {
         if (a < 0 || b < 0) {
             System.out.println("Error: Invalid mathematical input");
             return;
@@ -299,9 +289,7 @@ public class MathSolver {
         printResult(a * b);
     }
 
-    public static void calculateRectanglePerimeter(String[] args) {
-        double a = Double.parseDouble(args[1]);
-        double b = Double.parseDouble(args[2]);
+    public static void calculateRectanglePerimeter(double a, double b) {
         if (a < 0 || b < 0) {
             System.out.println("Error: Invalid mathematical input");
             return;
@@ -309,17 +297,15 @@ public class MathSolver {
         printResult(2 * (a + b));
     }
 
-    public static void calculateOriginDistance(String[] args) {
-        double x = Double.parseDouble(args[1]);
-        double y = Double.parseDouble(args[2]);
+    public static void calculateOriginDistance(double x, double y) {
         printResult(Math.sqrt(x * x + y * y));
     }
 
     // --- Geometry Lab 2 Stubs ---
-    public static void calculateTriangleArea(String[] args) { System.out.println("triangle-area is not implemented yet"); }
-    public static void calculateTriangleValid(String[] args) { System.out.println("triangle-valid is not implemented yet"); }
-    public static void calculateQuadrant(String[] args) { System.out.println("quadrant is not implemented yet"); }
-    public static void calculateManhattanDistance(String[] args) { System.out.println("manhattan-distance is not implemented yet"); }
-    public static void calculateMidpoint(String[] args) { System.out.println("midpoint is not implemented yet"); }
-    public static void calculateCollinear(String[] args) { System.out.println("collinear is not implemented yet"); }
+    public static void calculateTriangleArea(double a, double b, double c) { System.out.println("triangle-area is not implemented yet"); }
+    public static void calculateTriangleValid(double a, double b, double c) { System.out.println("triangle-valid is not implemented yet"); }
+    public static void calculateQuadrant(double x, double y) { System.out.println("quadrant is not implemented yet"); }
+    public static void calculateManhattanDistance(double x1, double y1, double x2, double y2) { System.out.println("manhattan-distance is not implemented yet"); }
+    public static void calculateMidpoint(double x1, double y1, double x2, double y2) { System.out.println("midpoint is not implemented yet"); }
+    public static void calculateCollinear(double x1, double y1, double x2, double y2, double x3, double y3) { System.out.println("collinear is not implemented yet"); }
 }
