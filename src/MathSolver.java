@@ -309,3 +309,51 @@ public class MathSolver {
     public static void calculateMidpoint(double x1, double y1, double x2, double y2) { System.out.println("midpoint is not implemented yet"); }
     public static void calculateCollinear(double x1, double y1, double x2, double y2, double x3, double y3) { System.out.println("collinear is not implemented yet"); }
 }
+
+// Algebra 
+public static double calculateTaskZ(double x, double eps) {
+        validateInputs(x, eps);
+        double sum = 0.0;
+        double a = 1.0;
+        int k = 0;
+        while (Math.abs(a) >= eps) {
+            sum += a;
+            k++;
+            a = -a * x * ((double) (k + 1) / k);
+        }
+        return sum;
+    }
+
+    public static double calculateTaskI(double x, double eps) {
+        validateInputs(x, eps);
+        double sum = 0.0;
+        double a = 1.0;
+        int k = 0;
+        while (Math.abs(a) >= eps) {
+            sum += a;
+            k++;
+            a = -a * x * ((double) (k + 2) / k);
+        }
+        return sum;
+    }
+
+    public static double calculateTaskY(double x, double eps) {
+        validateInputs(x, eps);
+        double sum = 0.0;
+        double a = 1.0;
+        double xSquared = x * x;
+        while (Math.abs(a) >= eps) {
+            sum += a;
+            a = -a * xSquared;
+        }
+        return sum;
+    }
+
+    private static void validateInputs(double x, double eps) {
+        if (Math.abs(x) >= 1.0) {
+            throw new IllegalArgumentException("Argument |x| must be strictly less than 1. Received: " + x);
+        }
+        if (eps <= 0.0) {
+            throw new IllegalArgumentException("Precision eps must be greater than 0. Received: " + eps);
+        }
+    }
