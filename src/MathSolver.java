@@ -131,53 +131,101 @@ public class MathSolver {
                 calculateMidpoint(arguments[0].doubleValue(), arguments[1].doubleValue(), arguments[2].doubleValue(), arguments[3].doubleValue());
                 break;
             case "collinear":
-                calculateCollinear(arguments[0].doubleValue(), arguments[1].doubleValue(), arguments[2].doubleValue(), arguments[3].doubleValue(), arguments[4].doubleValue(), arguments[5].doubleValue());
+                calculateCollinear(
+                    arguments[0].doubleValue(),
+                    arguments[1].doubleValue(),
+                    arguments[2].doubleValue(),
+                    arguments[3].doubleValue(),
+                    arguments[4].doubleValue(),
+                    arguments[5].doubleValue()
+                );
+                break;
+            case "cylinder-volume":
+                calculateCylinderVolume(
+                    arguments[0].doubleValue(),
+                    arguments[1].doubleValue()
+                );
+                break;
+            case "cone-volume":
+                calculateConeVolume(
+                    arguments[0].doubleValue(),
+                    arguments[1].doubleValue()
+                );
+                break;
+            case "torus-volume":
+                calculateTorusVolume(
+                    arguments[0].doubleValue(),
+                    arguments[1].doubleValue()
+                );
+                break;
+            case "circle-segment-intersections":
+                calculateCircleSegmentIntersections(
+                    arguments[0].doubleValue(),
+                    arguments[1].doubleValue(),
+                    arguments[2].doubleValue(),
+                    arguments[3].doubleValue()
+                );
+                break;
+            case "circle-line":
+                calculateCircleLine(
+                    arguments[0].doubleValue(),
+                    arguments[1].doubleValue(),
+                    arguments[2].doubleValue(),
+                    arguments[3].doubleValue(),
+                    arguments[4].doubleValue(),
+                    arguments[5].doubleValue()
+                );
                 break;
         }
     }
 
     // CORE-12: Декомпозиція перевірки кількості аргументів
     public static int getExpectedArgsCount(String command) {
-        switch (command) {
-            case "abs":
-            case "sqrt":
-            case "circle-area":
-            case "circle-circumference":
-            case "factorial":
-            case "fibonacci":
-                return 1;
+    switch (command) {
+        case "abs":
+        case "sqrt":
+        case "circle-area":
+        case "circle-circumference":
+        case "factorial":
+        case "fibonacci":
+            return 1;
 
-            case "add":
-            case "sub":
-            case "mul":
-            case "div":
-            case "pow":
-            case "origin-distance":
-            case "rectangle-area":
-            case "rectangle-perimeter":
-            case "solve-linear":
-            case "gcd":
-            case "quadrant":
-                return 2;
+        case "add":
+        case "sub":
+        case "mul":
+        case "div":
+        case "pow":
+        case "origin-distance":
+        case "rectangle-area":
+        case "rectangle-perimeter":
+        case "solve-linear":
+        case "gcd":
+        case "quadrant":
+        case "cylinder-volume":
+        case "cone-volume":
+        case "torus-volume":
+            return 2;
 
-            case "solve-quadratic":
-            case "max3":
-            case "triangle-area":
-            case "triangle-valid":
-                return 3;
+        case "solve-quadratic":
+        case "max3":
+        case "triangle-area":
+        case "triangle-valid":
+            return 3;
 
-            case "distance":
-            case "manhattan-distance":
-            case "midpoint":
-                return 4;
+        case "distance":
+        case "manhattan-distance":
+        case "midpoint":
+        case "circle-segment-intersections":
+            return 4;
 
-            case "collinear":
-                return 6;
+        case "collinear":
+        case "circle-line":
+            return 6;
 
-            default:
-                return -1;
-        }
+        default:
+            return -1;
     }
+}
 
     // Заповнення масиву з числами
     public static boolean parseArguments(Number[] arr, String[] args) {
@@ -216,6 +264,7 @@ public class MathSolver {
     public static void printHelp() {
         System.out.println("JavaMathSolver\n");
         System.out.println("Available commands:\n");
+    
         System.out.println("add a b");
         System.out.println("sub a b");
         System.out.println("mul a b");
@@ -229,6 +278,7 @@ public class MathSolver {
         System.out.println("gcd a b");
         System.out.println("factorial n");
         System.out.println("fibonacci n\n");
+    
         System.out.println("distance x1 y1 x2 y2");
         System.out.println("circle-area r");
         System.out.println("circle-circumference r");
@@ -241,6 +291,16 @@ public class MathSolver {
         System.out.println("manhattan-distance x1 y1 x2 y2");
         System.out.println("midpoint x1 y1 x2 y2");
         System.out.println("collinear x1 y1 x2 y2 x3 y3");
+    
+        System.out.println("cylinder-volume radius height");
+        System.out.println("cone-volume radius height");
+        System.out.println("torus-volume innerRadius outerRadius");
+        System.out.println(
+            "circle-segment-intersections radius lineX yMin length"
+        );
+        System.out.println(
+            "circle-line centerX centerY radius lineA lineB lineC"
+        );
     }
 
     // ALGEBRA (ALG-01 ... ALG-06)
@@ -431,5 +491,122 @@ public class MathSolver {
         System.out.printf(Locale.ROOT, "Angles (rad): A=%f, B=%f, C=%f%n", radA, radB, radC);
         System.out.printf(Locale.ROOT, "Angles (deg): A=%f, B=%f, C=%f%n", Math.toDegrees(radA), Math.toDegrees(radB), Math.toDegrees(radC));
     }
+
+    // GEO-11: Cylinder volume
+    public static void calculateCylinderVolume(double radius, double height) {
+        if (radius < 0 || height < 0) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
     
+        printResult(Math.PI * radius * radius * height);
+    }
+    
+    // GEO-12: Cone volume
+    public static void calculateConeVolume(double radius, double height) {
+        if (radius < 0 || height < 0) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+    
+        printResult(Math.PI * radius * radius * height / 3);
+    }
+    
+    // GEO-13: Torus volume
+    public static void calculateTorusVolume(
+        double innerRadius,
+        double outerRadius
+    ) {
+        if (
+            innerRadius < 0 ||
+            outerRadius < 0 ||
+            innerRadius > outerRadius
+        ) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+    
+        double tubeRadius = (outerRadius - innerRadius) / 2;
+        double centerRadius = (outerRadius + innerRadius) / 2;
+    
+        printResult(
+            2 * Math.PI * Math.PI *
+            centerRadius * tubeRadius * tubeRadius
+        );
+    }
+    
+    // GEO-14: Circle and vertical segment intersections
+    public static void calculateCircleSegmentIntersections(
+        double radius,
+        double lineX,
+        double yMin,
+        double length
+    ) {
+        if (radius < 0 || length < 0) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+    
+        double yMax = yMin + length;
+        double discriminant = radius * radius - lineX * lineX;
+    
+        if (discriminant < -1e-9) {
+            System.out.println("Intersections: 0");
+            return;
+        }
+    
+        if (Math.abs(discriminant) <= 1e-9) {
+            int count =
+                0 >= yMin - 1e-9 && 0 <= yMax + 1e-9 ? 1 : 0;
+    
+            System.out.println("Intersections: " + count);
+            return;
+        }
+    
+        double y = Math.sqrt(discriminant);
+        int count = 0;
+    
+        if (y >= yMin - 1e-9 && y <= yMax + 1e-9) {
+            count++;
+        }
+    
+        if (-y >= yMin - 1e-9 && -y <= yMax + 1e-9) {
+            count++;
+        }
+    
+        System.out.println("Intersections: " + count);
+    }
+    
+    // GEO-15: Circle and line position
+    public static void calculateCircleLine(
+        double centerX,
+        double centerY,
+        double radius,
+        double lineA,
+        double lineB,
+        double lineC
+    ) {
+        if (
+            radius < 0 ||
+            (Math.abs(lineA) < 1e-9 && Math.abs(lineB) < 1e-9)
+        ) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+    
+        double distance =
+            Math.abs(
+                lineA * centerX +
+                lineB * centerY +
+                lineC
+            ) / Math.hypot(lineA, lineB);
+    
+        if (Math.abs(distance - radius) < 1e-9) {
+            System.out.println("одна точка дотику");
+        } else if (distance < radius) {
+            System.out.println("дві точки перетину");
+        } else {
+            System.out.println("жодної спільної точки");
+        }
+    }
 }
