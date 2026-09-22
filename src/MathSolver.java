@@ -257,9 +257,34 @@ public class MathSolver {
     public static void solveQuadratic(double a, double b, double c) { System.out.println("solve-quadratic is not implemented yet"); }
     public static void max3(double a, double b, double c) { System.out.println("max3 is not implemented yet"); }
     public static void gcd(int a, int b) { System.out.println("gcd is not implemented yet"); }
-    public static void factorial(int n) { System.out.println("factorial is not implemented yet"); }
-    public static void fibonacci(int n) { System.out.println("fibonacci is not implemented yet"); }
+    public static long factorial(int n) {
+        long result = 1;
+        for (int i = 2; i <= n; i++) {
+            result *= i;
+        }
+        return result;
+    }
 
+    public static long fibonacciIterative(int n) {
+        if (n < 2) {
+            return n;
+        }
+        long prev = 0;
+        long curr = 1;
+        for (int i = 2; i <= n; i++) {
+            long next = prev + curr;
+            prev = curr;
+            curr = next;
+        }
+        return curr;
+    }
+
+    public static long fibonacciRecursive(int n) {
+        if (n < 2) {
+            return n;
+        }
+        return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
+    }
     // GEOMETRY (GEO-01 ... GEO-06)
     public static void calculateDistance(double x1, double y1, double x2, double y2) {
         printResult(Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)));
