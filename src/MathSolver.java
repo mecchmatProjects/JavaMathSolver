@@ -433,3 +433,76 @@ public class MathSolver {
     }
     
 }
+
+    // Task 11: Cylinder volume
+    public static void calculateCylinderVolume(double radius, double height) {
+        if (radius < 0 || height < 0) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+        printResult(Math.PI * radius * radius * height);
+    }
+
+    // Task 12: Cone volume
+    public static void calculateConeVolume(double radius, double height) {
+        if (radius < 0 || height < 0) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+        printResult(Math.PI * radius * radius * height / 3);
+    }
+
+    // Task 13: Torus volume
+    public static void calculateTorusVolume(double innerRadius, double outerRadius) {
+        if (innerRadius < 0 || outerRadius < 0 || innerRadius > outerRadius) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+        double tubeRadius = (outerRadius - innerRadius) / 2;
+        double centerRadius = (outerRadius + innerRadius) / 2;
+        printResult(2 * Math.PI * Math.PI * centerRadius * tubeRadius * tubeRadius);
+    }
+
+    // Task 14: Circle and segment intersection
+    public static void calculateCircleSegmentIntersections(double radius, double lineX, double yMin, double lengthC) {
+        if (radius < 0) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+        double yMax = yMin + lengthC * lengthC;
+        double discr = radius * radius - lineX * lineX;
+        if (discr < -1e-9) {
+            System.out.println("Intersections: 0");
+            return;
+        }
+        if (Math.abs(discr) <= 1e-9) {
+            int count = (0 >= yMin - 1e-9 && 0 <= yMax + 1e-9) ? 1 : 0;
+            System.out.println("Intersections: " + count);
+            return;
+        }
+        double y = Math.sqrt(discr);
+        int count = 0;
+        if (y >= yMin - 1e-9 && y <= yMax + 1e-9) {
+            count++;
+        }
+        if (-y >= yMin - 1e-9 && -y <= yMax + 1e-9) {
+            count++;
+        }
+        System.out.println("Intersections: " + count);
+    }
+
+    // Task 15: Circle and line intersection classification
+    public static void calculateCircleLine(double centerX, double centerY, double radius, double lineA, double lineB, double lineC) {
+        if (radius < 0 || (lineA == 0 && lineB == 0)) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+        double dist = Math.abs(lineA * centerX + lineB * centerY + lineC) / Math.hypot(lineA, lineB);
+        if (Math.abs(dist - radius) < 1e-9) {
+            System.out.println("One point of tangency");
+        } else if (dist < radius) {
+            System.out.println("Two points of intersection");
+        } else {
+            System.out.println("No common points");
+        }
+    }
