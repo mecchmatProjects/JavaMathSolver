@@ -253,8 +253,39 @@ public class MathSolver {
     public static double sqrt(double a) { return Math.sqrt(a); }
 
     // --- Algebra Lab 2 ---
-    public static void solveLinear(double a, double b) { System.out.println("solve-linear is not implemented yet"); }
-    public static void solveQuadratic(double a, double b, double c) { System.out.println("solve-quadratic is not implemented yet"); }
+    public static void solveLinear(double a, double b) {
+        if (a == 0) {
+            if (b == 0) {
+                System.out.println("Infinite solutions");
+            } else {
+                System.out.println("No solution");
+            }
+        } else {
+            double x = -b / a;
+            printResult(x);
+        }
+    }
+    public static void solveQuadratic(double a, double b, double c) {
+        // Якщо a == 0, рівняння вироджується в лінійне: bx + c = 0
+        if (a == 0) {
+            solveLinear(b, c);
+            return;
+        }
+
+        double d = b * b - 4 * a * c;
+
+        if (d > 0) {
+            double x1 = (-b + Math.sqrt(d)) / (2 * a);
+            double x2 = (-b - Math.sqrt(d)) / (2 * a);
+            printResult(x1);
+            printResult(x2);
+        } else if (d == 0) {
+            double x = -b / (2 * a);
+            printResult(x);
+        } else {
+            System.out.println("No real roots");
+        }
+    }
     public static void max3(double a, double b, double c) { System.out.println("max3 is not implemented yet"); }
     public static void gcd(int a, int b) { System.out.println("gcd is not implemented yet"); }
     public static void factorial(int n) { System.out.println("factorial is not implemented yet"); }
