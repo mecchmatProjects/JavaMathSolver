@@ -1,4 +1,4 @@
-import java.util.Locale;
+import java.util.*;
 
 public class MathSolver {
     public static void main(String[] args) {
@@ -301,11 +301,64 @@ public class MathSolver {
         printResult(Math.sqrt(x * x + y * y));
     }
 
-    // --- Geometry Lab 2 Stubs ---
-    public static void calculateTriangleArea(double a, double b, double c) { System.out.println("triangle-area is not implemented yet"); }
-    public static void calculateTriangleValid(double a, double b, double c) { System.out.println("triangle-valid is not implemented yet"); }
-    public static void calculateQuadrant(double x, double y) { System.out.println("quadrant is not implemented yet"); }
-    public static void calculateManhattanDistance(double x1, double y1, double x2, double y2) { System.out.println("manhattan-distance is not implemented yet"); }
-    public static void calculateMidpoint(double x1, double y1, double x2, double y2) { System.out.println("midpoint is not implemented yet"); }
-    public static void calculateCollinear(double x1, double y1, double x2, double y2, double x3, double y3) { System.out.println("collinear is not implemented yet"); }
+    // --- Geometry Lab 2 ---
+    public static void calculateTriangleArea(double sideA, double sideB, double sideC) {
+        if (!triangleValid(sideA, sideB, sideC)) {
+            System.out.println("Error: Invalid triangle sides");
+            return;
+        }
+        double semiPerim = (sideA + sideB + sideC) / 2;
+        double area = Math.sqrt(Math.max(0, semiPerim * (semiPerim - sideA) * (semiPerim - sideB) * (semiPerim - sideC)));
+        printResult(area);
+    }
+    
+    public static boolean triangleValid(double sideA, double sideB, double sideC) {
+        return sideA > 0 && sideB > 0 && sideC > 0
+            && (sideA + sideB > sideC)
+            && (sideA + sideC > sideB)
+            && (sideB + sideC > sideA);
+    }
+    
+    public static void calculateTriangleValid(double sideA, double sideB, double sideC) {
+        System.out.println(triangleValid(sideA, sideB, sideC));
+    }
+    
+    public static void calculateQuadrant(double x, double y) {
+        if (x == 0 && y == 0) {
+            System.out.println("ORIGIN");
+        } else if (x == 0 || y == 0) {
+            System.out.println("AXIS");
+        } else if (x > 0 && y > 0) {
+            System.out.println("I");
+        } else if (x < 0 && y > 0) {
+            System.out.println("II");
+        } else if (x < 0 && y < 0) {
+            System.out.println("III");
+        } else {
+            System.out.println("IV");
+        }
+    }
+    
+    public static void calculateManhattanDistance(double x1, double y1, double x2, double y2) {
+        printResult(Math.abs(x2 - x1) + Math.abs(y2 - y1));
+    }
+    
+    public static void calculateMidpoint(double x1, double y1, double x2, double y2) {
+        double midX = (x1 + x2) / 2;
+        double midY = (y1 + y2) / 2;
+        System.out.printf(Locale.ROOT, "Midpoint: (%f, %f)%n", midX, midY);
+    }
+    
+    public static void calculateCollinear(double x1, double y1, double x2, double y2, double x3, double y3) {
+        double crossProduct = (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1);
+        System.out.println(Math.abs(crossProduct) < 1e-9);
+    }
+    
+    public static void calculateEllipseArea(double radiusA, double radiusB) {
+        if (radiusA < 0 || radiusB < 0) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+        printResult(Math.PI * radiusA * radiusB);
+    }
 }
