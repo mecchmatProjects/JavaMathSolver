@@ -431,8 +431,6 @@ public class MathSolver {
         System.out.printf(Locale.ROOT, "Angles (rad): A=%f, B=%f, C=%f%n", radA, radB, radC);
         System.out.printf(Locale.ROOT, "Angles (deg): A=%f, B=%f, C=%f%n", Math.toDegrees(radA), Math.toDegrees(radB), Math.toDegrees(radC));
     }
-    
-}
 
     // Task 11: Cylinder volume
     public static void calculateCylinderVolume(double radius, double height) {
@@ -506,3 +504,120 @@ public class MathSolver {
             System.out.println("No common points");
         }
     }
+    
+    // Task 16: Intersection of two circles
+    public static void calculateCirclesIntersect(double x1, double y1, double r1, double x2, double y2, double r2) {
+        if (r1 < 0 || r2 < 0) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+        double dist = Math.hypot(x2 - x1, y2 - y1);
+        boolean intersects = (dist <= r1 + r2 + 1e-9 && dist >= Math.abs(r1 - r2) - 1e-9);
+        System.out.println("Intersects: " + intersects);
+    }
+
+    // Task 17: Intersection of two squares
+    public static void calculateSquaresIntersect(double x1, double y1, double side1, double x2, double y2, double side2) {
+        if (side1 < 0 || side2 < 0) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+        double leftX = Math.max(x1, x2);
+        double bottomY = Math.max(y1, y2);
+        double rightX = Math.min(x1 + side1, x2 + side2);
+        double topY = Math.min(y1 + side1, y2 + side2);
+        if (leftX > rightX || bottomY > topY) {
+            System.out.println("Squares do not intersect");
+        } else {
+            System.out.printf(Locale.ROOT, "Intersect rect: Bottom-Left (%f, %f), Top-Right (%f, %f)%n", leftX, bottomY, rightX, topY);
+        }
+    }
+
+    // Task 18: Minimum bounding box for two rectangles
+    public static void calculateRectBoundingBox(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4) {
+        if (x1 > x2 || y1 > y2 || x3 > x4 || y3 > y4) {
+            System.out.println("Error: Bottom-left coordinates must be <= top-right coordinates");
+            return;
+        }
+        double minX = Math.min(Math.min(x1, x2), Math.min(x3, x4));
+        double minY = Math.min(Math.min(y1, y2), Math.min(y3, y4));
+        double maxX = Math.max(Math.max(x1, x2), Math.max(x3, x4));
+        double maxY = Math.max(Math.max(y1, y2), Math.max(y3, y4));
+        System.out.printf(Locale.ROOT, "Bounding box: Bottom-Left (%f, %f), Top-Right (%f, %f)%n", minX, minY, maxX, maxY);
+    }
+
+    public static void processPolygon() {
+        Scanner scanner = new Scanner(System.in);
+        List<double[]> points = new ArrayList<>();
+        while (scanner.hasNext()) {
+            String strX = scanner.next();
+            if (strX.equalsIgnoreCase("null")) {
+                if (scanner.hasNext()) {
+                    scanner.next();
+                }
+                break;
+            }
+            if (!scanner.hasNext()) {
+                break;
+            }
+            String strY = scanner.next();
+            if (strY.equalsIgnoreCase("null")) {
+                break;
+            }
+            
+            points.add(new double[]{Double.parseDouble(strX), Double.parseDouble(strY)});
+        }
+        
+        if (points.size() < 3) {
+            System.out.println("Error: A polygon must have at least 3 vertices.");
+            return;
+        }
+        
+        double perimeter = 0;
+        int count = points.size();
+        for (int i = 0; i < count; i++) {
+            double[] p1 = points.get(i), p2 = points.get((i + 1) % count);
+            perimeter += Math.hypot(p2[0] - p1[0], p2[1] - p1[1]);
+        }
+
+        int initialSign = 0;
+        boolean isConvex = true;
+        for (int i = 0; i < count; i++) {
+            double[] p1 = points.get(i), p2 = points.get((i + 1) % count), p3 = points.get((i + 2) % count);
+            double crossProduct = (p2[0] - p1[0]) * (p3[1] - p2[1]) - (p2[1] - p1[1]) * (p3[0] - p2[0]);
+            if (Math.abs(crossProduct) < 1e-9) {
+                continue;
+            }
+            int sign = crossProduct > 0 ? 1 : -1;
+            if (initialSign == 0) {
+                initialSign = sign;
+            } else if (sign != initialSign) {
+                isConvex = false;
+                break;
+            }
+        }
+        if (initialSign == 0) {
+            isConvex = false;
+        }
+
+        System.out.printf(Locale.ROOT, "Perimeter: %f%n", perimeter);
+        System.out.println("Is convex: " + isConvex);
+    }
+
+    // Monte Carlo simulation for triangle probability
+    public static void calculateMonteCarloTriangle(int totalTrials) {
+        if (totalTrials <= 0) {
+            System.out.println("Error: Number of trials must be positive");
+            return;
+        }
+        int validCount = 0;
+        for (int i = 0; i < totalTrials; i++) {
+            double sideA = Math.random(), sideB = Math.random(), sideC = Math.random();
+            if (sideA + sideB > sideC && sideA + sideC > sideB && sideB + sideC > sideA) {
+                validCount++;
+            }
+        }
+        printResult((double) validCount / totalTrials);
+    }
+
+}
