@@ -361,4 +361,75 @@ public class MathSolver {
         }
         printResult(Math.PI * radiusA * radiusB);
     }
+
+    // Task 8a: Triangle medians
+    public static void calculateMedians(double sideA, double sideB, double sideC) {
+        if (!triangleValid(sideA, sideB, sideC)) {
+            System.out.println("Error: Invalid triangle sides");
+            return;
+        }
+        double medA = 0.5 * Math.sqrt(Math.max(0, 2 * sideB * sideB + 2 * sideC * sideC - sideA * sideA));
+        double medB = 0.5 * Math.sqrt(Math.max(0, 2 * sideA * sideA + 2 * sideC * sideC - sideB * sideB));
+        double medC = 0.5 * Math.sqrt(Math.max(0, 2 * sideA * sideA + 2 * sideB * sideB - sideC * sideC));
+        System.out.printf(Locale.ROOT, "Medians: m_a=%f, m_b=%f, m_c=%f%n", medA, medB, medC);
+    }
+    
+    // Task 8b: Triangle bisectors
+    public static void calculateBisectors(double sideA, double sideB, double sideC) {
+        if (!triangleValid(sideA, sideB, sideC)) {
+            System.out.println("Error: Invalid triangle sides");
+            return;
+        }
+        double bisA = Math.sqrt(Math.max(0, sideB * sideC * ((sideB + sideC) * (sideB + sideC) - sideA * sideA))) / (sideB + sideC);
+        double bisB = Math.sqrt(Math.max(0, sideA * sideC * ((sideA + sideC) * (sideA + sideC) - sideB * sideB))) / (sideA + sideC);
+        double bisC = Math.sqrt(Math.max(0, sideA * sideB * ((sideA + sideB) * (sideA + sideB) - sideC * sideC))) / (sideA + sideB);
+        System.out.printf(Locale.ROOT, "Bisectors: l_a=%f, l_b=%f, l_c=%f%n", bisA, bisB, bisC);
+    }
+    
+    // Task 8c: Triangle heights
+    public static void calculateHeights(double sideA, double sideB, double sideC) {
+        if (!triangleValid(sideA, sideB, sideC)) {
+            System.out.println("Error: Invalid triangle sides");
+            return;
+        }
+        double semiPerim = (sideA + sideB + sideC) / 2;
+        double area = Math.sqrt(Math.max(0, semiPerim * (semiPerim - sideA) * (semiPerim - sideB) * (semiPerim - sideC)));
+        double hA = 2 * area / sideA;
+        double hB = 2 * area / sideB;
+        double hC = 2 * area / sideC;
+        System.out.printf(Locale.ROOT, "Heights: h_a=%f, h_b=%f, h_c=%f%n", hA, hB, hC);
+    }
+    
+    // Task 9: Area by angles (in radians) and inradius
+    public static void calculateAreaByAnglesAndInradius(double angleA, double angleB, double angleC, double inradius) {
+        if (inradius <= 0 || angleA <= 0 || angleB <= 0 || angleC <= 0 || angleA >= Math.PI || angleB >= Math.PI || angleC >= Math.PI) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+        if (Math.abs((angleA + angleB + angleC) - Math.PI) > 1e-4) {
+            System.out.println("Error: Sum of angles must be equal to PI radians");
+            return;
+        }
+        double sumCot = 1 / Math.tan(angleA / 2) + 1 / Math.tan(angleB / 2) + 1 / Math.tan(angleC / 2);
+        printResult(inradius * inradius * sumCot);
+    }
+    
+    // Task 10: Triangle angles (in radians and degrees)
+    public static void calculateTriangleAngles(double sideA, double sideB, double sideC) {
+        if (!triangleValid(sideA, sideB, sideC)) {
+            System.out.println("Error: Invalid triangle sides");
+            return;
+        }
+        double cosA = Math.min(1.0, Math.max(-1.0, (sideB * sideB + sideC * sideC - sideA * sideA) / (2 * sideB * sideC)));
+        double cosB = Math.min(1.0, Math.max(-1.0, (sideA * sideA + sideC * sideC - sideB * sideB) / (2 * sideA * sideC)));
+        double cosC = Math.min(1.0, Math.max(-1.0, (sideA * sideA + sideB * sideB - sideC * sideC) / (2 * sideA * sideB)));
+    
+        double radA = Math.acos(cosA);
+        double radB = Math.acos(cosB);
+        double radC = Math.acos(cosC);
+    
+        System.out.printf(Locale.ROOT, "Angles (rad): A=%f, B=%f, C=%f%n", radA, radB, radC);
+        System.out.printf(Locale.ROOT, "Angles (deg): A=%f, B=%f, C=%f%n", Math.toDegrees(radA), Math.toDegrees(radB), Math.toDegrees(radC));
+    }
+    
 }
