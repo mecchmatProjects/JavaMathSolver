@@ -93,6 +93,9 @@ public class MathSolver {
             case "fibonacci":
                 fibonacci(arguments[0].intValue());
                 break;
+            case "sin-taylor":
+                solveSinTaylor(arguments[0].doubleValue(), arguments[1].doubleValue());
+                break;
 
             // --- GEOMETRY (Lab 1) ---
             case "distance":
@@ -158,6 +161,7 @@ public class MathSolver {
             case "solve-linear":
             case "gcd":
             case "quadrant":
+            case "sin-taylor":
                 return 2;
 
             case "solve-quadratic":
@@ -228,7 +232,8 @@ public class MathSolver {
         System.out.println("max3 a b c");
         System.out.println("gcd a b");
         System.out.println("factorial n");
-        System.out.println("fibonacci n\n");
+        System.out.println("fibonacci n");
+        System.out.println("sin-taylor x eps\n");
         System.out.println("distance x1 y1 x2 y2");
         System.out.println("circle-area r");
         System.out.println("circle-circumference r");
@@ -308,4 +313,26 @@ public class MathSolver {
     public static void calculateManhattanDistance(double x1, double y1, double x2, double y2) { System.out.println("manhattan-distance is not implemented yet"); }
     public static void calculateMidpoint(double x1, double y1, double x2, double y2) { System.out.println("midpoint is not implemented yet"); }
     public static void calculateCollinear(double x1, double y1, double x2, double y2, double x3, double y3) { System.out.println("collinear is not implemented yet"); }
+
+    // 16 a) Обчислення sin(x) через ряд Тейлора
+    public static void solveSinTaylor(double x, double eps) {
+        if (eps <= 0) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+
+
+        x = x % (2 * Math.PI);
+
+        double sum = 0;
+        double term = x;
+        int step = 2;
+
+        while (Math.abs(term) >= eps) {
+            sum += term;
+            term = -term * x * x / (step * (step + 1));
+            step += 2;
+        }
+        printResult(sum);
+    }
 }
