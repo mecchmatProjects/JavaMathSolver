@@ -342,6 +342,22 @@ public class MathSolver {
 
 
 
+    //algebra series problems(k,l,m)
+    public static double calculateSeriesK(double x, double eps) {
+        validateInputs(x, eps);
+        double sum = 0.0;
+        double a = 1.0; 
+        int k = 1;
+        while (Math.abs(a) >= eps) {
+            sum += a;
+            a = -a * x * (2.0 * k - 3) / (2.0 * k);
+            k++;
+        }
+        return sum;
+    }
+
+
+
 
     private static void validateSeriesProblemsInputs(double x, double eps) {
         if (Math.abs(x) >= 1.0) {
