@@ -369,7 +369,19 @@ public class MathSolver {
         return sum;
     }
 
-
+    public static double calculateSeriesM(double x, double eps) {
+        validateInputs(x, eps);
+        double sum = 0.0;
+        double a = x; 
+        int k = 1;
+        double xSquared = x * x;
+        while (Math.abs(a) >= eps) {
+            sum += a;
+            a = a * xSquared * ((2.0 * k - 1) * (2.0 * k - 1)) / (2.0 * k * (2.0 * k + 1));
+            k++;
+        }
+        return sum;
+    }
 
 
 
