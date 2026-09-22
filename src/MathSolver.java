@@ -74,7 +74,7 @@ public class MathSolver {
                 }
                 break;
 
-            // --- ALGEBRA (Lab 2 stubs) ---
+            // --- ALGEBRA (Lab 2 stubs & Series) ---
             case "solve-linear":
                 solveLinear(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
@@ -92,6 +92,15 @@ public class MathSolver {
                 break;
             case "fibonacci":
                 fibonacci(arguments[0].intValue());
+                break;
+            case "series-z":
+                calculateSeriesZ(arguments[0].doubleValue(), arguments[1].doubleValue());
+                break;
+            case "series-i":
+                calculateSeriesI(arguments[0].doubleValue(), arguments[1].doubleValue());
+                break;
+            case "series-y":
+                calculateSeriesY(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
 
             // --- GEOMETRY (Lab 1) ---
@@ -158,6 +167,9 @@ public class MathSolver {
             case "solve-linear":
             case "gcd":
             case "quadrant":
+            case "series-z":
+            case "series-i":
+            case "series-y":
                 return 2;
 
             case "solve-quadratic":
@@ -183,7 +195,6 @@ public class MathSolver {
     public static boolean parseArguments(Number[] arr, String[] args) {
         for (int i = 0; i < args.length - 1; i++) {
             try {
-                // Приводимо до нижнього регістру, щоб охопити як "e", так і "E"
                 String argLower = args[i + 1].toLowerCase();
                 if (!argLower.contains(".") && !argLower.contains("e")) {
                     arr[i] = Long.parseLong(args[i + 1]);
@@ -228,7 +239,10 @@ public class MathSolver {
         System.out.println("max3 a b c");
         System.out.println("gcd a b");
         System.out.println("factorial n");
-        System.out.println("fibonacci n\n");
+        System.out.println("fibonacci n");
+        System.out.println("series-z x eps");
+        System.out.println("series-i x eps");
+        System.out.println("series-y x eps\n");
         System.out.println("distance x1 y1 x2 y2");
         System.out.println("circle-area r");
         System.out.println("circle-circumference r");
@@ -290,6 +304,63 @@ public class MathSolver {
     public static void gcd(int a, int b) { System.out.println("gcd is not implemented yet"); }
     public static void factorial(int n) { System.out.println("factorial is not implemented yet"); }
     public static void fibonacci(int n) { System.out.println("fibonacci is not implemented yet"); }
+
+    // ALGEBRA (Series: z, i, y)
+    public static void calculateSeriesZ(double x, double eps) {
+        if (Math.abs(x) >= 1.0 || eps <= 0.0) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+
+        double sum = 0.0;
+        double a = 1.0;
+        int k = 0;
+
+        while (Math.abs(a) >= eps) {
+            sum += a;
+            k++;
+            a = -a * x * ((k + 1.0) / k);
+        }
+
+        printResult(sum);
+    }
+
+    public static void calculateSeriesI(double x, double eps) {
+        if (Math.abs(x) >= 1.0 || eps <= 0.0) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+
+        double sum = 0.0;
+        double a = 1.0;
+        int k = 1;
+
+        while (Math.abs(a) >= eps) {
+            sum += a;
+            k++;
+            a = -a * x * (k + 1.0) / (k - 1.0);
+        }
+
+        printResult(sum);
+    }
+
+    public static void calculateSeriesY(double x, double eps) {
+        if (Math.abs(x) >= 1.0 || eps <= 0.0) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+
+        double sum = 0.0;
+        double a = 1.0;
+        double xSquared = x * x;
+
+        while (Math.abs(a) >= eps) {
+            sum += a;
+            a = -a * xSquared;
+        }
+
+        printResult(sum);
+    }
 
     // GEOMETRY (GEO-01 ... GEO-06)
     public static void calculateDistance(double x1, double y1, double x2, double y2) {
