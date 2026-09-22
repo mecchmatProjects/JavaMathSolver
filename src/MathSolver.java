@@ -339,4 +339,17 @@ public class MathSolver {
     public static void calculateManhattanDistance(double x1, double y1, double x2, double y2) { System.out.println("manhattan-distance is not implemented yet"); }
     public static void calculateMidpoint(double x1, double y1, double x2, double y2) { System.out.println("midpoint is not implemented yet"); }
     public static void calculateCollinear(double x1, double y1, double x2, double y2, double x3, double y3) { System.out.println("collinear is not implemented yet"); }
+
+
+
+
+    private static void validateSeriesProblemsInputs(double x, double eps) {
+        if (Math.abs(x) >= 1.0) {
+            throw new IllegalArgumentException("Argument |x| must be strictly less than 1. Received: " + x);
+        }
+        if (eps <= 0.0) {
+            throw new IllegalArgumentException("Precision eps must be greater than 0. Received: " + eps);
+        }
+    }
+    
 }
