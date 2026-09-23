@@ -74,7 +74,7 @@ public class MathSolver {
                 }
                 break;
 
-            // --- ALGEBRA (Lab 2 stubs & Series) ---
+            // --- ALGEBRA (Lab 2 & Series) ---
             case "solve-linear":
                 solveLinear(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
@@ -82,10 +82,10 @@ public class MathSolver {
                 solveQuadratic(arguments[0].doubleValue(), arguments[1].doubleValue(), arguments[2].doubleValue());
                 break;
             case "max3":
-                max3(arguments[0].doubleValue(), arguments[1].doubleValue(), arguments[2].doubleValue());
+                printResult(max3(arguments[0].doubleValue(), arguments[1].doubleValue(), arguments[2].doubleValue()));
                 break;
             case "gcd":
-                gcd(arguments[0].intValue(), arguments[1].intValue());
+                printResult(gcd(arguments[0].longValue(), arguments[1].longValue()));
                 break;
             case "factorial":
                 factorial(arguments[0].intValue());
@@ -230,9 +230,13 @@ public class MathSolver {
         return true;
     }
 
-    // CORE-14: Єдиний формат числового виводу.
+    // CORE-14: Єдиний формат числового виводу
     public static void printResult(double value) {
         System.out.printf(Locale.ROOT, "Result: %f%n", value);
+    }
+
+    public static void printResult(long value) {
+        System.out.printf(Locale.ROOT, "Result: %d%n", value);
     }
 
     // CORE-04: Довідка
@@ -316,8 +320,24 @@ public class MathSolver {
         }
     }
 
-    public static void max3(double a, double b, double c) { System.out.println("max3 is not implemented yet"); }
-    public static void gcd(int a, int b) { System.out.println("gcd is not implemented yet"); }
+    public static double max3(double a, double b, double c) {
+        double max = a;
+        if (b > max) { max = b; }
+        if (c > max) { max = c; }
+        return max;
+    }
+
+    public static long gcd(long a, long b) {
+        a = Math.abs(a);
+        b = Math.abs(b);
+        while (b != 0) {
+            long temp = a % b;
+            a = b;
+            b = temp;
+        }
+        return a;
+    }
+
     public static void factorial(int n) { System.out.println("factorial is not implemented yet"); }
     public static void fibonacci(int n) { System.out.println("fibonacci is not implemented yet"); }
 
