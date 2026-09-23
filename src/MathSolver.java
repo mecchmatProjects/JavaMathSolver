@@ -93,6 +93,15 @@ public class MathSolver {
             case "fibonacci":
                 fibonacci(arguments[0].intValue());
                 break;
+            case "series-k":
+                calculateSeriesK(arguments[0].doubleValue(), arguments[1].doubleValue());
+                break;
+            case "series-l":
+                calculateSeriesL(arguments[0].doubleValue(), arguments[1].doubleValue());
+                break;
+            case "series-m":
+                calculateSeriesM(arguments[0].doubleValue(), arguments[1].doubleValue());
+                break;
             case "series-z":
                 calculateSeriesZ(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
@@ -167,6 +176,9 @@ public class MathSolver {
             case "solve-linear":
             case "gcd":
             case "quadrant":
+            case "series-k":
+            case "series-l":
+            case "series-m":
             case "series-z":
             case "series-i":
             case "series-y":
@@ -240,6 +252,9 @@ public class MathSolver {
         System.out.println("gcd a b");
         System.out.println("factorial n");
         System.out.println("fibonacci n");
+        System.out.println("series-k x eps");
+        System.out.println("series-l x eps");
+        System.out.println("series-m x eps");
         System.out.println("series-z x eps");
         System.out.println("series-i x eps");
         System.out.println("series-y x eps\n");
@@ -279,8 +294,8 @@ public class MathSolver {
             printResult(x);
         }
     }
+
     public static void solveQuadratic(double a, double b, double c) {
-        // Якщо a == 0, рівняння вироджується в лінійне: bx + c = 0
         if (a == 0) {
             solveLinear(b, c);
             return;
@@ -300,10 +315,66 @@ public class MathSolver {
             System.out.println("No real roots");
         }
     }
+
     public static void max3(double a, double b, double c) { System.out.println("max3 is not implemented yet"); }
     public static void gcd(int a, int b) { System.out.println("gcd is not implemented yet"); }
     public static void factorial(int n) { System.out.println("factorial is not implemented yet"); }
     public static void fibonacci(int n) { System.out.println("fibonacci is not implemented yet"); }
+
+    // ALGEBRA SERIES PROBLEMS (k, l, m)
+    public static void calculateSeriesK(double x, double eps) {
+        if (!validateSeriesInputs(x, eps)) {
+            return;
+        }
+        double sum = 0.0;
+        double a = 1.0;
+        int k = 1;
+        while (Math.abs(a) >= eps) {
+            sum += a;
+            a = -a * x * (2.0 * k - 3.0) / (2.0 * k);
+            k++;
+        }
+        printResult(sum);
+    }
+
+    public static void calculateSeriesL(double x, double eps) {
+        if (!validateSeriesInputs(x, eps)) {
+            return;
+        }
+        double sum = 0.0;
+        double a = 1.0;
+        int k = 1;
+        while (Math.abs(a) >= eps) {
+            sum += a;
+            a = -a * x * (2.0 * k - 1.0) / (2.0 * k);
+            k++;
+        }
+        printResult(sum);
+    }
+
+    public static void calculateSeriesM(double x, double eps) {
+        if (!validateSeriesInputs(x, eps)) {
+            return;
+        }
+        double sum = 0.0;
+        double a = x;
+        int k = 1;
+        double xSquared = x * x;
+        while (Math.abs(a) >= eps) {
+            sum += a;
+            a = a * xSquared * ((2.0 * k - 1.0) * (2.0 * k - 1.0)) / (2.0 * k * (2.0 * k + 1.0));
+            k++;
+        }
+        printResult(sum);
+    }
+
+    private static boolean validateSeriesInputs(double x, double eps) {
+        if (Math.abs(x) >= 1.0 || eps <= 0.0) {
+            System.out.println("Error: Invalid mathematical input");
+            return false;
+        }
+        return true;
+    }
 
     // ALGEBRA (Series: z, i, y)
     public static void calculateSeriesZ(double x, double eps) {
