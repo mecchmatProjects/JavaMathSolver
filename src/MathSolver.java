@@ -74,7 +74,7 @@ public class MathSolver {
                 }
                 break;
 
-            // --- ALGEBRA (Lab 2 stubs) ---
+            // --- ALGEBRA (Lab 2 stubs & Series) ---
             case "solve-linear":
                 solveLinear(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
@@ -92,6 +92,15 @@ public class MathSolver {
                 break;
             case "fibonacci":
                 fibonacci(arguments[0].intValue());
+                break;
+            case "series-k":
+                calculateSeriesK(arguments[0].doubleValue(), arguments[1].doubleValue());
+                break;
+            case "series-l":
+                calculateSeriesL(arguments[0].doubleValue(), arguments[1].doubleValue());
+                break;
+            case "series-m":
+                calculateSeriesM(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
 
             // --- GEOMETRY (Lab 1) ---
@@ -158,6 +167,9 @@ public class MathSolver {
             case "solve-linear":
             case "gcd":
             case "quadrant":
+            case "series-k":
+            case "series-l":
+            case "series-m":
                 return 2;
 
             case "solve-quadratic":
@@ -228,7 +240,10 @@ public class MathSolver {
         System.out.println("max3 a b c");
         System.out.println("gcd a b");
         System.out.println("factorial n");
-        System.out.println("fibonacci n\n");
+        System.out.println("fibonacci n");
+        System.out.println("series-k x eps");
+        System.out.println("series-l x eps");
+        System.out.println("series-m x eps\n");
         System.out.println("distance x1 y1 x2 y2");
         System.out.println("circle-area r");
         System.out.println("circle-circumference r");
@@ -265,6 +280,7 @@ public class MathSolver {
             printResult(x);
         }
     }
+
     public static void solveQuadratic(double a, double b, double c) {
         // Якщо a == 0, рівняння вироджується в лінійне: bx + c = 0
         if (a == 0) {
@@ -286,10 +302,66 @@ public class MathSolver {
             System.out.println("No real roots");
         }
     }
+
     public static void max3(double a, double b, double c) { System.out.println("max3 is not implemented yet"); }
     public static void gcd(int a, int b) { System.out.println("gcd is not implemented yet"); }
     public static void factorial(int n) { System.out.println("factorial is not implemented yet"); }
     public static void fibonacci(int n) { System.out.println("fibonacci is not implemented yet"); }
+
+    // ALGEBRA SERIES PROBLEMS (k, l, m)
+    public static void calculateSeriesK(double x, double eps) {
+        if (!validateSeriesInputs(x, eps)) {
+            return;
+        }
+        double sum = 0.0;
+        double a = 1.0;
+        int k = 1;
+        while (Math.abs(a) >= eps) {
+            sum += a;
+            a = -a * x * (2.0 * k - 3.0) / (2.0 * k);
+            k++;
+        }
+        printResult(sum);
+    }
+
+    public static void calculateSeriesL(double x, double eps) {
+        if (!validateSeriesInputs(x, eps)) {
+            return;
+        }
+        double sum = 0.0;
+        double a = 1.0;
+        int k = 1;
+        while (Math.abs(a) >= eps) {
+            sum += a;
+            a = -a * x * (2.0 * k - 1.0) / (2.0 * k);
+            k++;
+        }
+        printResult(sum);
+    }
+
+    public static void calculateSeriesM(double x, double eps) {
+        if (!validateSeriesInputs(x, eps)) {
+            return;
+        }
+        double sum = 0.0;
+        double a = x;
+        int k = 1;
+        double xSquared = x * x;
+        while (Math.abs(a) >= eps) {
+            sum += a;
+            a = a * xSquared * ((2.0 * k - 1.0) * (2.0 * k - 1.0)) / (2.0 * k * (2.0 * k + 1.0));
+            k++;
+        }
+        printResult(sum);
+    }
+
+    private static boolean validateSeriesInputs(double x, double eps) {
+        if (Math.abs(x) >= 1.0 || eps <= 0.0) {
+            System.out.println("Error: Invalid mathematical input");
+            return false;
+        }
+        return true;
+    }
 
     // GEOMETRY (GEO-01 ... GEO-06)
     public static void calculateDistance(double x1, double y1, double x2, double y2) {
@@ -339,59 +411,4 @@ public class MathSolver {
     public static void calculateManhattanDistance(double x1, double y1, double x2, double y2) { System.out.println("manhattan-distance is not implemented yet"); }
     public static void calculateMidpoint(double x1, double y1, double x2, double y2) { System.out.println("midpoint is not implemented yet"); }
     public static void calculateCollinear(double x1, double y1, double x2, double y2, double x3, double y3) { System.out.println("collinear is not implemented yet"); }
-
-
-
-    //algebra series problems(k,l,m)
-    public static double calculateSeriesK(double x, double eps) {
-        validateInputs(x, eps);
-        double sum = 0.0;
-        double a = 1.0; 
-        int k = 1;
-        while (Math.abs(a) >= eps) {
-            sum += a;
-            a = -a * x * (2.0 * k - 3) / (2.0 * k);
-            k++;
-        }
-        return sum;
-    }
-
-    public static double calculateSeriesL(double x, double eps) {
-        validateInputs(x, eps);
-        double sum = 0.0;
-        double a = 1.0;
-        int k = 1;
-        while (Math.abs(a) >= eps) {
-            sum += a;
-            a = -a * x * (2.0 * k - 1) / (2.0 * k);
-            k++;
-        }
-        return sum;
-    }
-
-    public static double calculateSeriesM(double x, double eps) {
-        validateInputs(x, eps);
-        double sum = 0.0;
-        double a = x; 
-        int k = 1;
-        double xSquared = x * x;
-        while (Math.abs(a) >= eps) {
-            sum += a;
-            a = a * xSquared * ((2.0 * k - 1) * (2.0 * k - 1)) / (2.0 * k * (2.0 * k + 1));
-            k++;
-        }
-        return sum;
-    }
-
-
-
-    private static void validateSeriesProblemsInputs(double x, double eps) {
-        if (Math.abs(x) >= 1.0) {
-            throw new IllegalArgumentException("Argument |x| must be strictly less than 1. Received: " + x);
-        }
-        if (eps <= 0.0) {
-            throw new IllegalArgumentException("Precision eps must be greater than 0. Received: " + eps);
-        }
-    }
-    
 }
