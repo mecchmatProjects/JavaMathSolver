@@ -99,6 +99,9 @@ public class MathSolver {
             case "series-e":
                 calculateSeriesE(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
+            case "series-ln":
+                calculateSeriesLn(arguments[0].doubleValue(), arguments[1].doubleValue());
+                break;
             case "series-ye":
                 calculateSeriesYe(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
@@ -125,9 +128,6 @@ public class MathSolver {
                 break;
             case "series-h":
                 calculateSeriesH(arguments[0].doubleValue(), arguments[1].doubleValue());
-                break;
-            case "series-e":
-                calculateSeriesE(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
 
             // --- GEOMETRY (Lab 1) ---
@@ -196,6 +196,7 @@ public class MathSolver {
             case "quadrant":
             case "sin-taylor":
             case "series-e":
+            case "series-ln":
             case "series-ye":
             case "series-j":
             case "series-k":
@@ -205,7 +206,6 @@ public class MathSolver {
             case "series-i":
             case "series-y":
             case "series-h":
-            case "series-e":
                 return 2;
 
             case "solve-quadratic":
@@ -282,6 +282,7 @@ public class MathSolver {
         System.out.println("fibonacci n");
         System.out.println("sin-taylor x eps");
         System.out.println("series-e x eps");
+        System.out.println("series-ln x eps");
         System.out.println("series-ye x eps");
         System.out.println("series-j x eps");
         System.out.println("series-k x eps");
@@ -290,7 +291,6 @@ public class MathSolver {
         System.out.println("series-z x eps");
         System.out.println("series-i x eps");
         System.out.println("series-h x eps");
-        System.out.println("series-e x eps");
         System.out.println("series-y x eps\n");
         System.out.println("distance x1 y1 x2 y2");
         System.out.println("circle-area r");
@@ -401,8 +401,8 @@ public class MathSolver {
         printResult(curr);
     }
 
-    // ALGEBRA SERIES PROBLEMS (e, ye, j)
-    public static void calculateSeriesE(double x, double eps) {
+    // ALGEBRA SERIES (Лазаренко: Е -> ln(1+x), Є, Ж)
+    public static void calculateSeriesLn(double x, double eps) {
         if (!validateSeriesInputs(x, eps)) {
             return;
         }
@@ -558,7 +558,7 @@ public class MathSolver {
         printResult(sum);
     }
 
-    public static void calculateSeriesH(double x, double eps){
+    public static void calculateSeriesH(double x, double eps) {
         if (eps <= 0.0) {
             System.out.println("Error: Invalid mathematical input");
             return;
@@ -568,7 +568,7 @@ public class MathSolver {
         int k = 1;
         double xSquared = x * x;
 
-        while (Math.abs(a) >= eps){
+        while (Math.abs(a) >= eps) {
             sum += a;
             a = a * xSquared / ((2.0 * k - 1.0) * (2.0 * k));
             k++;
@@ -576,7 +576,8 @@ public class MathSolver {
         printResult(sum);
     }
 
-    public static void calculateSeriesE(double x, double eps){
+    // Експонента e^x (від лідерки)
+    public static void calculateSeriesE(double x, double eps) {
         if (eps <= 0.0) {
             System.out.println("Error: Invalid mathematical input");
             return;
@@ -591,12 +592,11 @@ public class MathSolver {
 
         while (Math.abs(a) >= eps) {
             sum += a;
-            a = a * x / k;
+            a = a * absX / k;
             k++;
         }
         printResult(isNegative ? (1.0 / sum) : sum);
     }
-
 
     // GEOMETRY (GEO-01 ... GEO-06)
     public static void calculateDistance(double x1, double y1, double x2, double y2) {
