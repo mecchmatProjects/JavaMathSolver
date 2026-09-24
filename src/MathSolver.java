@@ -401,6 +401,19 @@ public class MathSolver {
         }
         printResult(sum);
     }
+
+    public static void calculateSeriesYe(double x, double eps) {
+        if (!validateSeriesInputs(x, eps)) {
+            return;
+        }
+        double sum = 0.0;
+        double a = 1.0;
+        while (Math.abs(a) >= eps) {
+            sum += a;
+            a = -a * x;
+        }
+        printResult(sum);
+    }
     
     // ALGEBRA SERIES PROBLEMS (k, l, m)
     public static void calculateSeriesK(double x, double eps) {
