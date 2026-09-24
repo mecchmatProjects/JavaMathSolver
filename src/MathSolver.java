@@ -96,6 +96,15 @@ public class MathSolver {
             case "sin-taylor":
                 solveSinTaylor(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
+            case "series-e":
+                calculateSeriesE(arguments[0].doubleValue(), arguments[1].doubleValue());
+                break;
+            case "series-ye":
+                calculateSeriesYe(arguments[0].doubleValue(), arguments[1].doubleValue());
+                break;
+            case "series-j":
+                calculateSeriesJ(arguments[0].doubleValue(), arguments[1].doubleValue());
+                break;
             case "series-k":
                 calculateSeriesK(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
@@ -186,6 +195,9 @@ public class MathSolver {
             case "gcd":
             case "quadrant":
             case "sin-taylor":
+            case "series-e":
+            case "series-ye":
+            case "series-j":
             case "series-k":
             case "series-l":
             case "series-m":
@@ -269,6 +281,9 @@ public class MathSolver {
         System.out.println("factorial n");
         System.out.println("fibonacci n");
         System.out.println("sin-taylor x eps");
+        System.out.println("series-e x eps");
+        System.out.println("series-ye x eps");
+        System.out.println("series-j x eps");
         System.out.println("series-k x eps");
         System.out.println("series-l x eps");
         System.out.println("series-m x eps");
