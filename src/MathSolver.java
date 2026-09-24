@@ -353,8 +353,38 @@ public class MathSolver {
         return a;
     }
 
-    public static void factorial(int n) { System.out.println("factorial is not implemented yet"); }
-    public static void fibonacci(int n) { System.out.println("fibonacci is not implemented yet"); }
+    // ALG-15 Factorial
+    public static void factorial(int n) {
+        if (n < 0 || n > 20) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+        long result = 1;
+        for (int i = 2; i <= n; i++) {
+            result *= i;
+        }
+        printResult(result);
+    }
+
+    // ALG-16 Fibonacci
+    public static void fibonacci(int n) {
+        if (n < 0 || n > 92) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+        if (n == 0) {
+            printResult(0L);
+            return;
+        }
+        long prev = 0;
+        long curr = 1;
+        for (int i = 2; i <= n; i++) {
+            long next = prev + curr;
+            prev = curr;
+            curr = next;
+        }
+        printResult(curr);
+    }
 
     // ALGEBRA SERIES PROBLEMS (k, l, m)
     public static void calculateSeriesK(double x, double eps) {
