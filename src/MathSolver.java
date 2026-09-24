@@ -386,6 +386,22 @@ public class MathSolver {
         printResult(curr);
     }
 
+    // ALGEBRA SERIES PROBLEMS (e, ye, j)
+    public static void calculateSeriesE(double x, double eps) {
+        if (!validateSeriesInputs(x, eps)) {
+            return;
+        }
+        double sum = 0.0;
+        double a = x;
+        int k = 1;
+        while (Math.abs(a) >= eps) {
+            sum += a;
+            k++;
+            a = -a * x * (k - 1.0) / k;
+        }
+        printResult(sum);
+    }
+    
     // ALGEBRA SERIES PROBLEMS (k, l, m)
     public static void calculateSeriesK(double x, double eps) {
         if (!validateSeriesInputs(x, eps)) {
