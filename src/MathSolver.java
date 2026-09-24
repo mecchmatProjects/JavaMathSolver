@@ -114,6 +114,12 @@ public class MathSolver {
             case "series-y":
                 calculateSeriesY(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
+            case "series-h":
+                calculateSeriesH(arguments[0].doubleValue(), arguments[1].doubleValue());
+                break;
+            case "series-e":
+                calculateSeriesE(arguments[0].doubleValue(), arguments[1].doubleValue());
+                break;
 
             // --- GEOMETRY (Lab 1) ---
             case "distance":
@@ -186,6 +192,8 @@ public class MathSolver {
             case "series-z":
             case "series-i":
             case "series-y":
+            case "series-h":
+            case "series-e":
                 return 2;
 
             case "solve-quadratic":
@@ -266,6 +274,8 @@ public class MathSolver {
         System.out.println("series-m x eps");
         System.out.println("series-z x eps");
         System.out.println("series-i x eps");
+        System.out.println("series-h x eps");
+        System.out.println("series-e x eps");
         System.out.println("series-y x eps\n");
         System.out.println("distance x1 y1 x2 y2");
         System.out.println("circle-area r");
@@ -457,6 +467,46 @@ public class MathSolver {
 
         printResult(sum);
     }
+
+    public static void calculateSeriesH(double x, double eps){
+        if (eps <= 0.0) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+        double sum = 0.0;
+        double a = 1.0;
+        int k = 1;
+        double xSquared = x * x;
+
+        while (Math.abs(a) >= eps){
+            sum += a;
+            a = a * xSquared / ((2.0 * k - 1.0) * (2.0 * k));
+            k++;
+        }
+        printResult(sum);
+    }
+
+    public static void calculateSeriesE(double x, double eps){
+        if (eps <= 0.0) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+
+        boolean isNegative = x < 0;
+        double absX = Math.abs(x);
+
+        double sum = 0.0;
+        double a = 1.0;
+        int k = 1;
+
+        while (Math.abs(a) >= eps) {
+            sum += a;
+            a = a * x / k;
+            k++;
+        }
+        printResult(isNegative ? (1.0 / sum) : sum);
+    }
+
 
     // GEOMETRY (GEO-01 ... GEO-06)
     public static void calculateDistance(double x1, double y1, double x2, double y2) {
