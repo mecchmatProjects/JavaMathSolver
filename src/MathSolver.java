@@ -3,29 +3,23 @@ import java.util.Locale;
 
 public class MathSolver {
 
-    private static final int MAX_SERIES_ITERATIONS = 100_000_000;
+    private static final int MAX_SERIES_ITERATIONS = 10_000_000;
 
     public static void main(String[] args) {
-        // Базовий захист від виклику без параметрів
         if (args.length == 0) {
             System.out.println("JavaMathSolver v0.1");
             System.out.println("Use 'help' to see available commands.");
             return;
         }
 
-        // CORE-01: Визначення назви операції з args[0]
         String command = args[0];
 
-        // CORE-04: Обробка команди help
         if (command.equals("help")) {
             printHelp();
             return;
         }
 
-        // CORE-12: Математична валідація кількості аргументів
         int expected = getExpectedArgsCount(command);
-
-        // Якщо команда не знайдена у списку
         if (expected == -1) {
             System.out.println("Error: Unknown command: " + command);
             System.out.println("Use 'help' to see available commands.");
@@ -33,19 +27,15 @@ public class MathSolver {
         }
 
         int actualArgsCount = args.length - 1;
-
-        // Перевіряємо арність
         if (!validateArgs(actualArgsCount, expected)) {
             return;
         }
 
-        // CORE-13: Парсинг в один масив окремо Long та Double
         Number[] arguments = new Number[args.length - 1];
         if (!parseArguments(arguments, args)) {
             return;
         }
 
-        // CORE-11: Диспетчеризація на основі switch(command)
         switch (command) {
             // --- ALGEBRA (Lab 1) ---
             case "add":
@@ -58,7 +48,7 @@ public class MathSolver {
                 printResult(mul(arguments[0].doubleValue(), arguments[1].doubleValue()));
                 break;
             case "div":
-                if (arguments[1].doubleValue() == 0) {
+                if (arguments[1].doubleValue() == 0.0) {
                     System.out.println("Error: Division by zero");
                 } else {
                     printResult(div(arguments[0].doubleValue(), arguments[1].doubleValue()));
@@ -71,14 +61,14 @@ public class MathSolver {
                 printResult(abs(arguments[0].doubleValue()));
                 break;
             case "sqrt":
-                if (arguments[0].doubleValue() < 0) {
+                if (arguments[0].doubleValue() < 0.0) {
                     System.out.println("Error: Invalid mathematical input");
                 } else {
                     printResult(sqrt(arguments[0].doubleValue()));
                 }
                 break;
 
-            // --- ALGEBRA (Lab 2 & Series) ---
+            // --- ALGEBRA (Lab 2) ---
             case "solve-linear":
                 solveLinear(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
@@ -109,48 +99,63 @@ public class MathSolver {
                     fibonacci(arguments[0].longValue());
                 }
                 break;
-            // --- ALGEBRA (Taylor Series) ---
+
+            // --- ALGEBRA (Taylor Series / Series) ---
+            case "sin-taylor":
             case "taylor-sin":
                 calculateTaylorSin(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
+            case "series-b":
             case "taylor-cos":
                 calculateTaylorCos(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
+            case "series-c":
             case "taylor-sinh":
                 calculateTaylorSinh(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
+            case "series-h":
             case "taylor-cosh":
                 calculateTaylorCosh(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
+            case "series-e":
             case "taylor-exp":
                 calculateTaylorExp(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
+            case "series-ln":
             case "taylor-ln-one-plus-x":
                 calculateTaylorLnOnePlusX(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
+            case "series-ye":
             case "taylor-geom-series":
                 calculateTaylorGeomSeries(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
+            case "series-j":
             case "taylor-artanh":
                 calculateTaylorArtanh(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
-            case "taylor-inv-sq":
-                calculateTaylorInvSq(arguments[0].doubleValue(), arguments[1].doubleValue());
-                break;
-            case "taylor-inv-cube":
-                calculateTaylorInvCube(arguments[0].doubleValue(), arguments[1].doubleValue());
-                break;
-            case "taylor-inv-one-plus-x2":
-                calculateTaylorInvOnePlusX2(arguments[0].doubleValue(), arguments[1].doubleValue());
-                break;
+            case "series-k":
             case "taylor-sqrt-one-plus-x":
                 calculateTaylorSqrtOnePlusX(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
+            case "series-l":
             case "taylor-inv-sqrt-one-plus-x":
                 calculateTaylorInvSqrtOnePlusX(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
+            case "series-m":
             case "taylor-asin":
                 calculateTaylorAsin(arguments[0].doubleValue(), arguments[1].doubleValue());
+                break;
+            case "series-z":
+            case "taylor-inv-sq":
+                calculateTaylorInvSq(arguments[0].doubleValue(), arguments[1].doubleValue());
+                break;
+            case "series-i":
+            case "taylor-inv-cube":
+                calculateTaylorInvCube(arguments[0].doubleValue(), arguments[1].doubleValue());
+                break;
+            case "series-y":
+            case "taylor-inv-one-plus-x2":
+                calculateTaylorInvOnePlusX2(arguments[0].doubleValue(), arguments[1].doubleValue());
                 break;
 
             // --- GEOMETRY (Lab 1) ---
@@ -195,7 +200,6 @@ public class MathSolver {
         }
     }
 
-    // CORE-12: Декомпозиція перевірки кількості аргументів
     public static int getExpectedArgsCount(String command) {
         switch (command) {
             case "abs":
@@ -217,20 +221,34 @@ public class MathSolver {
             case "solve-linear":
             case "gcd":
             case "quadrant":
+            case "sin-taylor":
             case "taylor-sin":
+            case "series-b":
             case "taylor-cos":
+            case "series-c":
             case "taylor-sinh":
+            case "series-h":
             case "taylor-cosh":
+            case "series-e":
             case "taylor-exp":
+            case "series-ln":
             case "taylor-ln-one-plus-x":
+            case "series-ye":
             case "taylor-geom-series":
+            case "series-j":
             case "taylor-artanh":
-            case "taylor-inv-sq":
-            case "taylor-inv-cube":
-            case "taylor-inv-one-plus-x2":
+            case "series-k":
             case "taylor-sqrt-one-plus-x":
+            case "series-l":
             case "taylor-inv-sqrt-one-plus-x":
+            case "series-m":
             case "taylor-asin":
+            case "series-z":
+            case "taylor-inv-sq":
+            case "series-i":
+            case "taylor-inv-cube":
+            case "series-y":
+            case "taylor-inv-one-plus-x2":
                 return 2;
 
             case "solve-quadratic":
@@ -252,15 +270,21 @@ public class MathSolver {
         }
     }
 
-    // Заповнення масиву з числами
     public static boolean parseArguments(Number[] arr, String[] args) {
         for (int i = 0; i < args.length - 1; i++) {
             try {
-                String argLower = args[i + 1].toLowerCase();
+                String token = args[i + 1].trim();
+                String argLower = token.toLowerCase();
+
                 if (!argLower.contains(".") && !argLower.contains("e")) {
-                    arr[i] = Long.parseLong(args[i + 1]);
+                    arr[i] = Long.parseLong(token);
                 } else {
-                    arr[i] = Double.parseDouble(args[i + 1]);
+                    double val = Double.parseDouble(token);
+                    if (Double.isNaN(val) || Double.isInfinite(val)) {
+                        System.out.println("Error: Invalid mathematical input");
+                        return false;
+                    }
+                    arr[i] = val;
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Error: Invalid number: " + args[i + 1]);
@@ -270,7 +294,6 @@ public class MathSolver {
         return true;
     }
 
-    // Оновлений метод валідації
     public static boolean validateArgs(int actualCount, int expected) {
         if (actualCount != expected) {
             System.out.println("Error: Wrong number of arguments");
@@ -279,9 +302,8 @@ public class MathSolver {
         return true;
     }
 
-    // CORE-14: Єдиний формат числового виводу
     public static void printResult(double value) {
-        if (value == 0.0) {
+        if (value == 0.0 || Double.doubleToRawLongBits(value) == 0x8000000000000000L) {
             value = 0.0;
         }
         System.out.printf(Locale.ROOT, "Result: %f%n", value);
@@ -291,7 +313,6 @@ public class MathSolver {
         System.out.printf(Locale.ROOT, "Result: %d%n", value);
     }
 
-    // CORE-04: Довідка
     public static void printHelp() {
         System.out.println("JavaMathSolver\n");
         System.out.println("Available commands:\n");
@@ -308,20 +329,20 @@ public class MathSolver {
         System.out.println("gcd a b");
         System.out.println("factorial n");
         System.out.println("fibonacci n");
-        System.out.println("taylor-sin x eps");
-        System.out.println("taylor-cos x eps");
-        System.out.println("taylor-sinh x eps");
-        System.out.println("taylor-cosh x eps");
-        System.out.println("taylor-exp x eps");
-        System.out.println("taylor-ln-one-plus-x x eps");
-        System.out.println("taylor-geom-series x eps");
-        System.out.println("taylor-artanh x eps");
-        System.out.println("taylor-inv-sq x eps");
-        System.out.println("taylor-inv-cube x eps");
-        System.out.println("taylor-inv-one-plus-x2 x eps");
-        System.out.println("taylor-sqrt-one-plus-x x eps");
-        System.out.println("taylor-inv-sqrt-one-plus-x x eps");
-        System.out.println("taylor-asin x eps\n");
+        System.out.println("sin-taylor x eps");
+        System.out.println("series-b x eps");
+        System.out.println("series-c x eps");
+        System.out.println("series-h x eps");
+        System.out.println("series-e x eps");
+        System.out.println("series-ln x eps");
+        System.out.println("series-ye x eps");
+        System.out.println("series-j x eps");
+        System.out.println("series-k x eps");
+        System.out.println("series-l x eps");
+        System.out.println("series-m x eps");
+        System.out.println("series-z x eps");
+        System.out.println("series-i x eps");
+        System.out.println("series-y x eps\n");
         System.out.println("distance x1 y1 x2 y2");
         System.out.println("circle-area r");
         System.out.println("circle-circumference r");
@@ -347,8 +368,8 @@ public class MathSolver {
 
     // --- Algebra Lab 2 ---
     public static void solveLinear(double a, double b) {
-        if (a == 0) {
-            if (b == 0) {
+        if (a == 0.0) {
+            if (b == 0.0) {
                 System.out.println("Infinite solutions");
             } else {
                 System.out.println("No solution");
@@ -370,14 +391,14 @@ public class MathSolver {
         if (d > 0.0) {
             double x1, x2;
             if (b >= 0.0) {
-                x1 = 2.0 * c / (-b - Math.sqrt(d));
-                x2 = (-b - Math.sqrt(d)) / (2.0 * a);
+                x1 = (-b - Math.sqrt(d)) / (2.0 * a);
+                x2 = (2.0 * c) / (-b - Math.sqrt(d));
             } else {
-                x1 = (-b + Math.sqrt(d)) / (2.0 * a);
-                x2 = 2.0 * c / (-b + Math.sqrt(d));
+                x1 = (2.0 * c) / (-b + Math.sqrt(d));
+                x2 = (-b + Math.sqrt(d)) / (2.0 * a);
             }
-            printResult(x1);
-            printResult(x2);
+            printResult(Math.min(x1, x2));
+            printResult(Math.max(x1, x2));
         } else if (d == 0.0) {
             double x = -b / (2.0 * a);
             printResult(x);
@@ -387,10 +408,7 @@ public class MathSolver {
     }
 
     public static double max3(double a, double b, double c) {
-        double max = a;
-        if (b > max) { max = b; }
-        if (c > max) { max = c; }
-        return max;
+        return Math.max(a, Math.max(b, c));
     }
 
     public static void solveGcd(long a, long b) {
@@ -404,28 +422,18 @@ public class MathSolver {
         System.out.printf(Locale.ROOT, "Result: %s%n", res.toString());
     }
 
-    public static long gcd(long a, long b) {
-        while (b != 0L) {
-            long temp = a % b;
-            a = b;
-            b = temp;
-        }
-        return (a < 0L) ? -a : a;
-    }
-
-    // ALG-15 Factorial
     public static void factorial(long n) {
         if (n < 0L || n > 20L) {
             System.out.println("Error: Invalid mathematical input");
             return;
         }
         long result = 1L;
-        for (int i = 2; i <= n; i++) {
+        for (long i = 2L; i <= n; i++) {
             result *= i;
         }
         printResult(result);
     }
-    // ALG-16 Fibonacci
+
     public static void fibonacci(long n) {
         if (n < 0L || n > 92L) {
             System.out.println("Error: Invalid mathematical input");
@@ -437,7 +445,7 @@ public class MathSolver {
         }
         long prev = 0L;
         long curr = 1L;
-        for (int i = 2; i <= n; i++) {
+        for (long i = 2L; i <= n; i++) {
             long next = prev + curr;
             prev = curr;
             curr = next;
@@ -445,12 +453,33 @@ public class MathSolver {
         printResult(curr);
     }
 
-    public static void calculateTaylorSin(double x, double eps) {
-        if (!validateInfiniteSeriesInputs(x, eps)) return;
-
+    private static double normalizeAngle(double x) {
         x = x % (2.0 * Math.PI);
         if (x > Math.PI) x -= 2.0 * Math.PI;
         if (x < -Math.PI) x += 2.0 * Math.PI;
+        return x;
+    }
+
+    private static boolean validateInfiniteSeriesInputs(double x, double eps) {
+        if (!Double.isFinite(x) || !Double.isFinite(eps) || eps <= 0.0) {
+            System.out.println("Error: Invalid mathematical input");
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean validateSeriesInputs(double x, double eps) {
+        if (!Double.isFinite(x) || !Double.isFinite(eps) || Math.abs(x) >= 1.0 || eps <= 0.0) {
+            System.out.println("Error: Invalid mathematical input");
+            return false;
+        }
+        return true;
+    }
+
+    public static void calculateTaylorSin(double x, double eps) {
+        if (!validateInfiniteSeriesInputs(x, eps)) return;
+
+        x = normalizeAngle(x);
 
         double sum = 0.0;
         double a = x;
@@ -459,7 +488,8 @@ public class MathSolver {
 
         while (Math.abs(a) >= eps && iter++ < MAX_SERIES_ITERATIONS) {
             sum += a;
-            a = -a * x * x / (step * (step + 1.0));
+            a = -a * x * x / ((double) step * (step + 1));
+            if (!Double.isFinite(a) || !Double.isFinite(sum) || a == 0.0) break;
             step += 2;
         }
         printResult(sum);
@@ -468,9 +498,7 @@ public class MathSolver {
     public static void calculateTaylorCos(double x, double eps) {
         if (!validateInfiniteSeriesInputs(x, eps)) return;
 
-        x = x % (2 * Math.PI);
-        if (x > Math.PI) x -= 2 * Math.PI;
-        if (x < -Math.PI) x += 2 * Math.PI;
+        x = normalizeAngle(x);
 
         double sum = 0.0;
         double a = 1.0;
@@ -480,6 +508,7 @@ public class MathSolver {
         while (Math.abs(a) >= eps && iter++ < MAX_SERIES_ITERATIONS) {
             sum += a;
             a = -a * x * x / ((2.0 * k - 1.0) * (2.0 * k));
+            if (!Double.isFinite(a) || !Double.isFinite(sum) || a == 0.0) break;
             k++;
         }
         printResult(sum);
@@ -487,6 +516,7 @@ public class MathSolver {
 
     public static void calculateTaylorSinh(double x, double eps) {
         if (!validateInfiniteSeriesInputs(x, eps)) return;
+
         double sum = 0.0;
         double a = x;
         int k = 1;
@@ -495,16 +525,49 @@ public class MathSolver {
         while (Math.abs(a) >= eps && iter++ < MAX_SERIES_ITERATIONS) {
             sum += a;
             a = a * (x * x) / ((2.0 * k) * (2.0 * k + 1.0));
-            if (!Double.isFinite(a) || a == 0.0) break;
+            if (!Double.isFinite(a) || !Double.isFinite(sum) || a == 0.0) break;
             k++;
         }
         printResult(sum);
     }
 
+    public static void calculateTaylorCosh(double x, double eps) {
+        if (!validateInfiniteSeriesInputs(x, eps)) return;
 
+        double sum = 0.0;
+        double a = 1.0;
+        int k = 1;
+        double xSquared = x * x;
+        int iter = 0;
 
+        while (Math.abs(a) >= eps && iter++ < MAX_SERIES_ITERATIONS) {
+            sum += a;
+            a = a * xSquared / ((2.0 * k - 1.0) * (2.0 * k));
+            if (!Double.isFinite(a) || !Double.isFinite(sum) || a == 0.0) break;
+            k++;
+        }
+        printResult(sum);
+    }
 
-    // ALGEBRA SERIES (Лазаренко: Е -> ln(1+x), Є, Ж)
+    public static void calculateTaylorExp(double x, double eps) {
+        if (!validateInfiniteSeriesInputs(x, eps)) return;
+
+        boolean isNegative = x < 0.0;
+        double absX = Math.abs(x);
+        double sum = 0.0;
+        double a = 1.0;
+        int k = 1;
+        int iter = 0;
+
+        while (Math.abs(a) >= eps && iter++ < MAX_SERIES_ITERATIONS) {
+            sum += a;
+            a = a * absX / k;
+            if (!Double.isFinite(a) || !Double.isFinite(sum) || a == 0.0) break;
+            k++;
+        }
+        printResult(isNegative ? (1.0 / sum) : sum);
+    }
+
     public static void calculateTaylorLnOnePlusX(double x, double eps) {
         if (!validateSeriesInputs(x, eps)) return;
 
@@ -517,6 +580,7 @@ public class MathSolver {
             sum += a;
             k++;
             a = -a * x * (k - 1.0) / k;
+            if (!Double.isFinite(a) || !Double.isFinite(sum) || a == 0.0) break;
         }
         printResult(sum);
     }
@@ -531,6 +595,7 @@ public class MathSolver {
         while (Math.abs(a) >= eps && iter++ < MAX_SERIES_ITERATIONS) {
             sum += a;
             a = -a * x;
+            if (!Double.isFinite(a) || !Double.isFinite(sum) || a == 0.0) break;
         }
         printResult(sum);
     }
@@ -548,11 +613,11 @@ public class MathSolver {
             sum += a;
             k++;
             a = a * xSquared * (2.0 * k - 3.0) / (2.0 * k - 1.0);
+            if (!Double.isFinite(a) || !Double.isFinite(sum) || a == 0.0) break;
         }
         printResult(sum);
     }
 
-    // ALGEBRA SERIES PROBLEMS (k, l, m)
     public static void calculateTaylorSqrtOnePlusX(double x, double eps) {
         if (!validateSeriesInputs(x, eps)) return;
 
@@ -564,6 +629,7 @@ public class MathSolver {
         while (Math.abs(a) >= eps && iter++ < MAX_SERIES_ITERATIONS) {
             sum += a;
             a = -a * x * (2.0 * k - 3.0) / (2.0 * k);
+            if (!Double.isFinite(a) || !Double.isFinite(sum) || a == 0.0) break;
             k++;
         }
         printResult(sum);
@@ -580,6 +646,7 @@ public class MathSolver {
         while (Math.abs(a) >= eps && iter++ < MAX_SERIES_ITERATIONS) {
             sum += a;
             a = -a * x * (2.0 * k - 1.0) / (2.0 * k);
+            if (!Double.isFinite(a) || !Double.isFinite(sum) || a == 0.0) break;
             k++;
         }
         printResult(sum);
@@ -597,29 +664,12 @@ public class MathSolver {
         while (Math.abs(a) >= eps && iter++ < MAX_SERIES_ITERATIONS) {
             sum += a;
             a = a * xSquared * ((2.0 * k - 1.0) * (2.0 * k - 1.0)) / (2.0 * k * (2.0 * k + 1.0));
+            if (!Double.isFinite(a) || !Double.isFinite(sum) || a == 0.0) break;
             k++;
         }
         printResult(sum);
     }
 
-    private static boolean validateSeriesInputs(double x, double eps) {
-        if (!Double.isFinite(x) || !Double.isFinite(eps) || Math.abs(x) >= 1.0 || eps <= 0.0) {
-            System.out.println("Error: Invalid mathematical input");
-            return false;
-        }
-        return true;
-    }
-
-    private static boolean validateInfiniteSeriesInputs(double x, double eps) {
-        if (!Double.isFinite(x) || !Double.isFinite(eps) || eps <= 0.0) {
-            System.out.println("Error: Invalid mathematical input");
-            return false;
-        }
-        return true;
-    }
-
-
-    // ALGEBRA (Series: z, i, y)
     public static void calculateTaylorInvSq(double x, double eps) {
         if (!validateSeriesInputs(x, eps)) return;
 
@@ -632,6 +682,7 @@ public class MathSolver {
             sum += a;
             k++;
             a = -a * x * ((k + 1.0) / k);
+            if (!Double.isFinite(a) || !Double.isFinite(sum) || a == 0.0) break;
         }
         printResult(sum);
     }
@@ -648,6 +699,7 @@ public class MathSolver {
             sum += a;
             k++;
             a = -a * x * (k + 1.0) / (k - 1.0);
+            if (!Double.isFinite(a) || !Double.isFinite(sum) || a == 0.0) break;
         }
         printResult(sum);
     }
@@ -663,46 +715,9 @@ public class MathSolver {
         while (Math.abs(a) >= eps && iter++ < MAX_SERIES_ITERATIONS) {
             sum += a;
             a = -a * xSquared;
+            if (!Double.isFinite(a) || !Double.isFinite(sum) || a == 0.0) break;
         }
         printResult(sum);
-    }
-
-    public static void calculateTaylorCosh(double x, double eps) {
-        if (!validateInfiniteSeriesInputs(x, eps)) return;
-
-        double sum = 0.0;
-        double a = 1.0;
-        int k = 1;
-        double xSquared = x * x;
-        int iter = 0;
-
-        while (Math.abs(a) >= eps && iter++ < MAX_SERIES_ITERATIONS) {
-            sum += a;
-            a = a * xSquared / ((2.0 * k - 1.0) * (2.0 * k));
-            if (!Double.isFinite(a) || a == 0.0) break;
-            k++;
-        }
-        printResult(sum);
-    }
-
-    // Експонента e^x (від лідерки)
-    public static void calculateTaylorExp(double x, double eps) {
-        if (!validateInfiniteSeriesInputs(x, eps)) return;
-
-        boolean isNegative = x < 0;
-        double absX = Math.abs(x);
-        double sum = 0.0;
-        double a = 1.0;
-        int k = 1;
-        int iter = 0;
-
-        while (Math.abs(a) >= eps && iter++ < MAX_SERIES_ITERATIONS) {
-            sum += a;
-            a = a * absX / k;
-            if (!Double.isFinite(a) || a == 0.0) break;
-            k++;
-        }
-        printResult(isNegative ? (1.0 / sum) : sum);
     }
 
     // GEOMETRY (GEO-01 ... GEO-06)
@@ -711,7 +726,7 @@ public class MathSolver {
     }
 
     public static void calculateCircleArea(double r) {
-        if (r < 0) {
+        if (r < 0.0) {
             System.out.println("Error: Invalid mathematical input");
             return;
         }
@@ -719,15 +734,15 @@ public class MathSolver {
     }
 
     public static void calculateCircleCircumference(double r) {
-        if (r < 0) {
+        if (r < 0.0) {
             System.out.println("Error: Invalid mathematical input");
             return;
         }
-        printResult(2 * Math.PI * r);
+        printResult(2.0 * Math.PI * r);
     }
 
     public static void calculateRectangleArea(double a, double b) {
-        if (a < 0 || b < 0) {
+        if (a < 0.0 || b < 0.0) {
             System.out.println("Error: Invalid mathematical input");
             return;
         }
@@ -735,11 +750,11 @@ public class MathSolver {
     }
 
     public static void calculateRectanglePerimeter(double a, double b) {
-        if (a < 0 || b < 0) {
+        if (a < 0.0 || b < 0.0) {
             System.out.println("Error: Invalid mathematical input");
             return;
         }
-        printResult(2 * (a + b));
+        printResult(2.0 * (a + b));
     }
 
     public static void calculateOriginDistance(double x, double y) {
@@ -753,6 +768,4 @@ public class MathSolver {
     public static void calculateManhattanDistance(double x1, double y1, double x2, double y2) { System.out.println("manhattan-distance is not implemented yet"); }
     public static void calculateMidpoint(double x1, double y1, double x2, double y2) { System.out.println("midpoint is not implemented yet"); }
     public static void calculateCollinear(double x1, double y1, double x2, double y2, double x3, double y3) { System.out.println("collinear is not implemented yet"); }
-
-
 }
