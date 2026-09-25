@@ -1,4 +1,4 @@
-import java.util.*;
+import java.util.Locale;
 
 public class MathSolver {
     public static void main(String[] args) {
@@ -302,58 +302,90 @@ public class MathSolver {
     }
 
     // --- Geometry Lab 2 ---
+    public static double heronArea(double sideA, double sideB, double sideC) {
+        double m = Math.max(sideA, Math.max(sideB, sideC));
+        if (m <= 0) {
+            return 0;
+        }
+        double a = sideA / m;
+        double b = sideB / m;
+        double c = sideC / m;
+        double s = (a + b + c) / 2.0;
+        double diffA = s - a;
+        double diffB = s - b;
+        double diffC = s - c;
+        if (diffA < 0 || diffB < 0 || diffC < 0) {
+            return 0;
+        }
+        double scaledArea = Math.sqrt(s * diffA * diffB * diffC);
+        return (scaledArea * m) * m;
+    }
+
     public static void calculateTriangleArea(double sideA, double sideB, double sideC) {
         if (!triangleValid(sideA, sideB, sideC)) {
-            System.out.println("Error: Invalid triangle sides");
+            System.out.println("Error: Invalid mathematical input");
             return;
         }
-        double semiPerim = (sideA + sideB + sideC) / 2;
-        double area = Math.sqrt(Math.max(0, semiPerim * (semiPerim - sideA) * (semiPerim - sideB) * (semiPerim - sideC)));
+        double area = heronArea(sideA, sideB, sideC);
+        if (Double.isInfinite(area) || Double.isNaN(area)) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
         printResult(area);
     }
-    
+
     public static boolean triangleValid(double sideA, double sideB, double sideC) {
         return sideA > 0 && sideB > 0 && sideC > 0
             && (sideA + sideB > sideC)
             && (sideA + sideC > sideB)
             && (sideB + sideC > sideA);
     }
-    
+
     public static void calculateTriangleValid(double sideA, double sideB, double sideC) {
-        System.out.println(triangleValid(sideA, sideB, sideC));
+        printResult(triangleValid(sideA, sideB, sideC));
     }
-    
+
     public static void calculateQuadrant(double x, double y) {
         if (x == 0 && y == 0) {
-            System.out.println("ORIGIN");
+            printResult("ORIGIN");
         } else if (x == 0 || y == 0) {
-            System.out.println("AXIS");
+            printResult("AXIS");
         } else if (x > 0 && y > 0) {
-            System.out.println("I");
+            printResult("I");
         } else if (x < 0 && y > 0) {
-            System.out.println("II");
+            printResult("II");
         } else if (x < 0 && y < 0) {
-            System.out.println("III");
+            printResult("III");
         } else {
-            System.out.println("IV");
+            printResult("IV");
         }
     }
-    
+
     public static void calculateManhattanDistance(double x1, double y1, double x2, double y2) {
         printResult(Math.abs(x2 - x1) + Math.abs(y2 - y1));
     }
-    
+
     public static void calculateMidpoint(double x1, double y1, double x2, double y2) {
         double midX = (x1 + x2) / 2;
         double midY = (y1 + y2) / 2;
-        System.out.printf(Locale.ROOT, "Midpoint: (%f, %f)%n", midX, midY);
+        printResult(String.format(Locale.ROOT, "Midpoint: (%f, %f)", midX, midY));
     }
-    
+
     public static void calculateCollinear(double x1, double y1, double x2, double y2, double x3, double y3) {
         double crossProduct = (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1);
-        System.out.println(Math.abs(crossProduct) < 1e-9);
+        double len1 = Math.hypot(x2 - x1, y2 - y1);
+        double len2 = Math.hypot(x3 - x1, y3 - y1);
+        double len3 = Math.hypot(x3 - x2, y3 - y2);
+        if (len1 == 0 || len2 == 0 || len3 == 0) {
+            printResult(true);
+            return;
+        }
+        double scale = len1 * len2;
+        printResult(Math.abs(crossProduct) <= 1e-9 * scale);
     }
-    
+
+
+    // Task 7: Ellipse area
     public static void calculateEllipseArea(double radiusA, double radiusB) {
         if (radiusA < 0 || radiusB < 0) {
             System.out.println("Error: Invalid mathematical input");
@@ -365,41 +397,56 @@ public class MathSolver {
     // Task 8a: Triangle medians
     public static void calculateMedians(double sideA, double sideB, double sideC) {
         if (!triangleValid(sideA, sideB, sideC)) {
-            System.out.println("Error: Invalid triangle sides");
+            System.out.println("Error: Invalid mathematical input");
             return;
         }
         double medA = 0.5 * Math.sqrt(Math.max(0, 2 * sideB * sideB + 2 * sideC * sideC - sideA * sideA));
         double medB = 0.5 * Math.sqrt(Math.max(0, 2 * sideA * sideA + 2 * sideC * sideC - sideB * sideB));
         double medC = 0.5 * Math.sqrt(Math.max(0, 2 * sideA * sideA + 2 * sideB * sideB - sideC * sideC));
+        if (Double.isInfinite(medA) || Double.isInfinite(medB) || Double.isInfinite(medC)) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
         System.out.printf(Locale.ROOT, "Medians: m_a=%f, m_b=%f, m_c=%f%n", medA, medB, medC);
     }
-    
+
     // Task 8b: Triangle bisectors
     public static void calculateBisectors(double sideA, double sideB, double sideC) {
         if (!triangleValid(sideA, sideB, sideC)) {
-            System.out.println("Error: Invalid triangle sides");
+            System.out.println("Error: Invalid mathematical input");
             return;
         }
         double bisA = Math.sqrt(Math.max(0, sideB * sideC * ((sideB + sideC) * (sideB + sideC) - sideA * sideA))) / (sideB + sideC);
         double bisB = Math.sqrt(Math.max(0, sideA * sideC * ((sideA + sideC) * (sideA + sideC) - sideB * sideB))) / (sideA + sideC);
         double bisC = Math.sqrt(Math.max(0, sideA * sideB * ((sideA + sideB) * (sideA + sideB) - sideC * sideC))) / (sideA + sideB);
+        if (Double.isInfinite(bisA) || Double.isInfinite(bisB) || Double.isInfinite(bisC)) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
         System.out.printf(Locale.ROOT, "Bisectors: l_a=%f, l_b=%f, l_c=%f%n", bisA, bisB, bisC);
     }
-    
+
     // Task 8c: Triangle heights
     public static void calculateHeights(double sideA, double sideB, double sideC) {
         if (!triangleValid(sideA, sideB, sideC)) {
-            System.out.println("Error: Invalid triangle sides");
+            System.out.println("Error: Invalid mathematical input");
             return;
         }
-        double semiPerim = (sideA + sideB + sideC) / 2;
-        double area = Math.sqrt(Math.max(0, semiPerim * (semiPerim - sideA) * (semiPerim - sideB) * (semiPerim - sideC)));
+        double area = heronArea(sideA, sideB, sideC);
+        if (Double.isInfinite(area) || Double.isNaN(area)) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
         double hA = 2 * area / sideA;
         double hB = 2 * area / sideB;
         double hC = 2 * area / sideC;
+        if (Double.isInfinite(hA) || Double.isInfinite(hB) || Double.isInfinite(hC)) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
         System.out.printf(Locale.ROOT, "Heights: h_a=%f, h_b=%f, h_c=%f%n", hA, hB, hC);
     }
-    
+
     // Task 9: Area by angles (in radians) and inradius
     public static void calculateAreaByAnglesAndInradius(double angleA, double angleB, double angleC, double inradius) {
         if (inradius <= 0 || angleA <= 0 || angleB <= 0 || angleC <= 0 || angleA >= Math.PI || angleB >= Math.PI || angleC >= Math.PI) {
@@ -407,27 +454,32 @@ public class MathSolver {
             return;
         }
         if (Math.abs((angleA + angleB + angleC) - Math.PI) > 1e-4) {
-            System.out.println("Error: Sum of angles must be equal to PI radians");
+            System.out.println("Error: Invalid mathematical input");
             return;
         }
         double sumCot = 1 / Math.tan(angleA / 2) + 1 / Math.tan(angleB / 2) + 1 / Math.tan(angleC / 2);
-        printResult(inradius * inradius * sumCot);
+        double result = inradius * inradius * sumCot;
+        if (Double.isInfinite(result) || Double.isNaN(result)) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+        printResult(result);
     }
-    
+
     // Task 10: Triangle angles (in radians and degrees)
     public static void calculateTriangleAngles(double sideA, double sideB, double sideC) {
         if (!triangleValid(sideA, sideB, sideC)) {
-            System.out.println("Error: Invalid triangle sides");
+            System.out.println("Error: Invalid mathematical input");
             return;
         }
         double cosA = Math.min(1.0, Math.max(-1.0, (sideB * sideB + sideC * sideC - sideA * sideA) / (2 * sideB * sideC)));
         double cosB = Math.min(1.0, Math.max(-1.0, (sideA * sideA + sideC * sideC - sideB * sideB) / (2 * sideA * sideC)));
         double cosC = Math.min(1.0, Math.max(-1.0, (sideA * sideA + sideB * sideB - sideC * sideC) / (2 * sideA * sideB)));
-    
+
         double radA = Math.acos(cosA);
         double radB = Math.acos(cosB);
         double radC = Math.acos(cosC);
-    
+
         System.out.printf(Locale.ROOT, "Angles (rad): A=%f, B=%f, C=%f%n", radA, radB, radC);
         System.out.printf(Locale.ROOT, "Angles (deg): A=%f, B=%f, C=%f%n", Math.toDegrees(radA), Math.toDegrees(radB), Math.toDegrees(radC));
     }
@@ -438,7 +490,12 @@ public class MathSolver {
             System.out.println("Error: Invalid mathematical input");
             return;
         }
-        printResult(Math.PI * radius * radius * height);
+        double vol = Math.PI * radius * radius * height;
+        if (Double.isInfinite(vol) || Double.isNaN(vol)) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+        printResult(vol);
     }
 
     // Task 12: Cone volume
@@ -447,7 +504,12 @@ public class MathSolver {
             System.out.println("Error: Invalid mathematical input");
             return;
         }
-        printResult(Math.PI * radius * radius * height / 3);
+        double vol = Math.PI * radius * radius * height / 3;
+        if (Double.isInfinite(vol) || Double.isNaN(vol)) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+        printResult(vol);
     }
 
     // Task 13: Torus volume
@@ -458,7 +520,12 @@ public class MathSolver {
         }
         double tubeRadius = (outerRadius - innerRadius) / 2;
         double centerRadius = (outerRadius + innerRadius) / 2;
-        printResult(2 * Math.PI * Math.PI * centerRadius * tubeRadius * tubeRadius);
+        double vol = 2 * Math.PI * Math.PI * centerRadius * tubeRadius * tubeRadius;
+        if (Double.isInfinite(vol) || Double.isNaN(vol)) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+        printResult(vol);
     }
 
     // Task 14: Circle and segment intersection
@@ -470,12 +537,12 @@ public class MathSolver {
         double yMax = yMin + lengthC * lengthC;
         double discr = radius * radius - lineX * lineX;
         if (discr < -1e-9) {
-            System.out.println("Intersections: 0");
+            System.out.println(0);
             return;
         }
         if (Math.abs(discr) <= 1e-9) {
             int count = (0 >= yMin - 1e-9 && 0 <= yMax + 1e-9) ? 1 : 0;
-            System.out.println("Intersections: " + count);
+            System.out.println(count);
             return;
         }
         double y = Math.sqrt(discr);
@@ -486,7 +553,7 @@ public class MathSolver {
         if (-y >= yMin - 1e-9 && -y <= yMax + 1e-9) {
             count++;
         }
-        System.out.println("Intersections: " + count);
+        System.out.println(count);
     }
 
     // Task 15: Circle and line intersection classification
@@ -504,7 +571,7 @@ public class MathSolver {
             System.out.println("No common points");
         }
     }
-    
+
     // Task 16: Intersection of two circles
     public static void calculateCirclesIntersect(double x1, double y1, double r1, double x2, double y2, double r2) {
         if (r1 < 0 || r2 < 0) {
@@ -513,7 +580,7 @@ public class MathSolver {
         }
         double dist = Math.hypot(x2 - x1, y2 - y1);
         boolean intersects = (dist <= r1 + r2 + 1e-9 && dist >= Math.abs(r1 - r2) - 1e-9);
-        System.out.println("Intersects: " + intersects);
+        System.out.println(intersects);
     }
 
     // Task 17: Intersection of two squares
@@ -536,56 +603,41 @@ public class MathSolver {
     // Task 18: Minimum bounding box for two rectangles
     public static void calculateRectBoundingBox(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4) {
         if (x1 > x2 || y1 > y2 || x3 > x4 || y3 > y4) {
-            System.out.println("Error: Bottom-left coordinates must be <= top-right coordinates");
+            System.out.println("Error: Invalid mathematical input");
             return;
         }
-        double minX = Math.min(Math.min(x1, x2), Math.min(x3, x4));
-        double minY = Math.min(Math.min(y1, y2), Math.min(y3, y4));
-        double maxX = Math.max(Math.max(x1, x2), Math.max(x3, x4));
-        double maxY = Math.max(Math.max(y1, y2), Math.max(y3, y4));
+        double minX = Math.min(x1, x3);
+        double minY = Math.min(y1, y3);
+        double maxX = Math.max(x2, x4);
+        double maxY = Math.max(y2, y4);
         System.out.printf(Locale.ROOT, "Bounding box: Bottom-Left (%f, %f), Top-Right (%f, %f)%n", minX, minY, maxX, maxY);
     }
 
-    public static void processPolygon() {
-        Scanner scanner = new Scanner(System.in);
-        List<double[]> points = new ArrayList<>();
-        while (scanner.hasNext()) {
-            String strX = scanner.next();
-            if (strX.equalsIgnoreCase("null")) {
-                if (scanner.hasNext()) {
-                    scanner.next();
-                }
-                break;
-            }
-            if (!scanner.hasNext()) {
-                break;
-            }
-            String strY = scanner.next();
-            if (strY.equalsIgnoreCase("null")) {
-                break;
-            }
-            
-            points.add(new double[]{Double.parseDouble(strX), Double.parseDouble(strY)});
-        }
-        
-        if (points.size() < 3) {
-            System.out.println("Error: A polygon must have at least 3 vertices.");
+    // Polygon task: perimeter and convexity
+    public static void processPolygon(double... coords) {
+        if (coords == null || coords.length < 6 || coords.length % 2 != 0) {
+            System.out.println("Error: Invalid mathematical input");
             return;
         }
-        
+        int count = coords.length / 2;
         double perimeter = 0;
-        int count = points.size();
         for (int i = 0; i < count; i++) {
-            double[] p1 = points.get(i), p2 = points.get((i + 1) % count);
-            perimeter += Math.hypot(p2[0] - p1[0], p2[1] - p1[1]);
+            double x1 = coords[2 * i], y1 = coords[2 * i + 1];
+            double x2 = coords[2 * ((i + 1) % count)], y2 = coords[2 * ((i + 1) % count) + 1];
+            perimeter += Math.hypot(x2 - x1, y2 - y1);
         }
 
         int initialSign = 0;
         boolean isConvex = true;
         for (int i = 0; i < count; i++) {
-            double[] p1 = points.get(i), p2 = points.get((i + 1) % count), p3 = points.get((i + 2) % count);
-            double crossProduct = (p2[0] - p1[0]) * (p3[1] - p2[1]) - (p2[1] - p1[1]) * (p3[0] - p2[0]);
-            if (Math.abs(crossProduct) < 1e-9) {
+            double x1 = coords[2 * i], y1 = coords[2 * i + 1];
+            double x2 = coords[2 * ((i + 1) % count)], y2 = coords[2 * ((i + 1) % count) + 1];
+            double x3 = coords[2 * ((i + 2) % count)], y3 = coords[2 * ((i + 2) % count) + 1];
+
+            double crossProduct = (x2 - x1) * (y3 - y2) - (y2 - y1) * (x3 - x2);
+            double len1 = Math.hypot(x2 - x1, y2 - y1);
+            double len2 = Math.hypot(x3 - x2, y3 - y2);
+            if (len1 * len2 > 0 && Math.abs(crossProduct) <= 1e-9 * (len1 * len2)) {
                 continue;
             }
             int sign = crossProduct > 0 ? 1 : -1;
@@ -604,15 +656,49 @@ public class MathSolver {
         System.out.println("Is convex: " + isConvex);
     }
 
-    // Monte Carlo simulation for triangle probability
-    public static void calculateMonteCarloTriangle(int totalTrials) {
-        if (totalTrials <= 0) {
-            System.out.println("Error: Number of trials must be positive");
+    public static void processPolygon(String[] args) {
+        if (args == null) {
+            System.out.println("Error: Invalid mathematical input");
             return;
         }
+        int start = (args.length > 0 && args[0].equalsIgnoreCase("polygon")) ? 1 : 0;
+        int count = 0;
+        for (int i = start; i < args.length; i++) {
+            if (args[i].equalsIgnoreCase("null")) {
+                break;
+            }
+            count++;
+        }
+        if (count < 6 || count % 2 != 0) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+        double[] coords = new double[count];
+        for (int i = 0; i < count; i++) {
+            try {
+                coords[i] = Double.parseDouble(args[start + i]);
+            } catch (NumberFormatException e) {
+                System.out.println("Error: Invalid mathematical input");
+                return;
+            }
+        }
+        processPolygon(coords);
+    }
+
+    // Monte Carlo simulation for triangle probability
+    public static void calculateMonteCarloTriangle(int totalTrials) {
+        calculateMonteCarloTriangle(totalTrials, 42L);
+    }
+
+    public static void calculateMonteCarloTriangle(int totalTrials, long seed) {
+        if (totalTrials <= 0) {
+            System.out.println("Error: Invalid mathematical input");
+            return;
+        }
+        java.util.Random rnd = new java.util.Random(seed);
         int validCount = 0;
         for (int i = 0; i < totalTrials; i++) {
-            double sideA = Math.random(), sideB = Math.random(), sideC = Math.random();
+            double sideA = rnd.nextDouble(), sideB = rnd.nextDouble(), sideC = rnd.nextDouble();
             if (sideA + sideB > sideC && sideA + sideC > sideB && sideB + sideC > sideA) {
                 validCount++;
             }
