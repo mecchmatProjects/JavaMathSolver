@@ -1,3 +1,4 @@
+import java.math.BigInteger;
 import java.util.Locale;
 
 public class MathSolver {
@@ -88,13 +89,25 @@ public class MathSolver {
                 printResult(max3(arguments[0].doubleValue(), arguments[1].doubleValue(), arguments[2].doubleValue()));
                 break;
             case "gcd":
-                printResult(gcd(arguments[0].longValue(), arguments[1].longValue()));
+                if (!(arguments[0] instanceof Long) || !(arguments[1] instanceof Long)) {
+                    System.out.println("Error: Invalid mathematical input");
+                } else {
+                    solveGcd(arguments[0].longValue(), arguments[1].longValue());
+                }
                 break;
             case "factorial":
-                factorial(arguments[0].intValue());
+                if (!(arguments[0] instanceof Long)) {
+                    System.out.println("Error: Invalid mathematical input");
+                } else {
+                    factorial(arguments[0].longValue());
+                }
                 break;
             case "fibonacci":
-                fibonacci(arguments[0].intValue());
+                if (!(arguments[0] instanceof Long)) {
+                    System.out.println("Error: Invalid mathematical input");
+                } else {
+                    fibonacci(arguments[0].longValue());
+                }
                 break;
             // --- ALGEBRA (Taylor Series) ---
             case "taylor-sin":
@@ -268,6 +281,9 @@ public class MathSolver {
 
     // CORE-14: Єдиний формат числового виводу
     public static void printResult(double value) {
+        if (value == 0.0) {
+            value = 0.0;
+        }
         System.out.printf(Locale.ROOT, "Result: %f%n", value);
     }
 
@@ -344,20 +360,26 @@ public class MathSolver {
     }
 
     public static void solveQuadratic(double a, double b, double c) {
-        if (a == 0) {
+        if (a == 0.0) {
             solveLinear(b, c);
             return;
         }
 
-        double d = b * b - 4 * a * c;
+        double d = b * b - 4.0 * a * c;
 
-        if (d > 0) {
-            double x1 = (-b + Math.sqrt(d)) / (2 * a);
-            double x2 = (-b - Math.sqrt(d)) / (2 * a);
+        if (d > 0.0) {
+            double x1, x2;
+            if (b >= 0.0) {
+                x1 = 2.0 * c / (-b - Math.sqrt(d));
+                x2 = (-b - Math.sqrt(d)) / (2.0 * a);
+            } else {
+                x1 = (-b + Math.sqrt(d)) / (2.0 * a);
+                x2 = 2.0 * c / (-b + Math.sqrt(d));
+            }
             printResult(x1);
             printResult(x2);
-        } else if (d == 0) {
-            double x = -b / (2 * a);
+        } else if (d == 0.0) {
+            double x = -b / (2.0 * a);
             printResult(x);
         } else {
             System.out.println("No real roots");
@@ -371,42 +393,50 @@ public class MathSolver {
         return max;
     }
 
+    public static void solveGcd(long a, long b) {
+        if (a == 0L && b == 0L) {
+            printResult(0L);
+            return;
+        }
+        BigInteger b1 = BigInteger.valueOf(a);
+        BigInteger b2 = BigInteger.valueOf(b);
+        BigInteger res = b1.gcd(b2);
+        System.out.printf(Locale.ROOT, "Result: %s%n", res.toString());
+    }
+
     public static long gcd(long a, long b) {
-        a = Math.abs(a);
-        b = Math.abs(b);
-        while (b != 0) {
+        while (b != 0L) {
             long temp = a % b;
             a = b;
             b = temp;
         }
-        return a;
+        return (a < 0L) ? -a : a;
     }
 
     // ALG-15 Factorial
-    public static void factorial(int n) {
-        if (n < 0 || n > 20) {
+    public static void factorial(long n) {
+        if (n < 0L || n > 20L) {
             System.out.println("Error: Invalid mathematical input");
             return;
         }
-        long result = 1;
+        long result = 1L;
         for (int i = 2; i <= n; i++) {
             result *= i;
         }
         printResult(result);
     }
-
     // ALG-16 Fibonacci
-    public static void fibonacci(int n) {
-        if (n < 0 || n > 92) {
+    public static void fibonacci(long n) {
+        if (n < 0L || n > 92L) {
             System.out.println("Error: Invalid mathematical input");
             return;
         }
-        if (n == 0) {
+        if (n == 0L) {
             printResult(0L);
             return;
         }
-        long prev = 0;
-        long curr = 1;
+        long prev = 0L;
+        long curr = 1L;
         for (int i = 2; i <= n; i++) {
             long next = prev + curr;
             prev = curr;
@@ -418,7 +448,9 @@ public class MathSolver {
     public static void calculateTaylorSin(double x, double eps) {
         if (!validateInfiniteSeriesInputs(x, eps)) return;
 
-        x = x % (2 * Math.PI);
+        x = x % (2.0 * Math.PI);
+        if (x > Math.PI) x -= 2.0 * Math.PI;
+        if (x < -Math.PI) x += 2.0 * Math.PI;
 
         double sum = 0.0;
         double a = x;
@@ -571,7 +603,7 @@ public class MathSolver {
     }
 
     private static boolean validateSeriesInputs(double x, double eps) {
-        if (Math.abs(x) >= 1.0 || eps <= 0.0) {
+        if (!Double.isFinite(x) || !Double.isFinite(eps) || Math.abs(x) >= 1.0 || eps <= 0.0) {
             System.out.println("Error: Invalid mathematical input");
             return false;
         }
