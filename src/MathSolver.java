@@ -212,6 +212,14 @@ public class MathSolver {
         System.out.printf(Locale.ROOT, "Result: %f%n", value);
     }
 
+    public static void printResult(String value) {
+    System.out.println("Result: " + value);
+    }
+    
+    public static void printResult(boolean value) {
+        System.out.println("Result: " + value);
+    }
+
     // CORE-04: Довідка
     public static void printHelp() {
         System.out.println("JavaMathSolver\n");
@@ -368,7 +376,7 @@ public class MathSolver {
     public static void calculateMidpoint(double x1, double y1, double x2, double y2) {
         double midX = (x1 + x2) / 2;
         double midY = (y1 + y2) / 2;
-        printResult(String.format(Locale.ROOT, "Midpoint: (%f, %f)", midX, midY));
+        printResult(String.format(Locale.ROOT, "(%f, %f)", midX, midY));
     }
 
     public static void calculateCollinear(double x1, double y1, double x2, double y2, double x3, double y3) {
@@ -383,7 +391,6 @@ public class MathSolver {
         double scale = len1 * len2;
         printResult(Math.abs(crossProduct) <= 1e-9 * scale);
     }
-
 
     // Task 7: Ellipse area
     public static void calculateEllipseArea(double radiusA, double radiusB) {
@@ -407,7 +414,7 @@ public class MathSolver {
             System.out.println("Error: Invalid mathematical input");
             return;
         }
-        System.out.printf(Locale.ROOT, "Medians: m_a=%f, m_b=%f, m_c=%f%n", medA, medB, medC);
+        printResult(String.format(Locale.ROOT, "m_a=%f, m_b=%f, m_c=%f", medA, medB, medC));
     }
 
     // Task 8b: Triangle bisectors
@@ -423,7 +430,7 @@ public class MathSolver {
             System.out.println("Error: Invalid mathematical input");
             return;
         }
-        System.out.printf(Locale.ROOT, "Bisectors: l_a=%f, l_b=%f, l_c=%f%n", bisA, bisB, bisC);
+        printResult(String.format(Locale.ROOT, "l_a=%f, l_b=%f, l_c=%f", bisA, bisB, bisC));
     }
 
     // Task 8c: Triangle heights
@@ -444,7 +451,7 @@ public class MathSolver {
             System.out.println("Error: Invalid mathematical input");
             return;
         }
-        System.out.printf(Locale.ROOT, "Heights: h_a=%f, h_b=%f, h_c=%f%n", hA, hB, hC);
+        printResult(String.format(Locale.ROOT, "h_a=%f, h_b=%f, h_c=%f", hA, hB, hC));
     }
 
     // Task 9: Area by angles (in radians) and inradius
@@ -480,8 +487,9 @@ public class MathSolver {
         double radB = Math.acos(cosB);
         double radC = Math.acos(cosC);
 
-        System.out.printf(Locale.ROOT, "Angles (rad): A=%f, B=%f, C=%f%n", radA, radB, radC);
-        System.out.printf(Locale.ROOT, "Angles (deg): A=%f, B=%f, C=%f%n", Math.toDegrees(radA), Math.toDegrees(radB), Math.toDegrees(radC));
+        printResult(String.format(Locale.ROOT, "A=%f rad, B=%f rad, C=%f rad", radA, radB, radC));
+        printResult(String.format(Locale.ROOT, "A=%f deg, B=%f deg, C=%f deg",
+                Math.toDegrees(radA), Math.toDegrees(radB), Math.toDegrees(radC)));
     }
 
     // Task 11: Cylinder volume
@@ -537,12 +545,12 @@ public class MathSolver {
         double yMax = yMin + lengthC * lengthC;
         double discr = radius * radius - lineX * lineX;
         if (discr < -1e-9) {
-            System.out.println(0);
+            printResult(0);
             return;
         }
         if (Math.abs(discr) <= 1e-9) {
             int count = (0 >= yMin - 1e-9 && 0 <= yMax + 1e-9) ? 1 : 0;
-            System.out.println(count);
+            printResult(count);
             return;
         }
         double y = Math.sqrt(discr);
@@ -553,7 +561,7 @@ public class MathSolver {
         if (-y >= yMin - 1e-9 && -y <= yMax + 1e-9) {
             count++;
         }
-        System.out.println(count);
+        printResult(count);
     }
 
     // Task 15: Circle and line intersection classification
@@ -580,7 +588,7 @@ public class MathSolver {
         }
         double dist = Math.hypot(x2 - x1, y2 - y1);
         boolean intersects = (dist <= r1 + r2 + 1e-9 && dist >= Math.abs(r1 - r2) - 1e-9);
-        System.out.println(intersects);
+        printResult(intersects);
     }
 
     // Task 17: Intersection of two squares
@@ -628,15 +636,21 @@ public class MathSolver {
         }
 
         int initialSign = 0;
-        boolean isConvex = true;
+        boolean signConsistent = true;
+        double turningSum = 0;
         for (int i = 0; i < count; i++) {
             double x1 = coords[2 * i], y1 = coords[2 * i + 1];
             double x2 = coords[2 * ((i + 1) % count)], y2 = coords[2 * ((i + 1) % count) + 1];
             double x3 = coords[2 * ((i + 2) % count)], y3 = coords[2 * ((i + 2) % count) + 1];
 
-            double crossProduct = (x2 - x1) * (y3 - y2) - (y2 - y1) * (x3 - x2);
-            double len1 = Math.hypot(x2 - x1, y2 - y1);
-            double len2 = Math.hypot(x3 - x2, y3 - y2);
+            double edge1x = x2 - x1, edge1y = y2 - y1;
+            double edge2x = x3 - x2, edge2y = y3 - y2;
+            double crossProduct = edge1x * edge2y - edge1y * edge2x;
+            double dotProduct = edge1x * edge2x + edge1y * edge2y;
+            double len1 = Math.hypot(edge1x, edge1y);
+            double len2 = Math.hypot(edge2x, edge2y);
+            turningSum += Math.atan2(crossProduct, dotProduct);
+
             if (len1 * len2 > 0 && Math.abs(crossProduct) <= 1e-9 * (len1 * len2)) {
                 continue;
             }
@@ -644,45 +658,15 @@ public class MathSolver {
             if (initialSign == 0) {
                 initialSign = sign;
             } else if (sign != initialSign) {
-                isConvex = false;
+                signConsistent = false;
                 break;
             }
         }
-        if (initialSign == 0) {
-            isConvex = false;
-        }
+        boolean turningSumOk = Math.abs(Math.abs(turningSum) - 2 * Math.PI) < 1e-6;
+        boolean isConvex = signConsistent && initialSign != 0 && turningSumOk;
 
-        System.out.printf(Locale.ROOT, "Perimeter: %f%n", perimeter);
-        System.out.println("Is convex: " + isConvex);
-    }
-
-    public static void processPolygon(String[] args) {
-        if (args == null) {
-            System.out.println("Error: Invalid mathematical input");
-            return;
-        }
-        int start = (args.length > 0 && args[0].equalsIgnoreCase("polygon")) ? 1 : 0;
-        int count = 0;
-        for (int i = start; i < args.length; i++) {
-            if (args[i].equalsIgnoreCase("null")) {
-                break;
-            }
-            count++;
-        }
-        if (count < 6 || count % 2 != 0) {
-            System.out.println("Error: Invalid mathematical input");
-            return;
-        }
-        double[] coords = new double[count];
-        for (int i = 0; i < count; i++) {
-            try {
-                coords[i] = Double.parseDouble(args[start + i]);
-            } catch (NumberFormatException e) {
-                System.out.println("Error: Invalid mathematical input");
-                return;
-            }
-        }
-        processPolygon(coords);
+        printResult(String.format(Locale.ROOT, "Perimeter: %f", perimeter));
+        printResult("Is convex: " + isConvex);
     }
 
     // Monte Carlo simulation for triangle probability
@@ -705,5 +689,3 @@ public class MathSolver {
         }
         printResult((double) validCount / totalTrials);
     }
-
-}
