@@ -1,213 +1,307 @@
 import java.math.BigInteger;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 public class MathSolver {
 
+    private static final String VERSION = "0.2";
     private static final int MAX_SERIES_ITERATIONS = 10_000_000;
+
+    // CORE-12: службові значення арності
+    private static final int UNKNOWN_COMMAND = -1;
+    private static final int VARIADIC = -2;
+    private static final int VARIADIC_MIN_ARGS = 6;
+
+    // CORE-15: стандартизовані повідомлення
+    private static final String ERR_UNKNOWN_COMMAND = "Unknown command: ";
+    private static final String ERR_INVALID_NUMBER = "Invalid number: ";
+    private static final String ERR_NOT_ENOUGH_ARGS = "Error: Not enough arguments";
+    private static final String ERR_TOO_MANY_ARGS = "Error: Too many arguments";
+    private static final String ERR_DIVISION_BY_ZERO = "Error: Division by zero";
+    private static final String ERR_INVALID_INPUT = "Error: Invalid mathematical input";
+    private static final String HINT_HELP = "Use 'help' to see available commands.";
+
+    // CORE-13: допустимі формати чисел
+    private static final Pattern INTEGER_PATTERN = Pattern.compile("[+-]?\\d+");
+    private static final Pattern DECIMAL_PATTERN = Pattern.compile("[+-]?(\\d+\\.?\\d*|\\.\\d+)([eE][+-]?\\d+)?");
 
     public static void main(String[] args) {
         if (args.length == 0) {
-            System.out.println("JavaMathSolver v0.1");
-            System.out.println("Use 'help' to see available commands.");
+            System.out.println("JavaMathSolver v" + VERSION);
+            System.out.println(HINT_HELP);
             return;
         }
 
-        String command = args[0];
-
-        if (command.equals("help")) {
-            printHelp();
-            return;
-        }
+        String command = args[0].trim().toLowerCase(Locale.ROOT);
 
         int expected = getExpectedArgsCount(command);
-        if (expected == -1) {
-            System.out.println("Error: Unknown command: " + command);
-            System.out.println("Use 'help' to see available commands.");
+        if (expected == UNKNOWN_COMMAND) {
+            printUnknownCommand(args[0]);
             return;
         }
 
-        int actualArgsCount = args.length - 1;
-        if (!validateArgs(actualArgsCount, expected)) {
+        if (!validateArgs(args.length - 1, expected)) {
             return;
         }
 
-        Number[] arguments = new Number[args.length - 1];
-        if (!parseArguments(arguments, args)) {
+        Number[] arguments = parseArguments(args);
+        if (arguments == null) {
             return;
         }
+
+        dispatch(command, arguments);
+    }
+
+    // CORE-11: диспетчеризація команд
+    public static void dispatch(String command, Number[] arguments) {
+        double[] a = toDoubleArray(arguments);
 
         switch (command) {
-            // --- ALGEBRA (Lab 1) ---
+            case "help":
+                printHelp();
+                break;
+
+            // --- ALGEBRA: Lab 1 ---
             case "add":
-                printResult(add(arguments[0].doubleValue(), arguments[1].doubleValue()));
+                printResult(add(a[0], a[1]));
                 break;
             case "sub":
-                printResult(sub(arguments[0].doubleValue(), arguments[1].doubleValue()));
+                printResult(sub(a[0], a[1]));
                 break;
             case "mul":
-                printResult(mul(arguments[0].doubleValue(), arguments[1].doubleValue()));
+                printResult(mul(a[0], a[1]));
                 break;
             case "div":
-                if (arguments[1].doubleValue() == 0.0) {
-                    System.out.println("Error: Division by zero");
+                if (a[1] == 0.0) {
+                    printError(ERR_DIVISION_BY_ZERO);
                 } else {
-                    printResult(div(arguments[0].doubleValue(), arguments[1].doubleValue()));
+                    printResult(div(a[0], a[1]));
                 }
                 break;
             case "pow":
-                printResult(pow(arguments[0].doubleValue(), arguments[1].doubleValue()));
+                printResult(pow(a[0], a[1]));
                 break;
             case "abs":
-                printResult(abs(arguments[0].doubleValue()));
+                printResult(abs(a[0]));
                 break;
             case "sqrt":
-                if (arguments[0].doubleValue() < 0.0) {
-                    System.out.println("Error: Invalid mathematical input");
+                if (a[0] < 0.0) {
+                    printError(ERR_INVALID_INPUT);
                 } else {
-                    printResult(sqrt(arguments[0].doubleValue()));
+                    printResult(sqrt(a[0]));
                 }
                 break;
 
-            // --- ALGEBRA (Lab 2) ---
+            // --- ALGEBRA: Lab 2 ---
             case "solve-linear":
-                solveLinear(arguments[0].doubleValue(), arguments[1].doubleValue());
+                solveLinear(a[0], a[1]);
                 break;
             case "solve-quadratic":
-                solveQuadratic(arguments[0].doubleValue(), arguments[1].doubleValue(), arguments[2].doubleValue());
+                solveQuadratic(a[0], a[1], a[2]);
                 break;
             case "max3":
-                printResult(max3(arguments[0].doubleValue(), arguments[1].doubleValue(), arguments[2].doubleValue()));
+                printResult(max3(a[0], a[1], a[2]));
                 break;
-            case "gcd":
-                if (!(arguments[0] instanceof Long) || !(arguments[1] instanceof Long)) {
-                    System.out.println("Error: Invalid mathematical input");
+            case "gcd": {
+                Long x = toLongExact(arguments[0]);
+                Long y = toLongExact(arguments[1]);
+                if (x == null || y == null) {
+                    printError(ERR_INVALID_INPUT);
                 } else {
-                    solveGcd(arguments[0].longValue(), arguments[1].longValue());
+                    solveGcd(x, y);
                 }
                 break;
-            case "factorial":
-                if (!(arguments[0] instanceof Long)) {
-                    System.out.println("Error: Invalid mathematical input");
+            }
+            case "factorial": {
+                Long n = toLongExact(arguments[0]);
+                if (n == null) {
+                    printError(ERR_INVALID_INPUT);
                 } else {
-                    factorial(arguments[0].longValue());
+                    factorial(n);
                 }
                 break;
-            case "fibonacci":
-                if (!(arguments[0] instanceof Long)) {
-                    System.out.println("Error: Invalid mathematical input");
+            }
+            case "fibonacci": {
+                Long n = toLongExact(arguments[0]);
+                if (n == null) {
+                    printError(ERR_INVALID_INPUT);
                 } else {
-                    fibonacci(arguments[0].longValue());
+                    fibonacci(n);
                 }
                 break;
+            }
 
-            // --- ALGEBRA (Taylor Series / Series) ---
-            case "sin-taylor":
+            // --- ALGEBRA: Taylor series (канонічна назва + аліас) ---
             case "taylor-sin":
-                calculateTaylorSin(arguments[0].doubleValue(), arguments[1].doubleValue());
+            case "sin-taylor":
+                calculateTaylorSin(a[0], a[1]);
                 break;
-            case "series-b":
             case "taylor-cos":
-                calculateTaylorCos(arguments[0].doubleValue(), arguments[1].doubleValue());
+            case "series-b":
+                calculateTaylorCos(a[0], a[1]);
                 break;
-            case "series-c":
             case "taylor-sinh":
-                calculateTaylorSinh(arguments[0].doubleValue(), arguments[1].doubleValue());
+            case "series-c":
+                calculateTaylorSinh(a[0], a[1]);
                 break;
-            case "series-h":
             case "taylor-cosh":
-                calculateTaylorCosh(arguments[0].doubleValue(), arguments[1].doubleValue());
+            case "series-h":
+                calculateTaylorCosh(a[0], a[1]);
                 break;
-            case "series-e":
             case "taylor-exp":
-                calculateTaylorExp(arguments[0].doubleValue(), arguments[1].doubleValue());
+            case "series-e":
+                calculateTaylorExp(a[0], a[1]);
                 break;
-            case "series-ln":
             case "taylor-ln-one-plus-x":
-                calculateTaylorLnOnePlusX(arguments[0].doubleValue(), arguments[1].doubleValue());
+            case "series-ln":
+                calculateTaylorLnOnePlusX(a[0], a[1]);
                 break;
-            case "series-ye":
             case "taylor-geom-series":
-                calculateTaylorGeomSeries(arguments[0].doubleValue(), arguments[1].doubleValue());
+            case "series-ye":
+                calculateTaylorGeomSeries(a[0], a[1]);
                 break;
-            case "series-j":
             case "taylor-artanh":
-                calculateTaylorArtanh(arguments[0].doubleValue(), arguments[1].doubleValue());
+            case "series-j":
+                calculateTaylorArtanh(a[0], a[1]);
                 break;
-            case "series-k":
             case "taylor-sqrt-one-plus-x":
-                calculateTaylorSqrtOnePlusX(arguments[0].doubleValue(), arguments[1].doubleValue());
+            case "series-k":
+                calculateTaylorSqrtOnePlusX(a[0], a[1]);
                 break;
-            case "series-l":
             case "taylor-inv-sqrt-one-plus-x":
-                calculateTaylorInvSqrtOnePlusX(arguments[0].doubleValue(), arguments[1].doubleValue());
+            case "series-l":
+                calculateTaylorInvSqrtOnePlusX(a[0], a[1]);
                 break;
-            case "series-m":
             case "taylor-asin":
-                calculateTaylorAsin(arguments[0].doubleValue(), arguments[1].doubleValue());
+            case "series-m":
+                calculateTaylorAsin(a[0], a[1]);
                 break;
-            case "series-z":
             case "taylor-inv-sq":
-                calculateTaylorInvSq(arguments[0].doubleValue(), arguments[1].doubleValue());
+            case "series-z":
+                calculateTaylorInvSq(a[0], a[1]);
                 break;
-            case "series-i":
             case "taylor-inv-cube":
-                calculateTaylorInvCube(arguments[0].doubleValue(), arguments[1].doubleValue());
+            case "series-i":
+                calculateTaylorInvCube(a[0], a[1]);
                 break;
-            case "series-y":
             case "taylor-inv-one-plus-x2":
-                calculateTaylorInvOnePlusX2(arguments[0].doubleValue(), arguments[1].doubleValue());
+            case "series-y":
+                calculateTaylorInvOnePlusX2(a[0], a[1]);
                 break;
 
-            // --- GEOMETRY (Lab 1) ---
+            // --- GEOMETRY: Lab 1 ---
             case "distance":
-                calculateDistance(arguments[0].doubleValue(), arguments[1].doubleValue(), arguments[2].doubleValue(), arguments[3].doubleValue());
-                break;
-            case "circle-area":
-                calculateCircleArea(arguments[0].doubleValue());
-                break;
-            case "circle-circumference":
-                calculateCircleCircumference(arguments[0].doubleValue());
-                break;
-            case "rectangle-area":
-                calculateRectangleArea(arguments[0].doubleValue(), arguments[1].doubleValue());
-                break;
-            case "rectangle-perimeter":
-                calculateRectanglePerimeter(arguments[0].doubleValue(), arguments[1].doubleValue());
+                calculateDistance(a[0], a[1], a[2], a[3]);
                 break;
             case "origin-distance":
-                calculateOriginDistance(arguments[0].doubleValue(), arguments[1].doubleValue());
+                calculateOriginDistance(a[0], a[1]);
+                break;
+            case "circle-area":
+                calculateCircleArea(a[0]);
+                break;
+            case "circle-circumference":
+                calculateCircleCircumference(a[0]);
+                break;
+            case "rectangle-area":
+                calculateRectangleArea(a[0], a[1]);
+                break;
+            case "rectangle-perimeter":
+                calculateRectanglePerimeter(a[0], a[1]);
                 break;
 
-            // --- GEOMETRY (Lab 2 stubs) ---
+            // --- GEOMETRY: Lab 2 ---
             case "triangle-area":
-                calculateTriangleArea(arguments[0].doubleValue(), arguments[1].doubleValue(), arguments[2].doubleValue());
+                calculateTriangleArea(a[0], a[1], a[2]);
                 break;
             case "triangle-valid":
-                calculateTriangleValid(arguments[0].doubleValue(), arguments[1].doubleValue(), arguments[2].doubleValue());
+                calculateTriangleValid(a[0], a[1], a[2]);
                 break;
             case "quadrant":
-                calculateQuadrant(arguments[0].doubleValue(), arguments[1].doubleValue());
+                calculateQuadrant(a[0], a[1]);
                 break;
             case "manhattan-distance":
-                calculateManhattanDistance(arguments[0].doubleValue(), arguments[1].doubleValue(), arguments[2].doubleValue(), arguments[3].doubleValue());
+                calculateManhattanDistance(a[0], a[1], a[2], a[3]);
                 break;
             case "midpoint":
-                calculateMidpoint(arguments[0].doubleValue(), arguments[1].doubleValue(), arguments[2].doubleValue(), arguments[3].doubleValue());
+                calculateMidpoint(a[0], a[1], a[2], a[3]);
                 break;
             case "collinear":
-                calculateCollinear(arguments[0].doubleValue(), arguments[1].doubleValue(), arguments[2].doubleValue(), arguments[3].doubleValue(), arguments[4].doubleValue(), arguments[5].doubleValue());
+                calculateCollinear(a[0], a[1], a[2], a[3], a[4], a[5]);
+                break;
+            case "ellipse-area":
+                calculateEllipseArea(a[0], a[1]);
+                break;
+            case "triangle-medians":
+                calculateMedians(a[0], a[1], a[2]);
+                break;
+            case "triangle-bisectors":
+                calculateBisectors(a[0], a[1], a[2]);
+                break;
+            case "triangle-heights":
+                calculateHeights(a[0], a[1], a[2]);
+                break;
+            case "triangle-area-inradius":
+                calculateAreaByAnglesAndInradius(a[0], a[1], a[2], a[3]);
+                break;
+            case "triangle-angles":
+                calculateTriangleAngles(a[0], a[1], a[2]);
+                break;
+            case "cylinder-volume":
+                calculateCylinderVolume(a[0], a[1]);
+                break;
+            case "cone-volume":
+                calculateConeVolume(a[0], a[1]);
+                break;
+            case "torus-volume":
+                calculateTorusVolume(a[0], a[1]);
+                break;
+            case "circle-segment":
+                calculateCircleSegmentIntersections(a[0], a[1], a[2], a[3]);
+                break;
+            case "circle-line":
+                calculateCircleLine(a[0], a[1], a[2], a[3], a[4], a[5]);
+                break;
+            case "circles-intersect":
+                calculateCirclesIntersect(a[0], a[1], a[2], a[3], a[4], a[5]);
+                break;
+            case "squares-intersect":
+                calculateSquaresIntersect(a[0], a[1], a[2], a[3], a[4], a[5]);
+                break;
+            case "rect-bounding-box":
+                calculateRectBoundingBox(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7]);
+                break;
+            case "polygon":
+                processPolygon(a);
+                break;
+            case "monte-carlo-triangle": {
+                Long n = toLongExact(arguments[0]);
+                if (n == null || n <= 0 || n > Integer.MAX_VALUE) {
+                    printError(ERR_INVALID_INPUT);
+                } else {
+                    calculateMonteCarloTriangle(n.intValue());
+                }
+                break;
+            }
+
+            default:
+                printUnknownCommand(command);
                 break;
         }
     }
 
+    // CORE-12: очікувана кількість аргументів
     public static int getExpectedArgsCount(String command) {
         switch (command) {
+            case "help":
+                return 0;
+
             case "abs":
             case "sqrt":
-            case "circle-area":
-            case "circle-circumference":
             case "factorial":
             case "fibonacci":
+            case "circle-area":
+            case "circle-circumference":
+            case "monte-carlo-triangle":
                 return 1;
 
             case "add":
@@ -215,96 +309,162 @@ public class MathSolver {
             case "mul":
             case "div":
             case "pow":
+            case "solve-linear":
+            case "gcd":
+            case "taylor-sin":
+            case "sin-taylor":
+            case "taylor-cos":
+            case "series-b":
+            case "taylor-sinh":
+            case "series-c":
+            case "taylor-cosh":
+            case "series-h":
+            case "taylor-exp":
+            case "series-e":
+            case "taylor-ln-one-plus-x":
+            case "series-ln":
+            case "taylor-geom-series":
+            case "series-ye":
+            case "taylor-artanh":
+            case "series-j":
+            case "taylor-sqrt-one-plus-x":
+            case "series-k":
+            case "taylor-inv-sqrt-one-plus-x":
+            case "series-l":
+            case "taylor-asin":
+            case "series-m":
+            case "taylor-inv-sq":
+            case "series-z":
+            case "taylor-inv-cube":
+            case "series-i":
+            case "taylor-inv-one-plus-x2":
+            case "series-y":
             case "origin-distance":
             case "rectangle-area":
             case "rectangle-perimeter":
-            case "solve-linear":
-            case "gcd":
             case "quadrant":
-            case "sin-taylor":
-            case "taylor-sin":
-            case "series-b":
-            case "taylor-cos":
-            case "series-c":
-            case "taylor-sinh":
-            case "series-h":
-            case "taylor-cosh":
-            case "series-e":
-            case "taylor-exp":
-            case "series-ln":
-            case "taylor-ln-one-plus-x":
-            case "series-ye":
-            case "taylor-geom-series":
-            case "series-j":
-            case "taylor-artanh":
-            case "series-k":
-            case "taylor-sqrt-one-plus-x":
-            case "series-l":
-            case "taylor-inv-sqrt-one-plus-x":
-            case "series-m":
-            case "taylor-asin":
-            case "series-z":
-            case "taylor-inv-sq":
-            case "series-i":
-            case "taylor-inv-cube":
-            case "series-y":
-            case "taylor-inv-one-plus-x2":
+            case "ellipse-area":
+            case "cylinder-volume":
+            case "cone-volume":
+            case "torus-volume":
                 return 2;
 
             case "solve-quadratic":
             case "max3":
             case "triangle-area":
             case "triangle-valid":
+            case "triangle-medians":
+            case "triangle-bisectors":
+            case "triangle-heights":
+            case "triangle-angles":
                 return 3;
 
             case "distance":
             case "manhattan-distance":
             case "midpoint":
+            case "triangle-area-inradius":
+            case "circle-segment":
                 return 4;
 
             case "collinear":
+            case "circle-line":
+            case "circles-intersect":
+            case "squares-intersect":
                 return 6;
 
+            case "rect-bounding-box":
+                return 8;
+
+            case "polygon":
+                return VARIADIC;
+
             default:
-                return -1;
+                return UNKNOWN_COMMAND;
         }
     }
 
-    public static boolean parseArguments(Number[] arr, String[] args) {
-        for (int i = 0; i < args.length - 1; i++) {
-            try {
-                String token = args[i + 1].trim();
-                String argLower = token.toLowerCase();
-
-                if (!argLower.contains(".") && !argLower.contains("e")) {
-                    arr[i] = Long.parseLong(token);
-                } else {
-                    double val = Double.parseDouble(token);
-                    if (Double.isNaN(val) || Double.isInfinite(val)) {
-                        System.out.println("Error: Invalid mathematical input");
-                        return false;
-                    }
-                    arr[i] = val;
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Error: Invalid number: " + args[i + 1]);
+    // CORE-12: перевірка кількості аргументів
+    public static boolean validateArgs(int actualCount, int expected) {
+        if (expected == VARIADIC) {
+            if (actualCount < VARIADIC_MIN_ARGS) {
+                printError(ERR_NOT_ENOUGH_ARGS);
                 return false;
             }
+            return true;
         }
-        return true;
-    }
-
-    public static boolean validateArgs(int actualCount, int expected) {
-        if (actualCount != expected) {
-            System.out.println("Error: Wrong number of arguments");
+        if (actualCount < expected) {
+            printError(ERR_NOT_ENOUGH_ARGS);
+            return false;
+        }
+        if (actualCount > expected) {
+            printError(ERR_TOO_MANY_ARGS);
             return false;
         }
         return true;
     }
 
+    // CORE-13: парсинг усіх аргументів після назви команди
+    public static Number[] parseArguments(String[] args) {
+        Number[] result = new Number[args.length - 1];
+        for (int i = 1; i < args.length; i++) {
+            Number value = parseNumber(args[i]);
+            if (value == null) {
+                printError(ERR_INVALID_NUMBER + args[i]);
+                return null;
+            }
+            result[i - 1] = value;
+        }
+        return result;
+    }
+
+    // Long для цілих у межах long, Double для решти; null, якщо формат некоректний
+    public static Number parseNumber(String raw) {
+        String token = raw.trim();
+        try {
+            if (INTEGER_PATTERN.matcher(token).matches()) {
+                try {
+                    return Long.parseLong(token);
+                } catch (NumberFormatException overflow) {
+                    // ціле поза межами long -> парситься як double нижче
+                }
+            } else if (!DECIMAL_PATTERN.matcher(token).matches()) {
+                return null;
+            }
+            double value = Double.parseDouble(token);
+            return Double.isFinite(value) ? value : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    // Ціле значення аргументу (приймає 5, 5.0, 1e3); null, якщо число не ціле
+    public static Long toLongExact(Number n) {
+        if (n instanceof Long) {
+            return (Long) n;
+        }
+        double v = n.doubleValue();
+        if (v != Math.rint(v) || Math.abs(v) >= 0x1p63) {
+            return null;
+        }
+        return (long) v;
+    }
+
+    public static double[] toDoubleArray(Number[] arguments) {
+        double[] result = new double[arguments.length];
+        for (int i = 0; i < arguments.length; i++) {
+            result[i] = arguments[i].doubleValue();
+        }
+        return result;
+    }
+
+    // CORE-14: єдиний формат виводу
     public static void printResult(double value) {
+        if (!Double.isFinite(value)) {
+            printError(ERR_INVALID_INPUT);
+            return;
+        }
         if (value == 0.0) {
-            value = 0.0;
+            value = 0.0; // -0.0 -> 0.0
         }
         System.out.printf(Locale.ROOT, "Result: %f%n", value);
     }
@@ -313,57 +473,99 @@ public class MathSolver {
         System.out.printf(Locale.ROOT, "Result: %d%n", value);
     }
 
-    public static void printResult(String value) {
-    System.out.println("Result: " + value);
-    }
-
     public static void printResult(boolean value) {
-        System.out.println("Result: " + value);
+        System.out.printf(Locale.ROOT, "Result: %b%n", value);
     }
 
-    // CORE-04: Довідка
+    public static void printResult(String value) {
+        System.out.printf(Locale.ROOT, "Result: %s%n", value);
+    }
+
+    // CORE-15: єдина точка виводу помилок
+    public static void printError(String message) {
+        System.out.println(message);
+    }
+
+    public static void printUnknownCommand(String command) {
+        printError(ERR_UNKNOWN_COMMAND + command);
+        System.out.println(HINT_HELP);
+    }
+
+    // CORE-04 / CORE-16: довідка
     public static void printHelp() {
-        System.out.println("JavaMathSolver\n");
-        System.out.println("Available commands:\n");
-        System.out.println("add a b");
-        System.out.println("sub a b");
-        System.out.println("mul a b");
-        System.out.println("div a b");
-        System.out.println("pow a b");
-        System.out.println("sqrt x");
-        System.out.println("abs x");
-        System.out.println("solve-linear a b");
-        System.out.println("solve-quadratic a b c");
-        System.out.println("max3 a b c");
-        System.out.println("gcd a b");
-        System.out.println("factorial n");
-        System.out.println("fibonacci n");
-        System.out.println("sin-taylor x eps");
-        System.out.println("series-b x eps");
-        System.out.println("series-c x eps");
-        System.out.println("series-h x eps");
-        System.out.println("series-e x eps");
-        System.out.println("series-ln x eps");
-        System.out.println("series-ye x eps");
-        System.out.println("series-j x eps");
-        System.out.println("series-k x eps");
-        System.out.println("series-l x eps");
-        System.out.println("series-m x eps");
-        System.out.println("series-z x eps");
-        System.out.println("series-i x eps");
-        System.out.println("series-y x eps\n");
-        System.out.println("distance x1 y1 x2 y2");
-        System.out.println("circle-area r");
-        System.out.println("circle-circumference r");
-        System.out.println("rectangle-area a b");
-        System.out.println("rectangle-perimeter a b");
-        System.out.println("origin-distance x y");
-        System.out.println("triangle-area a b c");
-        System.out.println("triangle-valid a b c");
-        System.out.println("quadrant x y");
-        System.out.println("manhattan-distance x1 y1 x2 y2");
-        System.out.println("midpoint x1 y1 x2 y2");
-        System.out.println("collinear x1 y1 x2 y2 x3 y3");
+        System.out.println("JavaMathSolver v" + VERSION);
+        System.out.println("Usage: java -cp src MathSolver <command> <arguments>");
+
+        System.out.println();
+        System.out.println("Algebra:");
+        printHelpLine("add a b", "a + b");
+        printHelpLine("sub a b", "a - b");
+        printHelpLine("mul a b", "a * b");
+        printHelpLine("div a b", "a / b");
+        printHelpLine("pow a b", "a ^ b");
+        printHelpLine("sqrt x", "square root of x");
+        printHelpLine("abs x", "|x|");
+        printHelpLine("solve-linear a b", "solve a*x + b = 0");
+        printHelpLine("solve-quadratic a b c", "solve a*x^2 + b*x + c = 0");
+        printHelpLine("max3 a b c", "maximum of three numbers");
+        printHelpLine("gcd a b", "greatest common divisor (integers)");
+        printHelpLine("factorial n", "n!, 0 <= n <= 20");
+        printHelpLine("fibonacci n", "F(n), 0 <= n <= 92");
+
+        System.out.println();
+        System.out.println("Taylor series (x eps; alias in brackets):");
+        printHelpLine("taylor-sin x eps", "sin(x) [sin-taylor]");
+        printHelpLine("taylor-cos x eps", "cos(x) [series-b]");
+        printHelpLine("taylor-sinh x eps", "sinh(x) [series-c]");
+        printHelpLine("taylor-cosh x eps", "cosh(x) [series-h]");
+        printHelpLine("taylor-exp x eps", "e^x [series-e]");
+        printHelpLine("taylor-ln-one-plus-x x eps", "ln(1 + x), |x| < 1 [series-ln]");
+        printHelpLine("taylor-geom-series x eps", "1 / (1 + x), |x| < 1 [series-ye]");
+        printHelpLine("taylor-artanh x eps", "artanh(x), |x| < 1 [series-j]");
+        printHelpLine("taylor-sqrt-one-plus-x x eps", "sqrt(1 + x), |x| < 1 [series-k]");
+        printHelpLine("taylor-inv-sqrt-one-plus-x x eps", "1 / sqrt(1 + x), |x| < 1 [series-l]");
+        printHelpLine("taylor-asin x eps", "arcsin(x), |x| < 1 [series-m]");
+        printHelpLine("taylor-inv-sq x eps", "1 / (1 + x)^2, |x| < 1 [series-z]");
+        printHelpLine("taylor-inv-cube x eps", "1 / (1 + x)^3, |x| < 1 [series-i]");
+        printHelpLine("taylor-inv-one-plus-x2 x eps", "1 / (1 + x^2), |x| < 1 [series-y]");
+
+        System.out.println();
+        System.out.println("Geometry:");
+        printHelpLine("distance x1 y1 x2 y2", "distance between two points");
+        printHelpLine("origin-distance x y", "distance from (0, 0)");
+        printHelpLine("manhattan-distance x1 y1 x2 y2", "|x2 - x1| + |y2 - y1|");
+        printHelpLine("midpoint x1 y1 x2 y2", "midpoint of a segment");
+        printHelpLine("quadrant x y", "I, II, III, IV, AXIS or ORIGIN");
+        printHelpLine("collinear x1 y1 x2 y2 x3 y3", "are three points on one line");
+        printHelpLine("circle-area r", "pi * r^2");
+        printHelpLine("circle-circumference r", "2 * pi * r");
+        printHelpLine("rectangle-area a b", "a * b");
+        printHelpLine("rectangle-perimeter a b", "2 * (a + b)");
+        printHelpLine("ellipse-area a b", "pi * a * b");
+        printHelpLine("triangle-valid a b c", "can sides a, b, c form a triangle");
+        printHelpLine("triangle-area a b c", "area by Heron's formula");
+        printHelpLine("triangle-medians a b c", "medians m_a, m_b, m_c");
+        printHelpLine("triangle-bisectors a b c", "bisectors l_a, l_b, l_c");
+        printHelpLine("triangle-heights a b c", "heights h_a, h_b, h_c");
+        printHelpLine("triangle-angles a b c", "angles in radians and degrees");
+        printHelpLine("triangle-area-inradius A B C r", "area by angles (rad) and inradius");
+        printHelpLine("cylinder-volume r h", "pi * r^2 * h");
+        printHelpLine("cone-volume r h", "pi * r^2 * h / 3");
+        printHelpLine("torus-volume r_in r_out", "torus volume by inner and outer radius");
+        printHelpLine("circle-segment r x y_min len", "circle x^2 + y^2 = r^2 and vertical segment");
+        printHelpLine("circle-line cx cy r a b c", "circle and line a*x + b*y + c = 0");
+        printHelpLine("circles-intersect x1 y1 r1 x2 y2 r2", "do two circles intersect");
+        printHelpLine("squares-intersect x1 y1 s1 x2 y2 s2", "intersection of two squares");
+        printHelpLine("rect-bounding-box x1 y1 x2 y2 x3 y3 x4 y4", "bounding box of two rectangles");
+        printHelpLine("polygon x1 y1 x2 y2 x3 y3 ...", "perimeter and convexity (>= 3 vertices)");
+        printHelpLine("monte-carlo-triangle n", "probability that 3 random sides form a triangle");
+
+        System.out.println();
+        printHelpLine("help", "show this help");
+    }
+
+    private static void printHelpLine(String usage, String description) {
+        System.out.printf(Locale.ROOT, "  %-42s %s%n", usage, description);
     }
 
     // ALGEBRA (ALG-01 ... ALG-06)
@@ -379,9 +581,9 @@ public class MathSolver {
     public static void solveLinear(double a, double b) {
         if (a == 0.0) {
             if (b == 0.0) {
-                System.out.println("Infinite solutions");
+                printResult("Infinite solutions");
             } else {
-                System.out.println("No solution");
+                printResult("No solution");
             }
         } else {
             double x = -b / a;
@@ -406,13 +608,12 @@ public class MathSolver {
                 x1 = (2.0 * c) / (-b + Math.sqrt(d));
                 x2 = (-b + Math.sqrt(d)) / (2.0 * a);
             }
-            printResult(Math.min(x1, x2));
-            printResult(Math.max(x1, x2));
+            printResult(String.format(Locale.ROOT, "x1=%f, x2=%f", Math.min(x1, x2), Math.max(x1, x2)));
         } else if (d == 0.0) {
             double x = -b / (2.0 * a);
             printResult(x);
         } else {
-            System.out.println("No real roots");
+            printResult("No real roots");
         }
     }
 
@@ -433,7 +634,7 @@ public class MathSolver {
 
     public static void factorial(long n) {
         if (n < 0L || n > 20L) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         long result = 1L;
@@ -445,7 +646,7 @@ public class MathSolver {
 
     public static void fibonacci(long n) {
         if (n < 0L || n > 92L) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         if (n == 0L) {
@@ -471,7 +672,7 @@ public class MathSolver {
 
     private static boolean validateInfiniteSeriesInputs(double x, double eps) {
         if (!Double.isFinite(x) || !Double.isFinite(eps) || eps <= 0.0) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return false;
         }
         return true;
@@ -479,7 +680,7 @@ public class MathSolver {
 
     private static boolean validateSeriesInputs(double x, double eps) {
         if (!Double.isFinite(x) || !Double.isFinite(eps) || Math.abs(x) >= 1.0 || eps <= 0.0) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return false;
         }
         return true;
@@ -736,7 +937,7 @@ public class MathSolver {
 
     public static void calculateCircleArea(double r) {
         if (r < 0.0) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         printResult(Math.PI * r * r);
@@ -744,7 +945,7 @@ public class MathSolver {
 
     public static void calculateCircleCircumference(double r) {
         if (r < 0.0) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         printResult(2.0 * Math.PI * r);
@@ -752,7 +953,7 @@ public class MathSolver {
 
     public static void calculateRectangleArea(double a, double b) {
         if (a < 0.0 || b < 0.0) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         printResult(a * b);
@@ -760,7 +961,7 @@ public class MathSolver {
 
     public static void calculateRectanglePerimeter(double a, double b) {
         if (a < 0.0 || b < 0.0) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         printResult(2.0 * (a + b));
@@ -792,12 +993,12 @@ public class MathSolver {
 
     public static void calculateTriangleArea(double sideA, double sideB, double sideC) {
         if (!triangleValid(sideA, sideB, sideC)) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         double area = heronArea(sideA, sideB, sideC);
         if (Double.isInfinite(area) || Double.isNaN(area)) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         printResult(area);
@@ -805,9 +1006,9 @@ public class MathSolver {
 
     public static boolean triangleValid(double sideA, double sideB, double sideC) {
         return sideA > 0 && sideB > 0 && sideC > 0
-            && (sideA + sideB > sideC)
-            && (sideA + sideC > sideB)
-            && (sideB + sideC > sideA);
+                && (sideA + sideB > sideC)
+                && (sideA + sideC > sideB)
+                && (sideB + sideC > sideA);
     }
 
     public static void calculateTriangleValid(double sideA, double sideB, double sideC) {
@@ -857,7 +1058,7 @@ public class MathSolver {
     // Task 7: Ellipse area
     public static void calculateEllipseArea(double radiusA, double radiusB) {
         if (radiusA < 0 || radiusB < 0) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         printResult(Math.PI * radiusA * radiusB);
@@ -866,14 +1067,14 @@ public class MathSolver {
     // Task 8a: Triangle medians
     public static void calculateMedians(double sideA, double sideB, double sideC) {
         if (!triangleValid(sideA, sideB, sideC)) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         double medA = 0.5 * Math.sqrt(Math.max(0, 2 * sideB * sideB + 2 * sideC * sideC - sideA * sideA));
         double medB = 0.5 * Math.sqrt(Math.max(0, 2 * sideA * sideA + 2 * sideC * sideC - sideB * sideB));
         double medC = 0.5 * Math.sqrt(Math.max(0, 2 * sideA * sideA + 2 * sideB * sideB - sideC * sideC));
         if (Double.isInfinite(medA) || Double.isInfinite(medB) || Double.isInfinite(medC)) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         printResult(String.format(Locale.ROOT, "m_a=%f, m_b=%f, m_c=%f", medA, medB, medC));
@@ -882,14 +1083,14 @@ public class MathSolver {
     // Task 8b: Triangle bisectors
     public static void calculateBisectors(double sideA, double sideB, double sideC) {
         if (!triangleValid(sideA, sideB, sideC)) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         double bisA = Math.sqrt(Math.max(0, sideB * sideC * ((sideB + sideC) * (sideB + sideC) - sideA * sideA))) / (sideB + sideC);
         double bisB = Math.sqrt(Math.max(0, sideA * sideC * ((sideA + sideC) * (sideA + sideC) - sideB * sideB))) / (sideA + sideC);
         double bisC = Math.sqrt(Math.max(0, sideA * sideB * ((sideA + sideB) * (sideA + sideB) - sideC * sideC))) / (sideA + sideB);
         if (Double.isInfinite(bisA) || Double.isInfinite(bisB) || Double.isInfinite(bisC)) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         printResult(String.format(Locale.ROOT, "l_a=%f, l_b=%f, l_c=%f", bisA, bisB, bisC));
@@ -898,19 +1099,19 @@ public class MathSolver {
     // Task 8c: Triangle heights
     public static void calculateHeights(double sideA, double sideB, double sideC) {
         if (!triangleValid(sideA, sideB, sideC)) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         double area = heronArea(sideA, sideB, sideC);
         if (Double.isInfinite(area) || Double.isNaN(area)) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         double hA = 2 * area / sideA;
         double hB = 2 * area / sideB;
         double hC = 2 * area / sideC;
         if (Double.isInfinite(hA) || Double.isInfinite(hB) || Double.isInfinite(hC)) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         printResult(String.format(Locale.ROOT, "h_a=%f, h_b=%f, h_c=%f", hA, hB, hC));
@@ -919,17 +1120,17 @@ public class MathSolver {
     // Task 9: Area by angles (in radians) and inradius
     public static void calculateAreaByAnglesAndInradius(double angleA, double angleB, double angleC, double inradius) {
         if (inradius <= 0 || angleA <= 0 || angleB <= 0 || angleC <= 0 || angleA >= Math.PI || angleB >= Math.PI || angleC >= Math.PI) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         if (Math.abs((angleA + angleB + angleC) - Math.PI) > 1e-4) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         double sumCot = 1 / Math.tan(angleA / 2) + 1 / Math.tan(angleB / 2) + 1 / Math.tan(angleC / 2);
         double result = inradius * inradius * sumCot;
         if (Double.isInfinite(result) || Double.isNaN(result)) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         printResult(result);
@@ -938,7 +1139,7 @@ public class MathSolver {
     // Task 10: Triangle angles (in radians and degrees)
     public static void calculateTriangleAngles(double sideA, double sideB, double sideC) {
         if (!triangleValid(sideA, sideB, sideC)) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         double cosA = Math.min(1.0, Math.max(-1.0, (sideB * sideB + sideC * sideC - sideA * sideA) / (2 * sideB * sideC)));
@@ -949,20 +1150,19 @@ public class MathSolver {
         double radB = Math.acos(cosB);
         double radC = Math.acos(cosC);
 
-        printResult(String.format(Locale.ROOT, "A=%f rad, B=%f rad, C=%f rad", radA, radB, radC));
-        printResult(String.format(Locale.ROOT, "A=%f deg, B=%f deg, C=%f deg",
-                Math.toDegrees(radA), Math.toDegrees(radB), Math.toDegrees(radC)));
+        printResult(String.format(Locale.ROOT, "A=%f rad (%f deg), B=%f rad (%f deg), C=%f rad (%f deg)",
+                radA, Math.toDegrees(radA), radB, Math.toDegrees(radB), radC, Math.toDegrees(radC)));
     }
 
     // Task 11: Cylinder volume
     public static void calculateCylinderVolume(double radius, double height) {
         if (radius < 0 || height < 0) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         double vol = Math.PI * radius * radius * height;
         if (Double.isInfinite(vol) || Double.isNaN(vol)) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         printResult(vol);
@@ -971,12 +1171,12 @@ public class MathSolver {
     // Task 12: Cone volume
     public static void calculateConeVolume(double radius, double height) {
         if (radius < 0 || height < 0) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         double vol = Math.PI * radius * radius * height / 3;
         if (Double.isInfinite(vol) || Double.isNaN(vol)) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         printResult(vol);
@@ -985,14 +1185,14 @@ public class MathSolver {
     // Task 13: Torus volume
     public static void calculateTorusVolume(double innerRadius, double outerRadius) {
         if (innerRadius < 0 || outerRadius < 0 || innerRadius > outerRadius) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         double tubeRadius = (outerRadius - innerRadius) / 2;
         double centerRadius = (outerRadius + innerRadius) / 2;
         double vol = 2 * Math.PI * Math.PI * centerRadius * tubeRadius * tubeRadius;
         if (Double.isInfinite(vol) || Double.isNaN(vol)) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         printResult(vol);
@@ -1001,7 +1201,7 @@ public class MathSolver {
     // Task 14: Circle and segment intersection
     public static void calculateCircleSegmentIntersections(double radius, double lineX, double yMin, double lengthC) {
         if (radius < 0) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         double yMax = yMin + lengthC * lengthC;
@@ -1029,7 +1229,7 @@ public class MathSolver {
     // Task 15: Circle and line intersection classification
     public static void calculateCircleLine(double centerX, double centerY, double radius, double lineA, double lineB, double lineC) {
         if (radius < 0 || (lineA == 0 && lineB == 0)) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         double dist = Math.abs(lineA * centerX + lineB * centerY + lineC) / Math.hypot(lineA, lineB);
@@ -1045,7 +1245,7 @@ public class MathSolver {
     // Task 16: Intersection of two circles
     public static void calculateCirclesIntersect(double x1, double y1, double r1, double x2, double y2, double r2) {
         if (r1 < 0 || r2 < 0) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         double dist = Math.hypot(x2 - x1, y2 - y1);
@@ -1056,7 +1256,7 @@ public class MathSolver {
     // Task 17: Intersection of two squares
     public static void calculateSquaresIntersect(double x1, double y1, double side1, double x2, double y2, double side2) {
         if (side1 < 0 || side2 < 0) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         double leftX = Math.max(x1, x2);
@@ -1073,7 +1273,7 @@ public class MathSolver {
     // Task 18: Minimum bounding box for two rectangles
     public static void calculateRectBoundingBox(double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4) {
         if (x1 > x2 || y1 > y2 || x3 > x4 || y3 > y4) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         double minX = Math.min(x1, x3);
@@ -1086,7 +1286,7 @@ public class MathSolver {
     // Polygon task: perimeter and convexity
     public static void processPolygon(double... coords) {
         if (coords == null || coords.length < 6 || coords.length % 2 != 0) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         int count = coords.length / 2;
@@ -1127,8 +1327,7 @@ public class MathSolver {
         boolean turningSumOk = Math.abs(Math.abs(turningSum) - 2 * Math.PI) < 1e-6;
         boolean isConvex = signConsistent && initialSign != 0 && turningSumOk;
 
-        printResult(String.format(Locale.ROOT, "Perimeter: %f", perimeter));
-        printResult("Is convex: " + isConvex);
+        printResult(String.format(Locale.ROOT, "perimeter=%f, convex=%b", perimeter, isConvex));
     }
 
     // Monte Carlo simulation for triangle probability
@@ -1138,7 +1337,7 @@ public class MathSolver {
 
     public static void calculateMonteCarloTriangle(int totalTrials, long seed) {
         if (totalTrials <= 0) {
-            System.out.println("Error: Invalid mathematical input");
+            printError(ERR_INVALID_INPUT);
             return;
         }
         java.util.Random rnd = new java.util.Random(seed);
