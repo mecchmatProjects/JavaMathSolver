@@ -303,7 +303,7 @@ public class MathSolver {
     }
 
     public static void printResult(double value) {
-        if (value == 0.0 || Double.doubleToRawLongBits(value) == 0x8000000000000000L) {
+        if (value == 0.0) {
             value = 0.0;
         }
         System.out.printf(Locale.ROOT, "Result: %f%n", value);
@@ -419,7 +419,7 @@ public class MathSolver {
         BigInteger b1 = BigInteger.valueOf(a);
         BigInteger b2 = BigInteger.valueOf(b);
         BigInteger res = b1.gcd(b2);
-        System.out.printf(Locale.ROOT, "Result: %s%n", res.toString());
+        printResult(res.longValue());
     }
 
     public static void factorial(long n) {
@@ -604,7 +604,7 @@ public class MathSolver {
         if (!validateSeriesInputs(x, eps)) return;
 
         double sum = 0.0;
-        double a = 2.0 * x;
+        double a = x;
         int k = 1;
         double xSquared = x * x;
         int iter = 0;
