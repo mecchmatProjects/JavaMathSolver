@@ -689,3 +689,4 @@ public class MathSolver {
         }
         printResult((double) validCount / totalTrials);
     }
+}
