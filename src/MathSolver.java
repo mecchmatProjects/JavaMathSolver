@@ -215,7 +215,7 @@ public class MathSolver {
     public static void printResult(String value) {
     System.out.println("Result: " + value);
     }
-    
+
     public static void printResult(boolean value) {
         System.out.println("Result: " + value);
     }
@@ -391,6 +391,7 @@ public class MathSolver {
         double scale = len1 * len2;
         printResult(Math.abs(crossProduct) <= 1e-9 * scale);
     }
+
 
     // Task 7: Ellipse area
     public static void calculateEllipseArea(double radiusA, double radiusB) {
@@ -572,11 +573,11 @@ public class MathSolver {
         }
         double dist = Math.abs(lineA * centerX + lineB * centerY + lineC) / Math.hypot(lineA, lineB);
         if (Math.abs(dist - radius) < 1e-9) {
-            System.out.println("One point of tangency");
+            printResult("One point of tangency");
         } else if (dist < radius) {
-            System.out.println("Two points of intersection");
+            printResult("Two points of intersection");
         } else {
-            System.out.println("No common points");
+            printResult("No common points");
         }
     }
 
@@ -602,9 +603,9 @@ public class MathSolver {
         double rightX = Math.min(x1 + side1, x2 + side2);
         double topY = Math.min(y1 + side1, y2 + side2);
         if (leftX > rightX || bottomY > topY) {
-            System.out.println("Squares do not intersect");
+            printResult("Squares do not intersect");
         } else {
-            System.out.printf(Locale.ROOT, "Intersect rect: Bottom-Left (%f, %f), Top-Right (%f, %f)%n", leftX, bottomY, rightX, topY);
+            printResult(String.format(Locale.ROOT, "Intersect rect: Bottom-Left (%f, %f), Top-Right (%f, %f)", leftX, bottomY, rightX, topY));
         }
     }
 
@@ -618,7 +619,7 @@ public class MathSolver {
         double minY = Math.min(y1, y3);
         double maxX = Math.max(x2, x4);
         double maxY = Math.max(y2, y4);
-        System.out.printf(Locale.ROOT, "Bounding box: Bottom-Left (%f, %f), Top-Right (%f, %f)%n", minX, minY, maxX, maxY);
+        printResult(String.format(Locale.ROOT, "Bounding box: Bottom-Left (%f, %f), Top-Right (%f, %f)", minX, minY, maxX, maxY));
     }
 
     // Polygon task: perimeter and convexity
@@ -689,4 +690,5 @@ public class MathSolver {
         }
         printResult((double) validCount / totalTrials);
     }
+
 }
