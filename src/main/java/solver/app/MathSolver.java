@@ -1,3 +1,5 @@
+package solver.app;
+
 import java.math.BigInteger;
 import java.util.Locale;
 import java.util.regex.Pattern;
