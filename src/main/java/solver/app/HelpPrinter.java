@@ -14,7 +14,7 @@ public final class HelpPrinter {
     // CORE-04 / CORE-16: довідка
     public static void printHelp() {
         System.out.println("JavaMathSolver v" + VERSION);
-        System.out.println("Usage: java -cp src MathSolver <command> <arguments>");
+        System.out.println("Usage: java -cp target/classes solver.app.MathSolver <command> <arguments>");
 
         System.out.println();
         System.out.println("Algebra:");
