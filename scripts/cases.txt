@@ -133,3 +133,82 @@ polygon 0 0 1 0 1 1 0
 monte-carlo-triangle 100000
 monte-carlo-triangle 0
 monte-carlo-triangle 2.5
+help 1
+# --- C0-a review: граничні та некоректні кейси для команд, що мали 1 кейс ---
+sub 0 0
+sub abc 1
+mul -3 0
+mul 1e200 1e200
+abs 0
+abs -0
+abs x
+circle-circumference 0
+circle-circumference -2
+origin-distance 0 0
+origin-distance 3
+rectangle-perimeter 0 0
+rectangle-perimeter -1 2
+manhattan-distance 0 0 0 0
+manhattan-distance -1 -1 1 1
+cone-volume 0 5
+cone-volume -1 3
+triangle-medians 1 1 1
+triangle-medians 1 2 3
+triangle-bisectors 1 1 1
+triangle-bisectors 1 2 3
+triangle-heights 1 1 1
+triangle-heights 1 2 3
+sin-taylor 0 1e-9
+sin-taylor 1 -1
+taylor-cos 0 1e-9
+taylor-cos 1 0
+series-b 0 1e-9
+series-b 1 -1
+taylor-sinh 0 1e-9
+taylor-sinh 1 0
+series-c 0 1e-9
+series-c 1 -1
+taylor-cosh -1 1e-9
+taylor-cosh 1 0
+series-h 2 1e-9
+series-h 1 -1
+taylor-exp 0 1e-9
+taylor-exp 1 0
+series-e 0 1e-12
+series-e 1 -1
+taylor-ln-one-plus-x 0 1e-9
+taylor-ln-one-plus-x 1 1e-9
+series-ln -0.5 1e-9
+series-ln 0.5 0
+taylor-geom-series 0 1e-9
+taylor-geom-series -1 1e-9
+series-ye 0.5 1e-9
+series-ye 0.5 0
+taylor-artanh 0 1e-9
+taylor-artanh 1 1e-9
+series-j -0.5 1e-9
+series-j 0.5 0
+taylor-sqrt-one-plus-x 0 1e-9
+taylor-sqrt-one-plus-x 1 1e-9
+series-k 0.5 1e-9
+series-k 0.5 0
+taylor-inv-sqrt-one-plus-x 0 1e-9
+taylor-inv-sqrt-one-plus-x -1 1e-9
+series-l 0.5 1e-9
+series-l 0.5 0
+taylor-asin 0 1e-9
+taylor-asin 1 1e-9
+series-m -0.5 1e-9
+series-m 0.5 0
+taylor-inv-sq 0 1e-9
+taylor-inv-sq 1 1e-9
+series-z 0.5 1e-9
+series-z 0.5 0
+taylor-inv-cube 0 1e-9
+taylor-inv-cube -1 1e-9
+series-i 0.5 1e-9
+series-i 0.5 0
+taylor-inv-one-plus-x2 0 1e-9
+taylor-inv-one-plus-x2 1 1e-9
+series-y -0.5 1e-9
+series-y 0.5 0
