@@ -97,7 +97,7 @@ public final class CommandCatalog {
                 return 8;
 
             case "polygon":
-                return VARIADIC;
+                return VARIADIC_POLYGON;
 
             default:
                 return UNKNOWN_COMMAND;
