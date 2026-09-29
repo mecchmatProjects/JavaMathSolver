@@ -1,0 +1,47 @@
+package solver.app;
+
+import java.util.Locale;
+import static solver.core.Output.*;
+import static solver.core.Messages.*;
+import static solver.core.ArgumentValidator.*;
+import static solver.core.NumberParser.*;
+import static solver.app.CommandCatalog.getExpectedArgsCount;
+import static solver.app.CommandDispatcher.dispatch;
+
+/**
+ * Точка входу JavaMathSolver.
+ */
+public final class MathSolver {
+
+    public static final String VERSION = "0.2";
+
+    private MathSolver() {
+    }
+
+    public static void main(String[] args) {
+        if (args.length == 0) {
+            System.out.println("JavaMathSolver v" + VERSION);
+            System.out.println(HINT_HELP);
+            return;
+        }
+
+        String command = args[0].trim().toLowerCase(Locale.ROOT);
+
+        int expected = getExpectedArgsCount(command);
+        if (expected == UNKNOWN_COMMAND) {
+            printUnknownCommand(args[0]);
+            return;
+        }
+
+        if (!validateArgs(args.length - 1, expected)) {
+            return;
+        }
+
+        Number[] arguments = parseArguments(args);
+        if (arguments == null) {
+            return;
+        }
+
+        dispatch(command, arguments);
+    }
+}
