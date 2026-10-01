@@ -1,13 +1,36 @@
 package solver.app;
 
-import static solver.core.ArgumentValidator.*;
+import solver.core.ArgumentValidator;
+
+import static solver.core.ArgumentValidator.UNKNOWN_COMMAND;
 
 /**
  * CORE-12: каталог команд і їх арність.
  */
 public final class CommandCatalog {
 
+    // C0-b: службові значення арності для команд зі змінною кількістю аргументів
+    public static final int VARIADIC_NUMBERS = ArgumentValidator.VARIADIC_NUMBERS;  // -2: >= 1 число (statistics)
+    public static final int VARIADIC_POINTS = ArgumentValidator.VARIADIC_POINTS;    // -3: >= 2, парна кількість (centroid)
+    public static final int VARIADIC_POLYGON = ArgumentValidator.VARIADIC_POLYGON;  // -4: >= 6, парна (polygon)
+    public static final int VARIADIC_TEXT = ArgumentValidator.VARIADIC_TEXT;        // -5: >= 1 слово (tokenize)
+
+    // C0-b: тип аргументів команди
+    public enum ArgKind { NUMERIC, TEXT }
+
     private CommandCatalog() {
+    }
+
+    // C0-b: текстові команди отримують вираз рядком, без парсингу чисел
+    public static ArgKind getArgKind(String command) {
+        switch (command) {
+            case "tokenize":
+            case "token-stats":
+            case "validate-expr":
+                return ArgKind.TEXT;
+            default:
+                return ArgKind.NUMERIC;
+        }
     }
 
     // CORE-12: очікувана кількість аргументів
@@ -97,7 +120,7 @@ public final class CommandCatalog {
                 return 8;
 
             case "polygon":
-                return VARIADIC;
+                return VARIADIC_POLYGON;
 
             default:
                 return UNKNOWN_COMMAND;

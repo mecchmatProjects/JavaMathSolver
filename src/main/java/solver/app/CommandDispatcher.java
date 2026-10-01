@@ -260,4 +260,14 @@ public final class CommandDispatcher {
                 break;
         }
     }
+
+    // C0-b: диспетчеризація текстових команд (аргумент - увесь вираз одним рядком)
+    public static void dispatchText(String command, String text) {
+        switch (command) {
+            // C10: tokenize, token-stats, validate-expr
+            default:
+                printUnknownCommand(command);
+                break;
+        }
+    }
 }

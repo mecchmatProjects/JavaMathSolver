@@ -11,6 +11,8 @@ public final class Messages {
     public static final String ERR_TOO_MANY_ARGS = "Error: Too many arguments";
     public static final String ERR_DIVISION_BY_ZERO = "Error: Division by zero";
     public static final String ERR_INVALID_INPUT = "Error: Invalid mathematical input";
+    public static final String ERR_ODD_COORDINATES = "Error: Coordinates must come in pairs";
+    public static final String ERR_INVALID_TOKEN = "Error: Invalid token: ";
     public static final String HINT_HELP = "Use 'help' to see available commands.";
 
     private Messages() {
