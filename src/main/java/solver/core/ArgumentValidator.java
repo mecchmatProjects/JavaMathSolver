@@ -14,13 +14,14 @@ public final class ArgumentValidator {
     // CORE-12: службові значення арності
     public static final int UNKNOWN_COMMAND = -1;
 
-    // C0-b: variadic-режими
-    /** Багатокутник: >= 3 вершини (6 чисел), парна кількість. */
-    public static final int VARIADIC_POLYGON = -2;
+    // C0-b: variadic-режими. Публічна точка для команд - CommandCatalog (app);
+    // тут ті самі значення, бо core не імпортує app (правило залежностей).
     /** Набір чисел: >= 1 число (statistics, normalize, ...). */
-    public static final int VARIADIC_NUMBERS = -3;
+    public static final int VARIADIC_NUMBERS = -2;
     /** Набір точок: >= 1 точка (2 числа), парна кількість (centroid, bounding-box, ...). */
-    public static final int VARIADIC_POINTS = -4;
+    public static final int VARIADIC_POINTS = -3;
+    /** Багатокутник: >= 3 вершини (6 чисел), парна кількість. */
+    public static final int VARIADIC_POLYGON = -4;
     /** Текстовий вираз: >= 1 слово, аргументи не парсяться як числа (tokenize, ...). */
     public static final int VARIADIC_TEXT = -5;
 

@@ -6,6 +6,9 @@ import static solver.core.Output.*;
 import static solver.core.Messages.*;
 import static solver.core.ArgumentValidator.*;
 import static solver.core.NumberParser.*;
+import solver.app.CommandCatalog.ArgKind;
+
+import static solver.app.CommandCatalog.getArgKind;
 import static solver.app.CommandCatalog.getExpectedArgsCount;
 import static solver.app.CommandDispatcher.dispatch;
 import static solver.app.CommandDispatcher.dispatchText;
@@ -35,13 +38,17 @@ public final class MathSolver {
             return;
         }
 
-        if (!validateArgs(args.length - 1, expected)) {
+        // C0-b: текстові команди отримують вираз цілим рядком, без парсингу чисел
+        if (getArgKind(command) == ArgKind.TEXT) {
+            if (args.length < 2) {
+                printError(ERR_NOT_ENOUGH_ARGS);
+                return;
+            }
+            dispatchText(command, joinText(args));
             return;
         }
 
-        // C0-b: текстові команди отримують вираз цілим рядком, без парсингу чисел
-        if (expected == VARIADIC_TEXT) {
-            dispatchText(command, joinText(args));
+        if (!validateArgs(args.length - 1, expected)) {
             return;
         }
 
