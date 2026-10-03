@@ -35,7 +35,11 @@ public final class Tokenizer {
      *
      * <ul>
      *   <li>пробіли й табуляції пропускаються і токенів не дають;</li>
-     *   <li>послідовність цифр це один NUMBER;</li>
+     *   <li>число це жадібна послідовність цифр і крапок: {@code цифри} або
+     *       {@code цифри.цифри} дають NUMBER, інакше ({@code 2..5}, {@code .5}) UNKNOWN;</li>
+     *   <li>{@code -} приклеюється до числа, лише якщо далі йде цифра і це перший токен
+     *       або попередній токен це оператор чи {@code (}: {@code -5} це NUMBER,
+     *       а {@code 3-5} це NUMBER MINUS NUMBER;</li>
      *   <li>послідовність літер це один IDENTIFIER;</li>
      *   <li>{@code + - * / ^ ( )} це по одному токену відповідного типу;</li>
      *   <li>будь-який інший символ це окремий токен UNKNOWN.</li>
@@ -54,14 +58,25 @@ public final class Tokenizer {
 
         // Крок циклу це не i++, а перехід на кінець поточної лексеми.
         // continue теж виконує крок, тому пробіл просто пропускається.
+        TokenType previous = null; // попередній токен (пробіли його не міняють)
         for (int i = 0, end = 0; i < expression.length(); i = end) {
-            end = scanEnd(expression, i);
             char first = expression.charAt(i);
+            boolean signed = isSignedNumberStart(expression, i, previous);
+            end = signed ? scanNumber(expression, i + 1) : scanEnd(expression, i);
             if (CharClassifier.isWhitespace(first)) {
                 continue;
             }
-            buffer[count] = typeOfFirstChar(first);
+            TokenType type;
+            if (signed) {
+                type = numberType(expression, i + 1, end);
+            } else if (isNumberStart(first)) {
+                type = numberType(expression, i, end);
+            } else {
+                type = typeOfFirstChar(first);
+            }
+            buffer[count] = type;
             count++;
+            previous = type;
         }
 
         return Arrays.copyOf(buffer, count);
@@ -75,9 +90,11 @@ public final class Tokenizer {
      * Постумова: {@code start < результат <= s.length()}, тобто цикл
      * ніколи не зациклюється.
      *
-     * <p>Поки що: пробіли, цифри і літери групуються в серію однакових
-     * символів, усе інше (оператори, дужки, невідомі символи) це лексема
-     * з одного символа. Цей метод перевикористають C5-C7.
+     * <p>Пробіли і літери групуються в серію однакових символів, число
+     * (цифри і крапки) читається жадібно, усе інше (оператори, дужки,
+     * невідомі символи) це лексема з одного символа. Знак мінуса перед
+     * числом тут не розглядається: це контекстне правило, див.
+     * {@link #isSignedNumberStart}. Цей метод перевикористають C6-C7.
      */
     private static int scanEnd(String s, int start) {
         char c = s.charAt(start);
@@ -85,8 +102,8 @@ public final class Tokenizer {
         if (CharClassifier.isWhitespace(c)) {
             return scanWhitespace(s, start);
         }
-        if (CharClassifier.isDigit(c)) {
-            return scanDigits(s, start);
+        if (isNumberStart(c)) {
+            return scanNumber(s, start);
         }
         if (CharClassifier.isLetter(c)) {
             return scanLetters(s, start);
@@ -102,12 +119,62 @@ public final class Tokenizer {
         return end;
     }
 
-    private static int scanDigits(String s, int start) {
+    // Число читається жадібно: усі цифри і крапки підряд ("2..5" це одна лексема).
+    private static int scanNumber(String s, int start) {
         int end = start + 1;
-        while (end < s.length() && CharClassifier.isDigit(s.charAt(end))) {
+        while (end < s.length()
+                && (CharClassifier.isDigit(s.charAt(end)) || CharClassifier.isDecimalPoint(s.charAt(end)))) {
             end++;
         }
         return end;
+    }
+
+    private static boolean isNumberStart(char c) {
+        return CharClassifier.isDigit(c) || CharClassifier.isDecimalPoint(c);
+    }
+
+    /**
+     * Чи є {@code '-'} у позиції {@code i} знаком числа, а не оператором: далі
+     * одразу йде цифра, і це перший токен або попередній токен це оператор чи {@code (}.
+     */
+    private static boolean isSignedNumberStart(String s, int i, TokenType previous) {
+        if (s.charAt(i) != '-' || i + 1 >= s.length() || !CharClassifier.isDigit(s.charAt(i + 1))) {
+            return false;
+        }
+        if (previous == null) {
+            return true;
+        }
+        switch (previous) {
+            case PLUS:
+            case MINUS:
+            case MULTIPLY:
+            case DIVIDE:
+            case POWER:
+            case LEFT_PARENTHESIS:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    // NUMBER, якщо s[start, end) має вигляд "цифри" або "цифри.цифри", інакше UNKNOWN.
+    private static TokenType numberType(String s, int start, int end) {
+        int i = start;
+        while (i < end && CharClassifier.isDigit(s.charAt(i))) {
+            i++;
+        }
+        if (i == start) {
+            return TokenType.UNKNOWN; // немає цифр перед крапкою: ".5"
+        }
+        if (i == end) {
+            return TokenType.NUMBER;  // "цифри"
+        }
+        i++; // це крапка: лексема складається лише з цифр і крапок
+        int fraction = i;
+        while (i < end && CharClassifier.isDigit(s.charAt(i))) {
+            i++;
+        }
+        return (i == end && i > fraction) ? TokenType.NUMBER : TokenType.UNKNOWN;
     }
 
     private static int scanLetters(String s, int start) {
@@ -120,7 +187,7 @@ public final class Tokenizer {
 
     /**
      * Тип лексеми за її першим символом (для C4 цього достатньо,
-     * бо scanEnd групує лише однорідні серії).
+     * бо числа тут не розглядаються: їх тип визначає numberType).
      */
     private static TokenType typeOfFirstChar(char c) {
         if (CharClassifier.isDigit(c)) {

@@ -230,4 +230,109 @@ class TokenizerTest {
         assertEquals(NUMBER, types[0]);
         assertEquals(NUMBER, types[types.length - 1]);
     }
+
+    // ===================================================================
+    // C5 — числа: десяткові, зі знаком, некоректні
+    // ===================================================================
+
+    @Test
+    void tokenizeTypesDecimalNumbers() {
+        assertArrayEquals(new TokenType[] {NUMBER}, Tokenizer.tokenizeTypes("3.14"));
+        assertArrayEquals(new TokenType[] {NUMBER}, Tokenizer.tokenizeTypes("0.001"));
+        assertArrayEquals(new TokenType[] {NUMBER}, Tokenizer.tokenizeTypes("007.50"));
+    }
+
+    @Test
+    void tokenizeTypesDecimalInExpression() {
+        assertArrayEquals(
+                new TokenType[] {NUMBER, MULTIPLY, IDENTIFIER},
+                Tokenizer.tokenizeTypes("12.5*x"));
+        assertArrayEquals(
+                new TokenType[] {NUMBER, MULTIPLY, IDENTIFIER, MINUS, NUMBER},
+                Tokenizer.tokenizeTypes("12.5*x - 3"));
+    }
+
+    @Test
+    void tokenizeTypesMinusAtStartIsPartOfNumber() {
+        assertArrayEquals(new TokenType[] {NUMBER}, Tokenizer.tokenizeTypes("-5"));
+        assertArrayEquals(new TokenType[] {NUMBER}, Tokenizer.tokenizeTypes("-3.14"));
+        assertArrayEquals(new TokenType[] {NUMBER}, Tokenizer.tokenizeTypes("  -5  "));
+    }
+
+    @Test
+    void tokenizeTypesBinaryMinusStaysMinus() {
+        assertArrayEquals(new TokenType[] {NUMBER, MINUS, NUMBER}, Tokenizer.tokenizeTypes("3-5"));
+        assertArrayEquals(new TokenType[] {NUMBER, MINUS, NUMBER}, Tokenizer.tokenizeTypes("3 - 5"));
+        assertArrayEquals(new TokenType[] {IDENTIFIER, MINUS, NUMBER}, Tokenizer.tokenizeTypes("x-5"));
+        assertArrayEquals(
+                new TokenType[] {RIGHT_PARENTHESIS, MINUS, NUMBER},
+                Tokenizer.tokenizeTypes(")-5"));
+    }
+
+    @Test
+    void tokenizeTypesMinusAfterOperatorIsPartOfNumber() {
+        assertArrayEquals(
+                new TokenType[] {NUMBER, MULTIPLY, NUMBER},
+                Tokenizer.tokenizeTypes("2*-3"));
+        assertArrayEquals(
+                new TokenType[] {NUMBER, MULTIPLY, NUMBER},
+                Tokenizer.tokenizeTypes("2 * -3"));
+        assertArrayEquals(
+                new TokenType[] {NUMBER, PLUS, NUMBER},
+                Tokenizer.tokenizeTypes("2+-3"));
+        assertArrayEquals(
+                new TokenType[] {NUMBER, POWER, NUMBER},
+                Tokenizer.tokenizeTypes("2^-1"));
+        assertArrayEquals(
+                new TokenType[] {NUMBER, MINUS, NUMBER},
+                Tokenizer.tokenizeTypes("3--5"));
+    }
+
+    @Test
+    void tokenizeTypesMinusAfterLeftParenthesisIsPartOfNumber() {
+        assertArrayEquals(
+                new TokenType[] {LEFT_PARENTHESIS, NUMBER, RIGHT_PARENTHESIS},
+                Tokenizer.tokenizeTypes("(-5)"));
+    }
+
+    @Test
+    void tokenizeTypesMinusNotFollowedByDigitStaysMinus() {
+        assertArrayEquals(new TokenType[] {MINUS, NUMBER}, Tokenizer.tokenizeTypes("- 5"));
+        assertArrayEquals(new TokenType[] {MINUS, IDENTIFIER}, Tokenizer.tokenizeTypes("-x"));
+        assertArrayEquals(new TokenType[] {MINUS}, Tokenizer.tokenizeTypes("-"));
+        assertArrayEquals(
+                new TokenType[] {MINUS, LEFT_PARENTHESIS, NUMBER, RIGHT_PARENTHESIS},
+                Tokenizer.tokenizeTypes("-(5)"));
+    }
+
+    @Test
+    void tokenizeTypesMalformedNumbersAreSingleUnknownToken() {
+        assertArrayEquals(new TokenType[] {UNKNOWN}, Tokenizer.tokenizeTypes("2..5"));
+        assertArrayEquals(new TokenType[] {UNKNOWN}, Tokenizer.tokenizeTypes("3.4.5"));
+        assertArrayEquals(new TokenType[] {UNKNOWN}, Tokenizer.tokenizeTypes(".5"));
+        assertArrayEquals(new TokenType[] {UNKNOWN}, Tokenizer.tokenizeTypes("5."));
+        assertArrayEquals(new TokenType[] {UNKNOWN}, Tokenizer.tokenizeTypes("."));
+        assertArrayEquals(new TokenType[] {UNKNOWN}, Tokenizer.tokenizeTypes("-2..5"));
+    }
+
+    @Test
+    void tokenizeTypesMalformedNumberInsideExpression() {
+        assertArrayEquals(
+                new TokenType[] {NUMBER, PLUS, UNKNOWN, MULTIPLY, IDENTIFIER},
+                Tokenizer.tokenizeTypes("1 + 2..5 * x"));
+    }
+
+    @Test
+    void tokenizeTypesDotBetweenNonDigitsIsUnknown() {
+        assertArrayEquals(
+                new TokenType[] {IDENTIFIER, UNKNOWN, IDENTIFIER},
+                Tokenizer.tokenizeTypes("x.y"));
+    }
+
+    @Test
+    void tokenizeTypesSpecExampleStillGivesElevenTokens() {
+        // "- 5" з пробілом: мінус бінарний, число 5 окремо
+        assertEquals(11, Tokenizer.tokenizeTypes("2*x^2 + 3*x - 5").length);
+        assertEquals(11, Tokenizer.tokenizeTypes("2*x^2+3*x-5").length);
+    }
 }
