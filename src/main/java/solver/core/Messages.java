@@ -14,6 +14,7 @@ public final class Messages {
     public static final String ERR_ODD_COORDINATES = "Error: Coordinates must come in pairs";
     public static final String ERR_INVALID_TOKEN = "Error: Invalid token: ";
     public static final String HINT_HELP = "Use 'help' to see available commands.";
+    public static final String ERR_NULL_EXPRESSION = "expression must not be null";
 
     private Messages() {
     }
