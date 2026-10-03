@@ -40,7 +40,9 @@ public final class Tokenizer {
      *   <li>{@code -} приклеюється до числа, лише якщо далі йде цифра і це перший токен
      *       або попередній токен це оператор чи {@code (}: {@code -5} це NUMBER,
      *       а {@code 3-5} це NUMBER MINUS NUMBER;</li>
-     *   <li>послідовність літер це один IDENTIFIER;</li>
+     *   <li>ідентифікатор це літера або {@code _}, далі літери, цифри, {@code _}
+     *       ({@code x}, {@code x1}, {@code velocity}); функції ({@code sin}, {@code sqrt})
+     *       для tokenizer це теж IDENTIFIER, а {@code 2x} це NUMBER IDENTIFIER;</li>
      *   <li>{@code + - * / ^ ( )} це по одному токену відповідного типу;</li>
      *   <li>будь-який інший символ це окремий токен UNKNOWN.</li>
      * </ul>
@@ -90,8 +92,8 @@ public final class Tokenizer {
      * Постумова: {@code start < результат <= s.length()}, тобто цикл
      * ніколи не зациклюється.
      *
-     * <p>Пробіли і літери групуються в серію однакових символів, число
-     * (цифри і крапки) читається жадібно, усе інше (оператори, дужки,
+     * <p>Пробіли групуються в серію, ідентифікатор (літера, далі літери і цифри) і число
+     * (цифри і крапки) читаються жадібно, усе інше (оператори, дужки,
      * невідомі символи) це лексема з одного символа. Знак мінуса перед
      * числом тут не розглядається: це контекстне правило, див.
      * {@link #isSignedNumberStart}. Цей метод перевикористають C6-C7.
@@ -106,7 +108,7 @@ public final class Tokenizer {
             return scanNumber(s, start);
         }
         if (CharClassifier.isLetter(c)) {
-            return scanLetters(s, start);
+            return scanIdentifier(s, start);
         }
         return start + 1;
     }
@@ -177,9 +179,11 @@ public final class Tokenizer {
         return (i == end && i > fraction) ? TokenType.NUMBER : TokenType.UNKNOWN;
     }
 
-    private static int scanLetters(String s, int start) {
+    // Ідентифікатор починається з літери (isLetter враховує '_'), далі літери і цифри.
+    private static int scanIdentifier(String s, int start) {
         int end = start + 1;
-        while (end < s.length() && CharClassifier.isLetter(s.charAt(end))) {
+        while (end < s.length()
+                && (CharClassifier.isLetter(s.charAt(end)) || CharClassifier.isDigit(s.charAt(end)))) {
             end++;
         }
         return end;
