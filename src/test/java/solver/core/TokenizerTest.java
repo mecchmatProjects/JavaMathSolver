@@ -335,4 +335,24 @@ class TokenizerTest {
         assertEquals(11, Tokenizer.tokenizeTypes("2*x^2 + 3*x - 5").length);
         assertEquals(11, Tokenizer.tokenizeTypes("2*x^2+3*x-5").length);
     }
+    //C7
+    @Test
+    void CheckIfLexemesEvenWorks(){
+        assertArrayEquals(
+                new String[] {"2","*","x","+","sin","(","x",")"},
+                Tokenizer.lexemes("2*x + sin(x)")
+        );
+    }
+    @Test
+    void CheckForDecimalsAndSignedNumbers() {
+        assertArrayEquals(
+                new String[] {"12", "+", "3.4", "*", "(", "-5", "/", "2", ")"},
+                Tokenizer.lexemes("12 + 3.4 * ( -5 / 2 )"));
+    }
+    @Test
+    void CheckForSameOperatorsNextToSignedNumbers() {
+        assertArrayEquals(
+                new String[]{"5", "-", "-3"},
+                Tokenizer.lexemes("5 - -3"));
+    }
 }

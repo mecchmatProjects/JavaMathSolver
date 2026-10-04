@@ -27,7 +27,35 @@ public final class Tokenizer {
         }
         return Arrays.copyOf(buffer, n);
     }
-
+    // C7: String -> String[]. -> ["2","*","x","+","sin","(","x",")"]
+    public static String[] lexemes(String expression){
+        if(expression == null){
+            throw new IllegalArgumentException(Messages.ERR_NULL_EXPRESSION);
+        }
+        String[] buffer = new String[expression.length()];
+        int count = 0;
+        TokenType previous = null;
+        for(int i=0, end=0; i<expression.length(); i=end){
+            char first = expression.charAt(i);
+            boolean signed = isSignedNumberStart(expression,i,previous);
+            end = signed ? scanNumber(expression, i+1) : scanEnd(expression,i);
+            if(CharClassifier.isWhitespace(first)){
+                continue;
+            }
+            char[] lexeme = new char[end-i];
+            expression.getChars(i,end,lexeme,0);
+            buffer[count] = new String(lexeme);
+            count++;
+            if (signed) {
+                previous = numberType(expression, i + 1, end);
+            } else if (isNumberStart(first)) {
+                previous = numberType(expression, i, end);
+            } else {
+                previous = typeOfFirstChar(first);
+            }
+        }
+        return Arrays.copyOf(buffer,count);
+    }
     // C4: String -> TokenType[], "2*x + 3" -> NUMBER MULTIPLY IDENTIFIER PLUS NUMBER
 
     /**
