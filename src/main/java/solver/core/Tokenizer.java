@@ -27,14 +27,17 @@ public final class Tokenizer {
         }
         return Arrays.copyOf(buffer, n);
     }
-    // C7: String -> String[]. -> ["2","*","x","+","sin","(","x",")"]
+    // C7: String -> String[]. "2*x + sin(x) -> ["2","*","x","+","sin","(","x",")"]
     public static String[] lexemes(String expression){
         if(expression == null){
             throw new IllegalArgumentException(Messages.ERR_NULL_EXPRESSION);
         }
+        // Токенів не більше, ніж символів: кожна лексема займає хоча б 1 символ.
         String[] buffer = new String[expression.length()];
         int count = 0;
-        TokenType previous = null;
+        // Крок циклу це не i++, а перехід на кінець поточної лексеми.
+        // continue теж виконує крок, тому пробіл просто пропускається.
+        TokenType previous = null; // попередній токен (пробіли його не міняють)
         for(int i=0, end=0; i<expression.length(); i=end){
             char first = expression.charAt(i);
             boolean signed = isSignedNumberStart(expression,i,previous);
@@ -42,10 +45,12 @@ public final class Tokenizer {
             if(CharClassifier.isWhitespace(first)){
                 continue;
             }
+
             char[] lexeme = new char[end-i];
             expression.getChars(i,end,lexeme,0);
             buffer[count] = new String(lexeme);
             count++;
+
             if (signed) {
                 previous = numberType(expression, i + 1, end);
             } else if (isNumberStart(first)) {
@@ -76,38 +81,28 @@ public final class Tokenizer {
      * @throws IllegalArgumentException якщо {@code expression == null}
      */
     public static TokenType[] tokenizeTypes(String expression) {
-        if (expression == null) {
-            throw new IllegalArgumentException(Messages.ERR_NULL_EXPRESSION);
-        }
+        String[] Lexemes = lexemes(expression);
 
-        // Токенів не більше, ніж символів: кожна лексема займає хоча б 1 символ.
-        TokenType[] buffer = new TokenType[expression.length()];
+        TokenType[] buffer = new TokenType[Lexemes.length];
         int count = 0;
 
-        // Крок циклу це не i++, а перехід на кінець поточної лексеми.
-        // continue теж виконує крок, тому пробіл просто пропускається.
-        TokenType previous = null; // попередній токен (пробіли його не міняють)
-        for (int i = 0, end = 0; i < expression.length(); i = end) {
-            char first = expression.charAt(i);
-            boolean signed = isSignedNumberStart(expression, i, previous);
-            end = signed ? scanNumber(expression, i + 1) : scanEnd(expression, i);
-            if (CharClassifier.isWhitespace(first)) {
-                continue;
-            }
+        TokenType previous = null;
+        for (int i = 0;i<Lexemes.length;i++) {
+            char first = Lexemes[i].charAt(0);
+            boolean signed = isSignedNumberStart(Lexemes[i], 0, previous);
             TokenType type;
             if (signed) {
-                type = numberType(expression, i + 1, end);
+                type = numberType(Lexemes[i], 1, Lexemes[i].length());
             } else if (isNumberStart(first)) {
-                type = numberType(expression, i, end);
+                type = numberType(Lexemes[i], 0, Lexemes[i].length());
             } else {
                 type = typeOfFirstChar(first);
             }
-            buffer[count] = type;
-            count++;
+            buffer[i] = type;
             previous = type;
         }
 
-        return Arrays.copyOf(buffer, count);
+        return Arrays.copyOf(buffer, Lexemes.length);
     }
 
     /**
