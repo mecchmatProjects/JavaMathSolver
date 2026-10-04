@@ -27,7 +27,20 @@ public final class Tokenizer {
         }
         return Arrays.copyOf(buffer, n);
     }
-    // C7: String -> String[]. "2*x + sin(x) -> ["2","*","x","+","sin","(","x",")"]
+
+    // C7: String -> String[]. "2*x + sin(x)" -> ["2","*","x","+","sin","(","x",")"]
+
+    /**
+     * Розбиває вираз на лексеми та створює з них масив String[]
+     * <ul>
+     *   <li>пробіли й табуляції пропускаються і токенів не дають;</li>
+     *   <li>{@code -} приклеюється до числа, лише якщо далі йде цифра і це перший токен
+     *       або попередній токен це оператор чи {@code (}: {@code -5} це "-5",
+     *       а {@code 3-5} це "3","-","5";</li>
+     *   <li>{@code + - * / ^ ( )} та послідовність літер беруться як одна лексема;</li>
+     * </ul>
+     *
+     */
     public static String[] lexemes(String expression){
         if(expression == null){
             throw new IllegalArgumentException(Messages.ERR_NULL_EXPRESSION);
@@ -41,26 +54,22 @@ public final class Tokenizer {
         for(int i=0, end=0; i<expression.length(); i=end){
             char first = expression.charAt(i);
             boolean signed = isSignedNumberStart(expression,i,previous);
-            end = signed ? scanNumber(expression, i+1) : scanEnd(expression,i);
+            end = signed
+                    ? scanNumber(expression, i+1)
+                    : scanEnd(expression,i);
+
             if(CharClassifier.isWhitespace(first)){
                 continue;
             }
 
-            char[] lexeme = new char[end-i];
-            expression.getChars(i,end,lexeme,0);
-            buffer[count] = new String(lexeme);
+            buffer[count] = expression.substring(i,end);
             count++;
 
-            if (signed) {
-                previous = numberType(expression, i + 1, end);
-            } else if (isNumberStart(first)) {
-                previous = numberType(expression, i, end);
-            } else {
-                previous = typeOfFirstChar(first);
-            }
+            previous = typeOf(expression.substring(i,end)); //using buffer[count] directly breaks the function somehow
         }
         return Arrays.copyOf(buffer,count);
     }
+
     // C4: String -> TokenType[], "2*x + 3" -> NUMBER MULTIPLY IDENTIFIER PLUS NUMBER
 
     /**
@@ -81,28 +90,15 @@ public final class Tokenizer {
      * @throws IllegalArgumentException якщо {@code expression == null}
      */
     public static TokenType[] tokenizeTypes(String expression) {
-        String[] Lexemes = lexemes(expression);
+        String[] lexemes = lexemes(expression);
 
-        TokenType[] buffer = new TokenType[Lexemes.length];
-        int count = 0;
+        TokenType[] buffer = new TokenType[lexemes.length];
 
-        TokenType previous = null;
-        for (int i = 0;i<Lexemes.length;i++) {
-            char first = Lexemes[i].charAt(0);
-            boolean signed = isSignedNumberStart(Lexemes[i], 0, previous);
-            TokenType type;
-            if (signed) {
-                type = numberType(Lexemes[i], 1, Lexemes[i].length());
-            } else if (isNumberStart(first)) {
-                type = numberType(Lexemes[i], 0, Lexemes[i].length());
-            } else {
-                type = typeOfFirstChar(first);
-            }
-            buffer[i] = type;
-            previous = type;
+        for (int i = 0;i<lexemes.length;i++) {
+            buffer[i] = typeOf(lexemes[i]);
         }
 
-        return Arrays.copyOf(buffer, Lexemes.length);
+        return buffer;
     }
 
     /**
@@ -227,5 +223,15 @@ public final class Tokenizer {
         }
         // + - * / ^ дають свій тип, усе інше дає UNKNOWN.
         return TokenType.operatorType(c);
+    }
+    private static TokenType typeOf(String lexeme){
+        if (lexeme.length()>1 &&
+                (lexeme.charAt(0) == '+' || lexeme.charAt(0) == '-')) {
+                return numberType(lexeme,1,lexeme.length());
+            }
+        if(isNumberStart(lexeme.charAt(0))){
+            return numberType(lexeme,0,lexeme.length());
+        }
+        return typeOfFirstChar(lexeme.charAt(0));
     }
 }

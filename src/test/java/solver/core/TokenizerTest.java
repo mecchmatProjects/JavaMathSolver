@@ -337,22 +337,40 @@ class TokenizerTest {
     }
     //C7
     @Test
-    void CheckIfLexemesEvenWorks(){
+    void checkIfLexemesEvenWorks(){
         assertArrayEquals(
                 new String[] {"2","*","x","+","sin","(","x",")"},
                 Tokenizer.lexemes("2*x + sin(x)")
         );
     }
     @Test
-    void CheckForDecimalsAndSignedNumbers() {
+    void decimalsAndSignedNumbersIntoLexemes() {
         assertArrayEquals(
                 new String[] {"12", "+", "3.4", "*", "(", "-5", "/", "2", ")"},
                 Tokenizer.lexemes("12 + 3.4 * ( -5 / 2 )"));
     }
     @Test
-    void CheckForSameOperatorsNextToSignedNumbers() {
+    void sameOperatorsNextToSignedNumbersIntoDifferentLexemes() {
         assertArrayEquals(
                 new String[]{"5", "-", "-3"},
                 Tokenizer.lexemes("5 - -3"));
     }
+    @Test
+    void shouldReturnEmptyArrayForEmptyString() {
+        assertEquals(0, Tokenizer.lexemes("").length);
+    }
+    @Test
+    void specialCharactersProcessedProperly(){
+        assertArrayEquals(new String[] {"x","@"}, Tokenizer.lexemes("x@"));
+    }
+    @Test
+    void malformedNumbersAreSingleLexemes(){
+        assertArrayEquals(new String[] {"2..5"}, Tokenizer.lexemes("2..5"));
+        assertArrayEquals(new String[] {"3.4.5"}, Tokenizer.lexemes("3.4.5"));
+        assertArrayEquals(new String[] {".5"}, Tokenizer.lexemes(".5"));
+        assertArrayEquals(new String[] {"5."}, Tokenizer.lexemes("5."));
+        assertArrayEquals(new String[] {"."}, Tokenizer.lexemes("."));
+        assertArrayEquals(new String[] {"-2..5"}, Tokenizer.lexemes("-2..5"));
+    }
+
 }
