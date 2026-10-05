@@ -397,4 +397,32 @@ class TokenizerTest {
     void lexemesMinusOperatorSeparate() {
         assertArrayEquals(new String[] {"x","-","5"}, Tokenizer.lexemes("x - 5"));
     }
+
+    // ===================================================================
+    // C8 — isValid method testing
+    // ===================================================================
+
+    @Test
+    void basicValidation() {
+        assertTrue(Tokenizer.isValid("2*x + 3"));
+        assertFalse(Tokenizer.isValid("2..5"));
+        assertFalse(Tokenizer.isValid("x@"));
+        assertFalse(Tokenizer.isValid("3.4.5"));
+        assertTrue(Tokenizer.isValid("2 + + 3"));//syntax is Parser's job
+
+    }
+
+    @Test
+    void zeroLexemesException() {
+        assertFalse(Tokenizer.isValid(""));
+        assertFalse(Tokenizer.isValid(" "));
+    }
+
+    @Test
+    void isValidNullExceptionThrow() {
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class, () -> Tokenizer.isValid(null));
+        assertEquals(Messages.ERR_NULL_EXPRESSION, ex.getMessage());
+    }
+
 }
