@@ -397,4 +397,5 @@ class TokenizerTest {
     void lexemesMinusOperatorSeparate() {
         assertArrayEquals(new String[] {"x","-","5"}, Tokenizer.lexemes("x - 5"));
     }
+
 }

@@ -34,17 +34,17 @@ public final class Tokenizer {
      * Розбиває вираз на лексеми та створює з них масив String[]
      * <ul>
      *   <li>пробіли й табуляції пропускаються і токенів не дають;</li>
-     *        <li>число це жадібна послідовність цифр і крапок: {@code цифри},
+     *   <li>число це жадібна послідовність цифр і крапок: {@code цифри},
      *      {@code цифри.цифри}, {@code 2..5} або {@code .5} дають одну лексему;</li>
      *   <li>{@code -} приклеюється до числа, лише якщо далі йде цифра і це перша лексема
      *       або попередня лексема це оператор чи {@code (}: {@code -5} це "-5",
      *       а {@code 3-5} це "3","-","5";</li>
      *   <li>{@code + - * / ^ ( )} беруться окремо як одна лексема</li>
-     *   <li>послідовність літер беруться як одна лексема</li>
+     *   <li>послідовність літер береться як одна лексема</li>
      *   <li>всі інші символи беруться як одна лексема</li>
      * </ul>
      *
-     *  @throws IllegalArgumentException якщо {@code expression == null}
+     * @throws IllegalArgumentException якщо {@code expression == null}
      */
     public static String[] lexemes(String expression){
         if (expression == null) {
@@ -56,12 +56,12 @@ public final class Tokenizer {
         // Крок циклу це не i++, а перехід на кінець поточної лексеми.
         // continue теж виконує крок, тому пробіл просто пропускається.
         TokenType previous = null; // попередній токен (пробіли його не міняють)
-        for (int i=0, end=0; i<expression.length(); i=end) {
+        for (int i = 0, end = 0; i < expression.length(); i = end) {
             char first = expression.charAt(i);
-            boolean signed = isSignedNumberStart(expression,i,previous);
+            boolean signed = isSignedNumberStart(expression, i, previous);
             end = signed
                     ? scanNumber(expression, i+1)
-                    : scanEnd(expression,i);
+                    : scanEnd(expression, i);
 
             if (CharClassifier.isWhitespace(first)) {
                 continue;
@@ -71,25 +71,27 @@ public final class Tokenizer {
             buffer[count++] = lexeme;
             previous = typeOf(lexeme);
         }
-        return Arrays.copyOf(buffer,count);
+        return Arrays.copyOf(buffer, count);
     }
 
     // C4: String -> TokenType[], "2*x + 3" -> NUMBER MULTIPLY IDENTIFIER PLUS NUMBER
 
     /**
      * Розбиває вираз на лексеми і повертає тип кожної лексеми.
-     * {@link #lexemes}
+     * лексеми беруться з {@link #lexemes}
      * <ul>
      *   <li>{@code цифри} або {@code цифри.цифри} дають NUMBER,
      *   інакше ({@code 2..5}, {@code .5}) UNKNOWN;</li>
      * </ul>
+     *
+     * @throws IllegalArgumentException якщо {@code expression == null}
      */
     public static TokenType[] tokenizeTypes(String expression) {
         String[] lexemes = lexemes(expression);
 
         TokenType[] buffer = new TokenType[lexemes.length];
 
-        for (int i = 0; i<lexemes.length; i++) {
+        for (int i = 0; i < lexemes.length; i++) {
             buffer[i] = typeOf(lexemes[i]);
         }
 
@@ -219,8 +221,8 @@ public final class Tokenizer {
     /**
      * Повертає відповідний {@code TokenType} лексеми
      */
-    private static TokenType typeOf(String lexeme){
-        if (lexeme.length()>1 && lexeme.charAt(0) == '-') {
+    private static TokenType typeOf(String lexeme) {
+        if (lexeme.length() > 1 && lexeme.charAt(0) == '-') {
             return numberType(lexeme, 1, lexeme.length());
         }
         if (isNumberStart(lexeme.charAt(0))) {
