@@ -44,4 +44,16 @@ public class MatrixTest {
         assertEquals(10.0, product.data[1][0], EPSILON);
         assertEquals(8.0, product.data[1][1], EPSILON);
     }
+
+    @Test
+    void testDeterminant() {
+        double[][] data = {
+                {6.0, 1.0, 1.0},
+                {4.0, -2.0, 5.0},
+                {2.0, 8.0, 7.0}
+        };
+        Matrix m = new Matrix(data);
+        // det(A) = -306.0
+        assertEquals(-306.0, m.determinant(), EPSILON);
+    }
 }

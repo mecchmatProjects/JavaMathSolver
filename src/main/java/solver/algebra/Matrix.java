@@ -55,6 +55,49 @@ public class Matrix {
         return res;
     }
 
+    public double determinant(){
+        if (rows != cols){
+            System.out.println("Error: determinant is defined only for square matrices. Current dimensions: " + rows + "x" + cols);
+            return Double.NaN;
+        }
+
+        int n = rows;
+
+        double[][] a = new double[n][n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                a[i][j] = this.data[i][j];
+            }
+        }
+        double det = 1.0;
+        for (int i = 0; i < n; i++){
+            int pivot = i;
+            while (pivot < n && Math.abs(a[pivot][i]) < 1e-9) {
+                pivot++;
+            }
+
+            if (pivot == n) {
+                return 0.0;
+            }
+
+            if (pivot != i){
+                double[] temp = a[i];
+                a[i] = a[pivot];
+                a[pivot] = temp;
+                det = -det;
+            }
+
+            for (int k = i+1; k<n; k++){
+                double factor = a[k][i] / a[i][i];
+                for (int j = i; j < n; j++){
+                    a[k][j] -= factor * a[i][j];
+                }
+            }
+            det *= a[i][i];
+        }
+        return det;
+    }
+
 
 
 
