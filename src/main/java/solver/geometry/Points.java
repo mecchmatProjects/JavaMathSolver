@@ -4,7 +4,7 @@ import static solver.core.Messages.*;
 import static solver.core.Output.*;
 
 /**
- * GEO: робота з  масивом точок Point[] (Lab 3, Tasks G2-G5).
+ * GEO: робота з масивом точок Point[] (Lab 3, Tasks G2-G5).
  */
 public final class Points {
 
