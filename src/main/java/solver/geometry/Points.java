@@ -1,0 +1,45 @@
+package solver.geometry;
+
+import static solver.core.Messages.*;
+import static solver.core.Output.*;
+
+/**
+ * GEO: робота з масивом точок Point[] (Lab 3, Tasks G2-G5).
+ */
+public final class Points {
+
+    // Task G2: distance between two points
+    public static double distance(Point a, Point b) {
+        return Math.hypot(b.x - a.x, b.y - a.y);
+    }
+
+    // Task G3: bounding box -> {minX, maxX, minY, maxY}
+    public static double[] boundingBox(Point[] points) {
+        if (!checkNotEmpty(points)) {
+            return null;
+        }
+        double minX = points[0].x, maxX = minX;
+        double minY = points[0].y, maxY = minY;
+        for (int i = 1; i < points.length; i++) {
+            minX = Math.min(minX, points[i].x);
+            maxX = Math.max(maxX, points[i].x);
+            minY = Math.min(minY, points[i].y);
+            maxY = Math.max(maxY, points[i].y);
+        }
+        return new double[]{minX, maxX, minY, maxY};
+    }
+
+    static boolean checkNotEmpty(Point[] points) {
+        if (points == null || points.length == 0) {
+            printError(ERR_POINTS_EMPTY);
+            return false;
+        }
+        for (int i = 0; i < points.length; i++) {
+            if (points[i] == null) {
+                printError(ERR_POINTS_NULL_ELEMENT);
+                return false;
+            }
+        }
+        return true;
+    }
+}
