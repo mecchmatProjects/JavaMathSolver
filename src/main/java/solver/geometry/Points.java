@@ -55,4 +55,21 @@ public final class Points {
         }
         return true;
     }
+
+    // Task G5: nearest point to p
+    public static Point nearest(Point p, Point[] points) {
+        if (!checkNotEmpty(points)) {
+            return null;
+        }
+        Point best = points[0];
+        double bestDistance = distance(p, best);
+        for (int i = 1; i < points.length; i++) {
+            double d = distance(p, points[i]);
+            if (d < bestDistance) {
+                bestDistance = d;
+                best = points[i];
+            }
+        }
+        return best;
+    }
 }
