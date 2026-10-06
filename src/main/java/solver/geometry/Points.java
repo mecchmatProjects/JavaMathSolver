@@ -29,6 +29,19 @@ public final class Points {
         return new double[]{minX, maxX, minY, maxY};
     }
 
+    // Task G4: centroid Cx = sum(xi) / n, Cy = sum(yi) / n
+    public static Point centroid(Point[] points) {
+        if (!checkNotEmpty(points)) {
+            return null;
+        }
+        double sumX = 0, sumY = 0;
+        for (int i = 0; i < points.length; i++) {
+            sumX += points[i].x;
+            sumY += points[i].y;
+        }
+        return Point.of(sumX / points.length, sumY / points.length);
+    }
+
     static boolean checkNotEmpty(Point[] points) {
         if (points == null || points.length == 0) {
             printError(ERR_POINTS_EMPTY);
