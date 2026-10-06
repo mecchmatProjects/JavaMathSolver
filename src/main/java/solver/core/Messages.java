@@ -5,6 +5,10 @@ package solver.core;
  */
 public final class Messages {
 
+    public static final String ERR_POINTS_EMPTY = "Error: Points array must not be empty";
+    public static final String ERR_POINTS_NULL_ELEMENT = "Error: Points array must not contain null";
+
+
     public static final String ERR_UNKNOWN_COMMAND = "Unknown command: ";
     public static final String ERR_INVALID_NUMBER = "Invalid number: ";
     public static final String ERR_NOT_ENOUGH_ARGS = "Error: Not enough arguments";
