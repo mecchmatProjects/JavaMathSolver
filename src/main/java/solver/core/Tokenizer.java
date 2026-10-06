@@ -34,14 +34,17 @@ public final class Tokenizer {
      * Розбиває вираз на лексеми та створює з них масив String[]
      * <ul>
      *   <li>пробіли й табуляції пропускаються і токенів не дають;</li>
-     *   <li>число це жадібна послідовність цифр і крапок: {@code цифри},
-     *      {@code цифри.цифри}, {@code 2..5} або {@code .5} дають одну лексему;</li>
+     *   <li>число — жадібна послідовність цифр і крапок: {@code цифри} або
+     *       {@code цифри.цифри}; некоректні {@code 2..5}, {@code .5} теж дають
+     *       одну лексему (у tokenizer це UNKNOWN);</li>
      *   <li>{@code -} приклеюється до числа, лише якщо далі йде цифра і це перша лексема
-     *       або попередня лексема це оператор чи {@code (}: {@code -5} це "-5",
-     *       а {@code 3-5} це "3","-","5";</li>
-     *   <li>{@code + - * / ^ ( )} беруться окремо як одна лексема</li>
-     *   <li>послідовність літер береться як одна лексема</li>
-     *   <li>всі інші символи беруться як одна лексема</li>
+     *       або попередня лексема — оператор чи {@code (}: {@code -5} → "-5",
+     *       а {@code 3-5} → "3","-","5";</li>
+     *   <li>ідентифікатор — літера або {@code _}, далі літери, цифри, {@code _}
+     *       ({@code x}, {@code x1}, {@code velocity}); функції ({@code sin}, {@code sqrt})
+     *       теж одна лексема; {@code 2x} → "2","x";</li>
+     *   <li>{@code + - * / ^ ( )} — кожен окремою лексемою;</li>
+     *   <li>будь-який інший символ — окрема лексема з одного символу (у tokenizer це UNKNOWN).</li>
      * </ul>
      *
      * @throws IllegalArgumentException якщо {@code expression == null}
@@ -106,8 +109,8 @@ public final class Tokenizer {
      * Постумова: {@code start < результат <= s.length()}, тобто цикл
      * ніколи не зациклюється.
      *
-     * <p>Пробіли і літери групуються в серію однакових символів, число
-     * (цифри і крапки) читається жадібно, усе інше (оператори, дужки,
+     * <p>Пробіли групуються в серію, ідентифікатор (літера, далі літери і цифри) і число
+     * (цифри і крапки) читаються жадібно, усе інше (оператори, дужки,
      * невідомі символи) це лексема з одного символа. Знак мінуса перед
      * числом тут не розглядається: це контекстне правило, див.
      * {@link #isSignedNumberStart}. Цей метод перевикористають C6-C7.
@@ -122,7 +125,7 @@ public final class Tokenizer {
             return scanNumber(s, start);
         }
         if (CharClassifier.isLetter(c)) {
-            return scanLetters(s, start);
+            return scanIdentifier(s, start);
         }
         return start + 1;
     }
@@ -193,9 +196,11 @@ public final class Tokenizer {
         return (i == end && i > fraction) ? TokenType.NUMBER : TokenType.UNKNOWN;
     }
 
-    private static int scanLetters(String s, int start) {
+    // Ідентифікатор починається з літери (isLetter враховує '_'), далі літери і цифри.
+    private static int scanIdentifier(String s, int start) {
         int end = start + 1;
-        while (end < s.length() && CharClassifier.isLetter(s.charAt(end))) {
+        while (end < s.length()
+                && (CharClassifier.isLetter(s.charAt(end)) || CharClassifier.isDigit(s.charAt(end)))) {
             end++;
         }
         return end;

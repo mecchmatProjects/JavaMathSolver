@@ -53,7 +53,7 @@ class TokenizerTest {
 
     // ===================================================================
     // C4 — tokenizeTypes
-    // Не перевіряємо "3.14", "x1" і "-5": це змінять C5 і C6 (так задумано),
+    // Не перевіряємо "3.14", "x1" і "-5": це змінили C5 і C6 (так задумано),
     // і тести C4 після цього не мають ламатися.
     // ===================================================================
 
@@ -397,5 +397,63 @@ class TokenizerTest {
     void lexemesMinusOperatorSeparate() {
         assertArrayEquals(new String[] {"x","-","5"}, Tokenizer.lexemes("x - 5"));
     }
+  
+    // C6 — ідентифікатори: літера або '_', далі літери, цифри, '_'
+    // ===================================================================
 
+    @Test
+    void tokenizeTypesIdentifiersFromSpec() {
+        for (String name : new String[] {"x", "y", "x1", "velocity", "mass", "sin", "cos", "sqrt"}) {
+            assertArrayEquals(new TokenType[] {IDENTIFIER}, Tokenizer.tokenizeTypes(name), name);
+        }
+    }
+
+    @Test
+    void tokenizeTypesIdentifierMayContainDigitsAndUnderscore() {
+        assertArrayEquals(new TokenType[] {IDENTIFIER}, Tokenizer.tokenizeTypes("x1y2"));
+        assertArrayEquals(new TokenType[] {IDENTIFIER}, Tokenizer.tokenizeTypes("a_1"));
+        assertArrayEquals(new TokenType[] {IDENTIFIER}, Tokenizer.tokenizeTypes("_x"));
+        assertArrayEquals(new TokenType[] {IDENTIFIER}, Tokenizer.tokenizeTypes("_1"));
+        assertArrayEquals(new TokenType[] {IDENTIFIER}, Tokenizer.tokenizeTypes("Mass2"));
+    }
+
+    @Test
+    void tokenizeTypesIdentifierCannotStartWithDigit() {
+        assertArrayEquals(new TokenType[] {NUMBER, IDENTIFIER}, Tokenizer.tokenizeTypes("1x"));
+        assertArrayEquals(new TokenType[] {NUMBER, IDENTIFIER}, Tokenizer.tokenizeTypes("2x"));
+        assertArrayEquals(new TokenType[] {NUMBER, IDENTIFIER}, Tokenizer.tokenizeTypes("12abc3"));
+    }
+
+    @Test
+    void tokenizeTypesFunctionsAreIdentifiers() {
+        assertArrayEquals(
+                new TokenType[] {
+                        IDENTIFIER, LEFT_PARENTHESIS, IDENTIFIER, RIGHT_PARENTHESIS, PLUS,
+                        IDENTIFIER, LEFT_PARENTHESIS, IDENTIFIER, RIGHT_PARENTHESIS
+                },
+                Tokenizer.tokenizeTypes("sin(x) + sqrt(y)"));
+    }
+
+    @Test
+    void tokenizeTypesIdentifiersWithDigitsInExpression() {
+        assertArrayEquals(
+                new TokenType[] {IDENTIFIER, PLUS, IDENTIFIER},
+                Tokenizer.tokenizeTypes("x1+y2"));
+        assertArrayEquals(
+                new TokenType[] {IDENTIFIER, MULTIPLY, NUMBER},
+                Tokenizer.tokenizeTypes("x1*2"));
+    }
+
+    @Test
+    void tokenizeTypesDigitsAfterIdentifierDoNotMergeWithFollowingNumber() {
+        // пробіл розділяє лексеми: "x1 2" це ідентифікатор і число
+        assertArrayEquals(new TokenType[] {IDENTIFIER, NUMBER}, Tokenizer.tokenizeTypes("x1 2"));
+    }
+
+    @Test
+    void tokenizeTypesMinusAfterIdentifierWithDigitIsBinary() {
+        assertArrayEquals(
+                new TokenType[] {IDENTIFIER, MINUS, NUMBER},
+                Tokenizer.tokenizeTypes("x1-5"));
+    }
 }
