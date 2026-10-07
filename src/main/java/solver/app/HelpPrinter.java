@@ -81,6 +81,10 @@ public final class HelpPrinter {
         printHelpLine("monte-carlo-triangle n", "probability that 3 random sides form a triangle");
 
         System.out.println();
+        System.out.println("Expressions (quote the expression or separate tokens with spaces):");
+        printHelpLine("validate-expr \"expr\"", "check that every token is recognised");
+
+        System.out.println();
         printHelpLine("help", "show this help");
     }
 

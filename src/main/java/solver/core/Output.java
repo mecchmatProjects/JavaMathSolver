@@ -8,6 +8,9 @@ import static solver.core.Messages.*;
  */
 public final class Output {
 
+    private static final String NEGATIVE_ZERO = "-0.000000";
+    private static final String POSITIVE_ZERO = "0.000000";
+
     private Output() {
     }
 
@@ -17,10 +20,11 @@ public final class Output {
             printError(ERR_INVALID_INPUT);
             return;
         }
-        if (value == 0.0) {
-            value = 0.0; // -0.0 -> 0.0
+        String formatted = String.format(Locale.ROOT, "%f", value);
+        if (formatted.equals(NEGATIVE_ZERO)) {
+            formatted = POSITIVE_ZERO; // -0.0 і все, що округлюється до нуля (-1e-9)
         }
-        System.out.printf(Locale.ROOT, "Result: %f%n", value);
+        System.out.printf(Locale.ROOT, "Result: %s%n", formatted);
     }
 
     public static void printResult(long value) {

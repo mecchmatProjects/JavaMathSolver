@@ -101,40 +101,55 @@ public final class Tokenizer {
         return buffer;
     }
 
-    //C9: int array of token amount
-
+    // C8: перевірка коректності на рівні лексем
     /**
-     * Повертає масив int[] кількості типів токенів у виразі
-     * <ul>
-     *     <li>{@code TokenStatistics[0]} - Numbers</li>
-     *     <li>{@code TokenStatistics[1]} - Identifiers</li>
-     *     <li>{@code TokenStatistics[2]} - Operators</li>
-     *     <li>{@code TokenStatistics[3]} - Parenthesis</li>
-     * </ul>
+     * Повертає {@code true}, якщо всі лексеми виразу розпізнані, інакше {@code false}.
      *
+     * <p>Вираз вважається некоректним, якщо він порожній (або лише з пробілів)
+     * чи хоча б одна лексема має тип {@code UNKNOWN} ({@code 2..5}, {@code x@}).
+     * Синтаксис ({@code 2 + + 3}) тут не перевіряється — це задача Parser.
+     *
+     * @throws IllegalArgumentException якщо {@code expression == null}
+     */
+    public static boolean isValid(String expression) {
+        TokenType[] types = tokenizeTypes(expression);
+        if (types.length == 0) {
+            return false;
+        }
+        for (TokenType type : types) {
+            if (type == TokenType.UNKNOWN) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // C9: статистика токенів
+    /**
+     * Повертає масив кількостей токенів кожної категорії у виразі:
+     * <ul>
+     *     <li>{@code [0]} — Numbers</li>
+     *     <li>{@code [1]} — Identifiers</li>
+     *     <li>{@code [2]} — Operators</li>
+     *     <li>{@code [3]} — Parentheses</li>
+     * </ul>
+     * Лексеми типу {@code UNKNOWN} не враховуються.
      */
     public static int[] tokenStatistics(String expression) {
         String[] lexemes = lexemes(expression);
-        int[] stats = new int[] {0,0,0,0};
+        int[] stats = new int[4];
         for (String lexeme : lexemes) {
             switch (typeOf(lexeme)) {
-                case NUMBER ->
-                    stats[0]++;
-                case IDENTIFIER ->
-                    stats[1]++;
-                case PLUS,
-                     MINUS,
-                     MULTIPLY,
-                     DIVIDE,
-                     POWER ->
-                    stats[2]++;
-                case LEFT_PARENTHESIS,
-                     RIGHT_PARENTHESIS->
-                    stats[3]++;
+                case NUMBER -> stats[0]++;
+                case IDENTIFIER -> stats[1]++;
+                case PLUS, MINUS, MULTIPLY, DIVIDE, POWER -> stats[2]++;
+                case LEFT_PARENTHESIS, RIGHT_PARENTHESIS -> stats[3]++;
+                default -> { } // UNKNOWN ігнорується
             }
         }
         return stats;
-    }
+    }   // ← саме цієї дужки не вистачало
+}
 
     /**
      * Повертає індекс КІНЦЯ (не включно) лексеми, що починається в позиції

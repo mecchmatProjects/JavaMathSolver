@@ -16,6 +16,9 @@ import static solver.geometry.Intersections.*;
 import static solver.geometry.Polygon.*;
 import static solver.geometry.MonteCarlo.*;
 
+import solver.core.TokenType;
+import solver.core.Tokenizer;
+
 /**
  * CORE-11: диспетчеризація команд.
  */
@@ -264,10 +267,30 @@ public final class CommandDispatcher {
     // C0-b: диспетчеризація текстових команд (аргумент - увесь вираз одним рядком)
     public static void dispatchText(String command, String text) {
         switch (command) {
-            // C10: tokenize, token-stats, validate-expr
+            case "validate-expr":
+                validateExpression(text);
+                break;
+            // C9: token-stats, C10: tokenize
             default:
                 printUnknownCommand(command);
                 break;
         }
+    }
+
+    // C8: "Result: true" або перша нерозпізнана лексема, напр. "Error: Invalid token: 2..5"
+    private static void validateExpression(String text) {
+        if (Tokenizer.isValid(text)) {
+            printResult(true);
+            return;
+        }
+        String[] lexemes = Tokenizer.lexemes(text);
+        TokenType[] types = Tokenizer.tokenizeTypes(text);
+        for (int i = 0; i < types.length; i++) {
+            if (types[i] == TokenType.UNKNOWN) {
+                printError(ERR_INVALID_TOKEN + lexemes[i]);
+                return;
+            }
+        }
+        printError(ERR_INVALID_INPUT); // недосяжно для непорожнього тексту, але без мовчазного виходу
     }
 }

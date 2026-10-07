@@ -467,4 +467,35 @@ class TokenizerTest {
                 Tokenizer.tokenStatistics("2*x + sin(x)"));
     }
 
+    // ===================================================================
+    // C8 — correctness check
+    // ===================================================================
+
+    @Test
+    void validExpressions() {
+        assertTrue(Tokenizer.isValid("2*x + 3"));
+        assertTrue(Tokenizer.isValid("-5"));
+        assertTrue(Tokenizer.isValid("sin(x) + sqrt(y)"));
+        assertTrue(Tokenizer.isValid("2 + + 3")); // синтаксис — справа Parser
+    }
+
+    @Test
+    void invalidTokens() {
+        assertFalse(Tokenizer.isValid("2..5"));
+        assertFalse(Tokenizer.isValid("3.4.5"));
+        assertFalse(Tokenizer.isValid("x@"));
+        assertFalse(Tokenizer.isValid(".5"));
+    }
+
+    @Test
+    void emptyOrBlankIsInvalid() {
+        assertFalse(Tokenizer.isValid(""));
+        assertFalse(Tokenizer.isValid(" "));
+        assertFalse(Tokenizer.isValid("\t"));
+    }
+
+    @Test
+    void nullThrows() {
+        assertThrows(IllegalArgumentException.class, () -> Tokenizer.isValid(null));
+    }
 }

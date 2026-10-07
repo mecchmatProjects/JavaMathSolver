@@ -36,7 +36,7 @@ javac -encoding UTF-8 -d out (Get-ChildItem -Recurse src/main/java -Filter *.jav
 ```
 
 ## Спосіб запуску
-Запуск програми виконується з явним зазначенням шляху до класів (`-cp src`):
+Запуск програми виконується з явним зазначенням шляху до класів (`-cp target/classes`):
 ```bash
 java -cp target/classes solver.app.MathSolver <command> <arguments>
 ```
@@ -52,34 +52,42 @@ java -cp target/classes solver.app.MathSolver help
 ### 1. Додавання (Addition)
 ```bash
 java -cp target/classes solver.app.MathSolver add 10 25
-# 10 + 25 = 35
+# Result: 35.000000
 ```
 
 ### 2. Множення (Multiplication)
 ```bash
 java -cp target/classes solver.app.MathSolver mul 4 7
-# 4 * 7 = 28
+# Result: 28.000000
 ```
 
 ### 3. Піднесення до степеня (Power)
 ```bash
 java -cp target/classes solver.app.MathSolver pow 2 10
-# 2^10 = 1024
+# Result: 1024.000000
 ```
 
 ### 4. Квадратний корінь (Square root)
 ```bash
 java -cp target/classes solver.app.MathSolver sqrt 144
-# sqrt(144) = 12
+# Result: 12.000000
 ```
 
 ### 5. Обчислення відстані між точками (Distance)
 ```bash
 java -cp target/classes solver.app.MathSolver distance 1 2 4 6
-# distance = 5
+# Result: 5.000000
 ```
 
-### 6. Невідома команда (Unknown command)
+### 6. Перевірка виразу (validate-expr, C8)
+```bash
+java -cp target/classes solver.app.MathSolver validate-expr "2*x + 3"
+# Result: true
+java -cp target/classes solver.app.MathSolver validate-expr "2..5"
+# Error: Invalid token: 2..5
+```
+
+### 7. Невідома команда (Unknown command)
 ```bash
 java -cp target/classes solver.app.MathSolver hello 1 2
 # Unknown command: hello
@@ -118,3 +126,4 @@ java -cp target/classes solver.app.MathSolver hello 1 2
 | `manhattan-distance` | `x1 y1 x2 y2` | Манхеттенська відстань між точками |
 | `midpoint` | `x1 y1 x2 y2` | Середина відрізка |
 | `collinear` | `x1 y1 x2 y2 x3 y3` | Перевірка, чи лежать три точки на одній прямій |
+| `validate-expr` | `"expr"` | Перевірка, що всі лексеми виразу розпізнані (C8); синтаксис не перевіряється |
