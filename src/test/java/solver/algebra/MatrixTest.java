@@ -137,4 +137,146 @@ public class MatrixTest {
     }
 
 
+    @Test
+    void testStandardTraceSquareMatrix() {
+        // tr(A) = 5 + (-3) + 8 = 10.0
+        double[][] data = {
+                { 5.0,  1.0,  2.0},
+                { 0.0, -3.0,  4.0},
+                { 1.0,  2.0,  8.0}
+        };
+        Matrix m = new Matrix(data);
+        assertEquals(10.0, m.trace(), EPSILON);
+    }
+
+    @Test
+    void testStandardTraceRectangularMatrix() {
+        // Для прямокутної 2x3 береться min(2, 3): a[0][0] + a[1][1] = 1.0 + 5.0 = 6.0
+        double[][] data = {
+                {1.0, 2.0, 3.0},
+                {4.0, 5.0, 6.0}
+        };
+        Matrix m = new Matrix(data);
+        assertEquals(6.0, m.trace(), EPSILON);
+    }
+
+    @Test
+    void testTraceSuperDiagonal() {
+        // offset = +1 (перша наддіагональ): a[0][1] + a[1][2] = 2.0 + 6.0 = 8.0
+        double[][] data = {
+                {1.0, 2.0, 3.0},
+                {4.0, 5.0, 6.0},
+                {7.0, 8.0, 9.0}
+        };
+        Matrix m = new Matrix(data);
+        assertEquals(8.0, m.trace(1), EPSILON);
+    }
+
+    @Test
+    void testTraceSubDiagonal() {
+        // offset = -1 (перша піддіагональ): a[1][0] + a[2][1] = 4.0 + 8.0 = 12.0
+        double[][] data = {
+                {1.0, 2.0, 3.0},
+                {4.0, 5.0, 6.0},
+                {7.0, 8.0, 9.0}
+        };
+        Matrix m = new Matrix(data);
+        assertEquals(12.0, m.trace(-1), EPSILON);
+    }
+
+    @Test
+    void testTraceCornerElements() {
+        // offset = 2 (верхній правий кут a[0][2] = 3.0)
+        // offset = -2 (нижній лівий кут a[2][0] = 7.0)
+        double[][] data = {
+                {1.0, 2.0, 3.0},
+                {4.0, 5.0, 6.0},
+                {7.0, 8.0, 9.0}
+        };
+        Matrix m = new Matrix(data);
+        assertEquals(3.0, m.trace(2), EPSILON);
+        assertEquals(7.0, m.trace(-2), EPSILON);
+    }
+
+    @Test
+    void testTraceOffsetOutOfBounds() {
+        // Вихід за межі матриці повинен повертати 0.0
+        double[][] data = {
+                {1.0, 2.0},
+                {3.0, 4.0}
+        };
+        Matrix m = new Matrix(data);
+        assertEquals(0.0, m.trace(2), EPSILON);
+        assertEquals(0.0, m.trace(-2), EPSILON);
+        assertEquals(0.0, m.trace(10), EPSILON);
+    }
+
+    @Test
+    void testTracePowerZero() {
+        // tr(A^0) = tr(I_n) = n = 3
+        double[][] data = {
+                {2.0, 1.0, 0.0},
+                {0.0, 3.0, 1.0},
+                {1.0, 0.0, 2.0}
+        };
+        Matrix m = new Matrix(data);
+        assertEquals(3.0, m.tracePower(0), EPSILON);
+    }
+
+    @Test
+    void testTracePowerOne() {
+        // tr(A^1) = tr(A) = 1.0 + 4.0 = 5.0
+        double[][] data = {
+                {1.0, 2.0},
+                {3.0, 4.0}
+        };
+        Matrix m = new Matrix(data);
+        assertEquals(5.0, m.tracePower(1), EPSILON);
+    }
+
+    @Test
+    void testTracePowerTwo() {
+        // A = [[1, 2], [3, 4]]
+        // A^2 = [[7, 10], [15, 22]] -> tr(A^2) = 7 + 22 = 29.0
+        // Формула оптимізації: 1*1 + 2*3 + 3*2 + 4*4 = 1 + 6 + 6 + 16 = 29.0
+        double[][] data = {
+                {1.0, 2.0},
+                {3.0, 4.0}
+        };
+        Matrix m = new Matrix(data);
+        assertEquals(29.0, m.tracePower(2), EPSILON);
+    }
+
+    @Test
+    void testTracePowerThree() {
+        // A = [[1, 2], [3, 4]]
+        // A^3 = [[37, 54], [81, 118]] -> tr(A^3) = 37 + 118 = 155.0
+        double[][] data = {
+                {1.0, 2.0},
+                {3.0, 4.0}
+        };
+        Matrix m = new Matrix(data);
+        assertEquals(155.0, m.tracePower(3), EPSILON);
+    }
+
+    @Test
+    void testTracePowerInvalidInputs() {
+        // Непрямокутна матриця повинна повертати Double.NaN
+        double[][] nonSquare = {
+                {1.0, 2.0, 3.0},
+                {4.0, 5.0, 6.0}
+        };
+        Matrix mNonSquare = new Matrix(nonSquare);
+        assertTrue(Double.isNaN(mNonSquare.tracePower(2)));
+
+        // Від'ємний степінь повинен повертати Double.NaN
+        double[][] square = {
+                {1.0, 2.0},
+                {3.0, 4.0}
+        };
+        Matrix mSquare = new Matrix(square);
+        assertTrue(Double.isNaN(mSquare.tracePower(-1)));
+    }
+
+
 }

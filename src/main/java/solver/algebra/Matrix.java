@@ -133,6 +133,59 @@ public class Matrix {
         return Math.pow(sum, 1.0 / p);
     }
 
+    public double trace(int offset){
+        if (offset >= cols || -offset >= rows){
+            System.out.println("Warning: Offset " + offset + " is out of matrix bounds (" + rows + "x" + cols + ").");
+            return 0.0;
+        }
+        double sum = 0.0;
+
+        int startRow = Math.max(0, -offset);
+        int startCol = Math.max(0, offset);
+        int length = Math.min(rows - startRow, cols - startCol);
+
+        for (int idx = 0; idx < length; idx++) {
+            sum += this.data[startRow + idx][startCol + idx];
+        }
+        return sum;
+    }
+
+    public double trace(){
+        return trace(0);
+    }
+
+    public double tracePower(int power){
+        if (rows != cols){
+            System.out.println("Error: Power trace requires square matrix.");
+            return Double.NaN;
+        }
+        if (power < 0){
+            System.out.println("Error: Negative powers are not supported without explicit inversion.");
+            return Double.NaN;
+        }
+        if (power == 0) {
+            return rows; // tr(I_n) = n
+        }
+        if (power == 1) {
+            return trace();
+        }
+        if (power == 2){
+            double sum = 0.0;
+            for (int i = 0; i < rows; i++){
+                for (int j = 0; j < cols; j++){
+                    sum += this.data[i][j] * this.data[j][i];
+                }
+            }
+            return sum;
+        }
+
+        Matrix curr = this;
+        for (int p = 1; p < power; p++){
+            curr = curr.multiplyMatrix(this);
+        }
+        return curr.trace();
+    }
+
 
 
 
