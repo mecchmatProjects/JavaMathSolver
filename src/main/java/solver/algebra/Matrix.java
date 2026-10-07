@@ -98,6 +98,42 @@ public class Matrix {
         return det;
     }
 
+    public double norm2(){
+        double sumOfSquares = 0;
+        for (int i = 0; i < rows; i++){
+            for (int j = 0; j < cols; j++){
+                sumOfSquares += this.data[i][j] * this.data[i][j];
+            }
+        }
+        return Math.sqrt(sumOfSquares);
+    }
+
+    public double norm(double p){
+        if (p < 1.0){
+            System.out.println("Error: p-norm requires p >= 1");
+            return Double.NaN;
+        }
+
+        if (Double.isInfinite(p)){
+            double max = 0.0;
+            for (int i = 0; i < rows; i++){
+                for (int j = 0; j < cols; j++){
+                    max = Math.max(max, Math.abs(this.data[i][j]));
+                }
+            }
+            return max;
+        }
+
+        double sum = 0.0;
+        for (int i = 0; i < rows; i++){
+            for (int j = 0; j < cols; j++){
+                sum += Math.pow(Math.abs(this.data[i][j]), p);
+            }
+        }
+        return Math.pow(sum, 1.0 / p);
+    }
+
+
 
 
 
