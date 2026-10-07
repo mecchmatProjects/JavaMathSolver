@@ -103,8 +103,123 @@ class CommandDispatcherTest {
     }
 
     @Test
-    void unimplementedTextCommandFallsToDefault() {
-        assertEquals("Unknown command: tokenize\n" + Messages.HINT_HELP,
-                capture(() -> CommandDispatcher.dispatchText("tokenize", "2*x")));
+    void validateExprEscapesControlCharacterInError() {
+        assertEquals("Error: Invalid token: \\n",
+                capture(() -> CommandDispatcher.dispatchText("validate-expr", "x\n+1")));
+    }
+
+    @Test
+    void validateExprOfBlankTextIsNotEnoughArgs() {
+        // main сюди порожнє не передає, але dispatchText не має мовчати
+        assertEquals(Messages.ERR_NOT_ENOUGH_ARGS,
+                capture(() -> CommandDispatcher.dispatchText("validate-expr", "   ")));
+    }
+
+    @Test
+    void unknownTextCommandFallsToDefault() {
+        assertEquals("Unknown command: nope\n" + Messages.HINT_HELP,
+                capture(() -> CommandDispatcher.dispatchText("nope", "2*x")));
+    }
+
+    // ===================================================================
+    // C10 — tokenize
+    // ===================================================================
+
+    private static String tokenize(String text) {
+        return capture(() -> CommandDispatcher.dispatchText("tokenize", text));
+    }
+
+    @Test
+    void tokenizeSpecExample() {
+        assertEquals(String.join("\n",
+                        "0: NUMBER 2",
+                        "1: MULTIPLY *",
+                        "2: IDENTIFIER x",
+                        "3: POWER ^",
+                        "4: NUMBER 2",
+                        "5: PLUS +",
+                        "6: NUMBER 3",
+                        "7: MULTIPLY *",
+                        "8: IDENTIFIER x",
+                        "9: MINUS -",
+                        "10: NUMBER 5"),
+                tokenize("2*x^2 + 3*x - 5"));
+    }
+
+    @Test
+    void tokenizeSingleToken() {
+        assertEquals("0: IDENTIFIER x", tokenize("x"));
+        assertEquals("0: NUMBER -3.14", tokenize("-3.14"));
+    }
+
+    @Test
+    void tokenizeFunctionsAndParentheses() {
+        assertEquals(String.join("\n",
+                        "0: IDENTIFIER sin",
+                        "1: LEFT_PARENTHESIS (",
+                        "2: IDENTIFIER x",
+                        "3: RIGHT_PARENTHESIS )",
+                        "4: DIVIDE /",
+                        "5: IDENTIFIER sqrt",
+                        "6: LEFT_PARENTHESIS (",
+                        "7: NUMBER 2",
+                        "8: RIGHT_PARENTHESIS )"),
+                tokenize("sin(x) / sqrt(2)"));
+    }
+
+    @Test
+    void tokenizeShowsUnknownTokensInsteadOfFailing() {
+        assertEquals(String.join("\n",
+                        "0: NUMBER 1",
+                        "1: PLUS +",
+                        "2: UNKNOWN 2..5",
+                        "3: UNKNOWN @"),
+                tokenize("1 + 2..5 @"));
+    }
+
+    @Test
+    void tokenizeEscapesControlCharacters() {
+        assertEquals("0: IDENTIFIER x\n1: UNKNOWN \\n\n2: IDENTIFIER y", tokenize("x\ny"));
+    }
+
+    @Test
+    void tokenizeKeepsSurrogatePairTogether() {
+        assertEquals("0: UNKNOWN \uD83D\uDE00", tokenize("\uD83D\uDE00"));
+    }
+
+    @Test
+    void tokenizeIndexesAreSequentialFromZero() {
+        String[] lines = tokenize("a + b - c * d / e ^ f").split("\n");
+        assertEquals(11, lines.length);
+        for (int i = 0; i < lines.length; i++) {
+            assertTrue(lines[i].startsWith(i + ": "), lines[i]);
+        }
+    }
+
+    @Test
+    void tokenizeOfBlankTextIsNotEnoughArgs() {
+        assertEquals(Messages.ERR_NOT_ENOUGH_ARGS, tokenize(""));
+        assertEquals(Messages.ERR_NOT_ENOUGH_ARGS, tokenize(" \t "));
+    }
+
+    @Test
+    void tokenizeDoesNotUseResultPrefix() {
+        assertFalse(tokenize("2*x").contains("Result:"));
+    }
+
+    // ===================================================================
+    // C9 — token-stats у CLI
+    // ===================================================================
+
+    @Test
+    void tokenStatsPrintsFourLabelledLines() {
+        assertEquals("Numbers: 2\nIdentifiers: 4\nOperators: 4\nParentheses: 2",
+                capture(() -> CommandDispatcher.dispatchText("token-stats", "2*x + 3*x - sin(x)")));
+    }
+
+    @Test
+    void tokenStatsSkipsUnknownTokens() {
+        assertEquals("Numbers: 0\nIdentifiers: 1\nOperators: 0\nParentheses: 0",
+                capture(() -> CommandDispatcher.dispatchText("token-stats", "x @ 2..5")));
     }
 }

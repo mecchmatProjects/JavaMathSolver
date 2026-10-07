@@ -54,10 +54,45 @@ class MathSolverTest {
         assertEquals("Error: Not enough arguments", run("validate-expr", "   "));
     }
 
+    // ===================================================================
+    // CLI: tokenize (C10), token-stats (C9)
+    // ===================================================================
+
     @Test
-    void unimplementedTextCommandsAreStillUnknown() {
-        // C9 / C10 ще не реалізовані: вони мають доходити до dispatchText, а не падати
-        assertTrue(run("tokenize", "2*x").startsWith("Unknown command: tokenize"));
+    void tokenizeQuotedAndSplitExpressionGiveSameOutput() {
+        String quoted = run("tokenize", "2*x^2 + 3*x - 5");
+        assertEquals(quoted, run("tokenize", "2*x^2", "+", "3*x", "-", "5"));
+        assertEquals(quoted, run("TOKENIZE", "  2*x^2 + 3*x - 5  "));
+        assertTrue(quoted.startsWith("0: NUMBER 2\n1: MULTIPLY *"));
+        assertTrue(quoted.endsWith("10: NUMBER 5"));
+    }
+
+    @Test
+    void tokenizeWithoutExpressionIsNotEnoughArgs() {
+        assertEquals(Messages.ERR_NOT_ENOUGH_ARGS, run("tokenize"));
+        assertEquals(Messages.ERR_NOT_ENOUGH_ARGS, run("tokenize", "   "));
+        assertEquals(Messages.ERR_NOT_ENOUGH_ARGS, run("tokenize", "", ""));
+    }
+
+    @Test
+    void tokenizeDoesNotParseArgumentsAsNumbers() {
+        // TEXT-команда: "x" не має давати "Invalid number: x"
+        assertEquals("0: IDENTIFIER x", run("tokenize", "x"));
+    }
+
+    @Test
+    void tokenStatsIsReachableFromCli() {
+        assertEquals("Numbers: 1\nIdentifiers: 3\nOperators: 2\nParentheses: 2",
+                run("token-stats", "2*x + sin(x)"));
+        assertEquals(Messages.ERR_NOT_ENOUGH_ARGS, run("token-stats"));
+    }
+
+    @Test
+    void everyTextCommandIsHandledByDispatcher() {
+        // кожна TEXT-команда з каталогу має свій case у dispatchText
+        for (String command : new String[] {"tokenize", "token-stats", "validate-expr"}) {
+            assertFalse(run(command, "x").startsWith(Messages.ERR_UNKNOWN_COMMAND), command);
+        }
     }
 
     // ===================================================================

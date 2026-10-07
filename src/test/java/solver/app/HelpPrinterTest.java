@@ -37,7 +37,7 @@ class HelpPrinterTest {
             "triangle-angles", "triangle-area-inradius", "cylinder-volume", "cone-volume", "torus-volume",
             "circle-segment", "circle-line", "circles-intersect", "squares-intersect", "rect-bounding-box",
             "polygon", "monte-carlo-triangle",
-            "validate-expr",
+            "tokenize", "token-stats", "validate-expr",
     };
 
     private static String help() {

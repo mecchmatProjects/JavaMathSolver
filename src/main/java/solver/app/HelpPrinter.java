@@ -82,6 +82,8 @@ public final class HelpPrinter {
 
         System.out.println();
         System.out.println("Expressions (quote the expression or separate tokens with spaces):");
+        printHelpLine("tokenize \"expr\"", "list tokens: index, type, lexeme");
+        printHelpLine("token-stats \"expr\"", "count numbers, identifiers, operators, parentheses");
         printHelpLine("validate-expr \"expr\"", "check that every token is recognised");
 
         System.out.println();
