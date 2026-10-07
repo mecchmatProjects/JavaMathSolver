@@ -101,6 +101,41 @@ public final class Tokenizer {
         return buffer;
     }
 
+    //C9: int array of token amount
+
+    /**
+     * Повертає масив int[] кількості типів токенів у виразі
+     * <ul>
+     *     <li>{@code TokenStatistics[0]} - Numbers</li>
+     *     <li>{@code TokenStatistics[1]} - Identifiers</li>
+     *     <li>{@code TokenStatistics[2]} - Operators</li>
+     *     <li>{@code TokenStatistics[3]} - Parenthesis</li>
+     * </ul>
+     *
+     */
+    public static int[] tokenStatistics(String expression) {
+        String[] lexemes = lexemes(expression);
+        int[] stats = new int[] {0,0,0,0};
+        for (String lexeme : lexemes) {
+            switch (typeOf(lexeme)) {
+                case NUMBER ->
+                    stats[0]++;
+                case IDENTIFIER ->
+                    stats[1]++;
+                case PLUS,
+                     MINUS,
+                     MULTIPLY,
+                     DIVIDE,
+                     POWER ->
+                    stats[2]++;
+                case LEFT_PARENTHESIS,
+                     RIGHT_PARENTHESIS->
+                    stats[3]++;
+            }
+        }
+        return stats;
+    }
+
     /**
      * Повертає індекс КІНЦЯ (не включно) лексеми, що починається в позиції
      * {@code start}. Лексема це {@code s.substring(start, end)}.
