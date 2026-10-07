@@ -18,7 +18,7 @@ import static solver.app.CommandDispatcher.dispatchText;
  */
 public final class MathSolver {
 
-    public static final String VERSION = "0.2";
+    public static final String VERSION = "0.3";
 
     private MathSolver() {
     }
@@ -40,11 +40,15 @@ public final class MathSolver {
 
         // C0-b: текстові команди отримують вираз цілим рядком, без парсингу чисел
         if (getArgKind(command) == ArgKind.TEXT) {
-            if (args.length < 2) {
+            if (!validateArgs(args.length - 1, expected)) {
+                return;
+            }
+            String text = joinText(args);
+            if (text.isEmpty()) { // validate-expr "   " — аргумент є, але виразу немає
                 printError(ERR_NOT_ENOUGH_ARGS);
                 return;
             }
-            dispatchText(command, joinText(args));
+            dispatchText(command, text);
             return;
         }
 

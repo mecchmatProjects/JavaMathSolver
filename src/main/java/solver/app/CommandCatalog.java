@@ -122,6 +122,13 @@ public final class CommandCatalog {
             case "polygon":
                 return VARIADIC_POLYGON;
 
+            // C0-b: текстові команди (див. getArgKind). Без цього main відсікав їх
+            // як Unknown command ще до перевірки ArgKind.TEXT.
+            case "tokenize":
+            case "token-stats":
+            case "validate-expr":
+                return VARIADIC_TEXT;
+
             default:
                 return UNKNOWN_COMMAND;
         }

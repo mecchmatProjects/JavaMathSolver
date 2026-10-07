@@ -212,3 +212,22 @@ taylor-inv-one-plus-x2 0 1e-9
 taylor-inv-one-plus-x2 1 1e-9
 series-y -0.5 1e-9
 series-y 0.5 0
+
+# C8: validate-expr (аргументи без лапок, бо скрипт ділить рядок по пробілах)
+validate-expr 2*x + 3
+validate-expr sin(x) + sqrt(y)
+validate-expr 2..5
+validate-expr x@
+validate-expr 3.4.5
+validate-expr
+# C10: tokenize
+tokenize 2*x^2 + 3*x - 5
+tokenize sin(x) + sqrt(y)
+tokenize -5 * (x - 3.14)
+tokenize 1 + 2..5 @
+tokenize
+# C9: token-stats
+token-stats 2*x + 3*x - sin(x)
+token-stats 2*x + sin(x)
+token-stats x @ 2..5
+token-stats
