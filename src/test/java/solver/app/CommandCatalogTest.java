@@ -42,4 +42,13 @@ class CommandCatalogTest {
     void polygonUsesPolygonMode() {
         assertEquals(CommandCatalog.VARIADIC_POLYGON, CommandCatalog.getExpectedArgsCount("polygon"));
     }
+
+    @Test
+    void textCommandsAreKnownToCatalog() {
+        // кожна TEXT-команда мусить мати арність, інакше main відсіче її як Unknown command
+        for (String command : new String[] {"tokenize", "token-stats", "validate-expr"}) {
+            assertEquals(ArgKind.TEXT, CommandCatalog.getArgKind(command), command);
+            assertEquals(CommandCatalog.VARIADIC_TEXT, CommandCatalog.getExpectedArgsCount(command), command);
+        }
+    }
 }
