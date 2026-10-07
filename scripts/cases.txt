@@ -212,3 +212,11 @@ taylor-inv-one-plus-x2 0 1e-9
 taylor-inv-one-plus-x2 1 1e-9
 series-y -0.5 1e-9
 series-y 0.5 0
+
+# C8: validate-expr (аргументи без лапок, бо скрипт ділить рядок по пробілах)
+validate-expr 2*x + 3
+validate-expr sin(x) + sqrt(y)
+validate-expr 2..5
+validate-expr x@
+validate-expr 3.4.5
+validate-expr
