@@ -121,6 +121,31 @@ class NumberParserTest {
     }
 
     @Test
+    void parseNumberOfNullIsNull() {
+        assertNull(NumberParser.parseNumber(null));
+    }
+
+    @Test
+    void invalidNumberWithLineBreakIsPrintedOnOneLine() {
+        String out = solver.testutil.StdOut.capture(
+                () -> assertNull(NumberParser.parseArguments(new String[] {"add", "1\n2", "3"})));
+        assertEquals("Invalid number: 1\\n2", out);
+    }
+
+    @Test
+    void unicodeDigitsAreNotNumbers() {
+        assertNull(NumberParser.parseNumber("٥"));     // арабська 5
+        assertNull(NumberParser.parseNumber("５"));     // повноширинна 5
+        assertNull(NumberParser.parseNumber("5 "));    // NBSP trim() не прибирає
+    }
+
+    @Test
+    void negativeZeroInputs() {
+        assertEquals(0L, NumberParser.parseNumber("-0"));
+        assertEquals(-0.0, NumberParser.parseNumber("-0.0"));
+    }
+
+    @Test
     void toDoubleArrayConvertsMixedNumbers() {
         assertArrayEquals(new double[] {2.0, 3.5, -1.0},
                 NumberParser.toDoubleArray(new Number[] {2L, 3.5, -1L}));

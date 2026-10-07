@@ -82,6 +82,48 @@ class OutputTest {
         assertEquals(Messages.ERR_DIVISION_BY_ZERO, capture(() -> Output.printError(Messages.ERR_DIVISION_BY_ZERO)));
     }
 
+    // ===================================================================
+    // C10 — printLine і видима форма лексем
+    // ===================================================================
+
+    @Test
+    void printLineHasNoResultPrefix() {
+        assertEquals("0: NUMBER 2", capture(() -> Output.printLine("0: NUMBER 2")));
+        assertEquals("100%", capture(() -> Output.printLine("100%"))); // не format-рядок
+    }
+
+    @Test
+    void displayLexemeKeepsOrdinaryText() {
+        assertEquals("2..5", Output.displayLexeme("2..5"));
+        assertEquals("@", Output.displayLexeme("@"));
+        assertEquals("a b", Output.displayLexeme("a b"));
+        assertEquals("é", Output.displayLexeme("é"));
+        assertEquals("😀", Output.displayLexeme("😀")); // emoji як є
+        assertEquals("", Output.displayLexeme(""));
+    }
+
+    @Test
+    void displayLexemeEscapesLineBreaksAndTabs() {
+        assertEquals("\\n", Output.displayLexeme("\n"));
+        assertEquals("\\r\\n", Output.displayLexeme("\r\n"));
+        assertEquals("a\\tb", Output.displayLexeme("a\tb"));
+    }
+
+    @Test
+    void displayLexemeEscapesInvisibleCharacters() {
+        assertEquals("\\u0000", Output.displayLexeme("\u0000"));
+        assertEquals("\\u001B", Output.displayLexeme("\u001B"));   // ESC
+        assertEquals("\\u200B", Output.displayLexeme("​"));   // zero-width space
+        assertEquals("\\u00A0", Output.displayLexeme(" "));   // NBSP
+        assertEquals("\\uFEFF", Output.displayLexeme("﻿"));   // BOM
+    }
+
+    @Test
+    void displayLexemeResultIsSingleLine() {
+        assertFalse(Output.displayLexeme("x\ny\rz").contains("\n"));
+        assertFalse(Output.displayLexeme("x\ny\rz").contains("\r"));
+    }
+
     @Test
     void unknownCommandPrintsNameAndHint() {
         assertEquals("Unknown command: hello\n" + Messages.HINT_HELP,
