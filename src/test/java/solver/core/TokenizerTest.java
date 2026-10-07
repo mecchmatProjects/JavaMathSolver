@@ -467,6 +467,137 @@ class TokenizerTest {
                 Tokenizer.tokenStatistics("2*x + sin(x)"));
     }
 
+    @Test
+    void tokenStatisticsSpecExpression() {
+        // Методичка C9 пише "Operators: 3", але у виразі 4 оператори: * + * -
+        assertArrayEquals(new int[] {2, 4, 4, 2},
+                Tokenizer.tokenStatistics("2*x + 3*x - sin(x)"));
+    }
+
+    @Test
+    void tokenStatisticsEmptyOrBlankIsAllZeros() {
+        assertArrayEquals(new int[] {0, 0, 0, 0}, Tokenizer.tokenStatistics(""));
+        assertArrayEquals(new int[] {0, 0, 0, 0}, Tokenizer.tokenStatistics(" \t "));
+    }
+
+    @Test
+    void tokenStatisticsAlwaysHasFourCategories() {
+        assertEquals(4, Tokenizer.tokenStatistics("").length);
+        assertEquals(4, Tokenizer.tokenStatistics("x").length);
+    }
+
+    @Test
+    void tokenStatisticsIgnoresUnknownTokens() {
+        assertArrayEquals(new int[] {0, 1, 0, 0}, Tokenizer.tokenStatistics("2..5 @ x"));
+        assertArrayEquals(new int[] {0, 0, 0, 0}, Tokenizer.tokenStatistics("@#$"));
+    }
+
+    @Test
+    void tokenStatisticsSignedNumberIsOneNumberNotOperator() {
+        assertArrayEquals(new int[] {1, 0, 0, 0}, Tokenizer.tokenStatistics("-5"));
+        assertArrayEquals(new int[] {2, 0, 1, 0}, Tokenizer.tokenStatistics("3 - 5"));
+        assertArrayEquals(new int[] {2, 0, 1, 0}, Tokenizer.tokenStatistics("2*-3"));
+    }
+
+    @Test
+    void tokenStatisticsCountsEveryOperatorAndParenthesis() {
+        assertArrayEquals(new int[] {0, 0, 5, 2}, Tokenizer.tokenStatistics("+-*/^()"));
+        assertArrayEquals(new int[] {0, 1, 0, 6}, Tokenizer.tokenStatistics("((( x )))"));
+    }
+
+    @Test
+    void tokenStatisticsSumEqualsNumberOfKnownTokens() {
+        String expr = "sin(x)^2 + cos(x)^2 - 1 / velocity @";
+        int[] stats = Tokenizer.tokenStatistics(expr);
+        int known = 0;
+        for (TokenType type : Tokenizer.tokenizeTypes(expr)) {
+            if (type != UNKNOWN) {
+                known++;
+            }
+        }
+        assertEquals(known, stats[0] + stats[1] + stats[2] + stats[3]);
+    }
+
+    @Test
+    void tokenStatisticsNullThrows() {
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class, () -> Tokenizer.tokenStatistics(null));
+        assertEquals(Messages.ERR_NULL_EXPRESSION, ex.getMessage());
+    }
+
+    // ===================================================================
+    // Узгодженість: lexemes і tokenizeTypes мають однакову довжину,
+    // а склеєні лексеми = вираз без пробілів (нічого не губиться і не дублюється)
+    // ===================================================================
+
+    private static final String[] SAMPLE_EXPRESSIONS = {
+            "", "x", "2*x + 3", "2*x^2 + 3*x - 5", "sin(x) + sqrt(y)", "-5", "3--5", "(-5)",
+            "1 + 2..5 * x", "x@#y", "12abc3", "  \t ", "a_1*_b2/3.75^-2", "x😀y",
+    };
+
+    @Test
+    void lexemesAndTypesHaveSameLength() {
+        for (String expr : SAMPLE_EXPRESSIONS) {
+            assertEquals(Tokenizer.lexemes(expr).length, Tokenizer.tokenizeTypes(expr).length, expr);
+        }
+    }
+
+    @Test
+    void lexemesConcatenateBackToExpressionWithoutWhitespace() {
+        for (String expr : SAMPLE_EXPRESSIONS) {
+            assertEquals(new String(Tokenizer.toCharacters(expr)), String.join("", Tokenizer.lexemes(expr)), expr);
+        }
+    }
+
+    @Test
+    void noLexemeIsEmptyOrContainsWhitespace() {
+        for (String expr : SAMPLE_EXPRESSIONS) {
+            for (String lexeme : Tokenizer.lexemes(expr)) {
+                assertFalse(lexeme.isEmpty(), expr);
+                assertFalse(lexeme.contains(" ") || lexeme.contains("\t"), expr + " -> '" + lexeme + "'");
+            }
+        }
+    }
+
+    @Test
+    void lexemesForC10DemoExample() {
+        assertArrayEquals(
+                new String[] {"2", "*", "x", "^", "2", "+", "3", "*", "x", "-", "5"},
+                Tokenizer.lexemes("2*x^2 + 3*x - 5"));
+    }
+
+    // ===================================================================
+    // Символи поза BMP (surrogate-пари): одна лексема, а не дві половинки
+    // ===================================================================
+
+    @Test
+    void surrogatePairIsOneUnknownLexeme() {
+        String emoji = "😀"; // 😀
+        assertArrayEquals(new String[] {"x", emoji}, Tokenizer.lexemes("x" + emoji));
+        assertArrayEquals(new TokenType[] {IDENTIFIER, UNKNOWN}, Tokenizer.tokenizeTypes("x" + emoji));
+        assertArrayEquals(new String[] {emoji, emoji}, Tokenizer.lexemes(emoji + emoji));
+    }
+
+    @Test
+    void mathItalicLetterIsNotAnIdentifier() {
+        String mathX = "𝑥"; // 𝑥 (U+1D465) — не ASCII-літера
+        assertArrayEquals(new String[] {"2", "*", mathX}, Tokenizer.lexemes("2*" + mathX));
+        assertFalse(Tokenizer.isValid("2*" + mathX));
+    }
+
+    @Test
+    void loneSurrogateIsSingleCharUnknownLexeme() {
+        assertArrayEquals(new String[] {"\uD83D", "x"}, Tokenizer.lexemes("\uD83Dx"));
+        assertArrayEquals(new String[] {"\uDE00"}, Tokenizer.lexemes("\uDE00"));
+        assertArrayEquals(new TokenType[] {UNKNOWN, IDENTIFIER}, Tokenizer.tokenizeTypes("\uD83Dx"));
+    }
+
+    @Test
+    void newlineIsNotWhitespaceForTokenizer() {
+        // C2: пробіл і табуляція — і все; '\n' дає UNKNOWN (так validate-expr його й покаже)
+        assertArrayEquals(new TokenType[] {IDENTIFIER, UNKNOWN, PLUS, NUMBER}, Tokenizer.tokenizeTypes("x\n+1"));
+    }
+
     // ===================================================================
     // C8 — correctness check
     // ===================================================================

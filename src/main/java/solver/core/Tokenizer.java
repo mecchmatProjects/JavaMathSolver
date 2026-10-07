@@ -44,7 +44,8 @@ public final class Tokenizer {
      *       ({@code x}, {@code x1}, {@code velocity}); функції ({@code sin}, {@code sqrt})
      *       теж одна лексема; {@code 2x} → "2","x";</li>
      *   <li>{@code + - * / ^ ( )} — кожен окремою лексемою;</li>
-     *   <li>будь-який інший символ — окрема лексема з одного символу (у tokenizer це UNKNOWN).</li>
+     *   <li>будь-який інший символ — окрема лексема з одного символу (у tokenizer це UNKNOWN);
+     *       символ поза BMP (surrogate-пара, напр. emoji) — теж одна лексема.</li>
      * </ul>
      *
      * @throws IllegalArgumentException якщо {@code expression == null}
@@ -175,6 +176,12 @@ public final class Tokenizer {
         }
         if (CharClassifier.isLetter(c)) {
             return scanIdentifier(s, start);
+        }
+        // Символ поза BMP (emoji, math-літери 𝑥) займає 2 char: не рвемо surrogate-пару,
+        // інакше в повідомленні про помилку замість символа буде "?".
+        if (Character.isHighSurrogate(c) && start + 1 < s.length()
+                && Character.isLowSurrogate(s.charAt(start + 1))) {
+            return start + 2;
         }
         return start + 1;
     }
