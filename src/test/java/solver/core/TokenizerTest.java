@@ -456,6 +456,17 @@ class TokenizerTest {
                 new TokenType[] {IDENTIFIER, MINUS, NUMBER},
                 Tokenizer.tokenizeTypes("x1-5"));
     }
+
+    // ===================================================================
+    // C9 — Token statistics
+    // ===================================================================
+
+    @Test
+    void basicTokenStatisticsTest() {
+        assertArrayEquals(new int[] {1,3,2,2},
+                Tokenizer.tokenStatistics("2*x + sin(x)"));
+    }
+
     // ===================================================================
     // C8 — correctness check
     // ===================================================================

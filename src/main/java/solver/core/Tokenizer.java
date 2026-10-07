@@ -124,6 +124,33 @@ public final class Tokenizer {
         return true;
     }
 
+    // C9: статистика токенів
+    /**
+     * Повертає масив кількостей токенів кожної категорії у виразі:
+     * <ul>
+     *     <li>{@code [0]} — Numbers</li>
+     *     <li>{@code [1]} — Identifiers</li>
+     *     <li>{@code [2]} — Operators</li>
+     *     <li>{@code [3]} — Parentheses</li>
+     * </ul>
+     * Лексеми типу {@code UNKNOWN} не враховуються.
+     */
+    public static int[] tokenStatistics(String expression) {
+        String[] lexemes = lexemes(expression);
+        int[] stats = new int[4];
+        for (String lexeme : lexemes) {
+            switch (typeOf(lexeme)) {
+                case NUMBER -> stats[0]++;
+                case IDENTIFIER -> stats[1]++;
+                case PLUS, MINUS, MULTIPLY, DIVIDE, POWER -> stats[2]++;
+                case LEFT_PARENTHESIS, RIGHT_PARENTHESIS -> stats[3]++;
+                default -> { } // UNKNOWN ігнорується
+            }
+        }
+        return stats;
+    }   // ← саме цієї дужки не вистачало
+}
+
     /**
      * Повертає індекс КІНЦЯ (не включно) лексеми, що починається в позиції
      * {@code start}. Лексема це {@code s.substring(start, end)}.
