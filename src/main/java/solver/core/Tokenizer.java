@@ -101,19 +101,25 @@ public final class Tokenizer {
         return buffer;
     }
 
-    //C8 - correctness check
+    // C8: перевірка коректності на рівні лексем
     /**
-     * Повертає {@code true} якщо вираз коректний та
-     * повертає {@code false} якщо вираз некоректний
+     * Повертає {@code true}, якщо всі лексеми виразу розпізнані, інакше {@code false}.
      *
-     * <p>Вираз важається некоректним якщо хочаб одна лексема має тип {@code UNKNOWN}
-     * або є порожнім
+     * <p>Вираз вважається некоректним, якщо він порожній (або лише з пробілів)
+     * чи хоча б одна лексема має тип {@code UNKNOWN} ({@code 2..5}, {@code x@}).
+     * Синтаксис ({@code 2 + + 3}) тут не перевіряється — це задача Parser.
+     *
+     * @throws IllegalArgumentException якщо {@code expression == null}
      */
-    public static Boolean isValid(String expression){
-        String[] lexemes = lexemes(expression);
-        if(lexemes.length == 0) return false;
-        for (String lexeme : lexemes) {
-            if (typeOf(lexeme) == TokenType.UNKNOWN) return false;
+    public static boolean isValid(String expression) {
+        TokenType[] types = tokenizeTypes(expression);
+        if (types.length == 0) {
+            return false;
+        }
+        for (TokenType type : types) {
+            if (type == TokenType.UNKNOWN) {
+                return false;
+            }
         }
         return true;
     }

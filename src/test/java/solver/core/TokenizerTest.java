@@ -457,22 +457,34 @@ class TokenizerTest {
                 Tokenizer.tokenizeTypes("x1-5"));
     }
     // ===================================================================
-    // C7 — String[] lexemes
+    // C8 — correctness check
     // ===================================================================
 
     @Test
-    void basicValidation(){
+    void validExpressions() {
         assertTrue(Tokenizer.isValid("2*x + 3"));
-        assertFalse(Tokenizer.isValid("2..5"));
-        assertFalse(Tokenizer.isValid("x@"));
-        assertFalse(Tokenizer.isValid("3.4.5"));
-        assertTrue(Tokenizer.isValid("2 + + 3"));//syntax is Parser's job
-
+        assertTrue(Tokenizer.isValid("-5"));
+        assertTrue(Tokenizer.isValid("sin(x) + sqrt(y)"));
+        assertTrue(Tokenizer.isValid("2 + + 3")); // синтаксис — справа Parser
     }
+
     @Test
-    void zeroLexemesException(){
+    void invalidTokens() {
+        assertFalse(Tokenizer.isValid("2..5"));
+        assertFalse(Tokenizer.isValid("3.4.5"));
+        assertFalse(Tokenizer.isValid("x@"));
+        assertFalse(Tokenizer.isValid(".5"));
+    }
+
+    @Test
+    void emptyOrBlankIsInvalid() {
         assertFalse(Tokenizer.isValid(""));
         assertFalse(Tokenizer.isValid(" "));
+        assertFalse(Tokenizer.isValid("\t"));
     }
 
+    @Test
+    void nullThrows() {
+        assertThrows(IllegalArgumentException.class, () -> Tokenizer.isValid(null));
+    }
 }
