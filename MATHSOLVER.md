@@ -11,7 +11,7 @@
 ```text
 src/main/java/solver/
 ├── app/       MathSolver (main), CommandDispatcher, CommandCatalog, HelpPrinter
-├── core/      Messages, Output, NumberParser, ArgumentValidator (+ Tokenizer у Lab 3)
+├── core/      Messages, Output, NumberParser, ArgumentValidator, CharClassifier, TokenType, Tokenizer
 ├── algebra/   Arithmetic, Equations, NumberTheory, TaylorSeries
 └── geometry/  Distances, Shapes, Triangles, Solids, Intersections, Polygon, MonteCarlo
 src/test/java/solver/   JUnit 5 тести
@@ -87,7 +87,36 @@ java -cp target/classes solver.app.MathSolver validate-expr "2..5"
 # Error: Invalid token: 2..5
 ```
 
-### 7. Невідома команда (Unknown command)
+### 7. Розбиття виразу на токени (tokenize, C10)
+```bash
+java -cp target/classes solver.app.MathSolver tokenize "2*x^2 + 3*x - 5"
+# 0: NUMBER 2
+# 1: MULTIPLY *
+# 2: IDENTIFIER x
+# 3: POWER ^
+# 4: NUMBER 2
+# 5: PLUS +
+# 6: NUMBER 3
+# 7: MULTIPLY *
+# 8: IDENTIFIER x
+# 9: MINUS -
+# 10: NUMBER 5
+```
+Нерозпізнані лексеми показуються як `UNKNOWN` (напр. `2: UNKNOWN 2..5`); керівні символи — у видимій формі (`\n`).
+
+### 8. Статистика токенів (token-stats, C9)
+```bash
+java -cp target/classes solver.app.MathSolver token-stats "2*x + 3*x - sin(x)"
+# Numbers: 2
+# Identifiers: 4
+# Operators: 4
+# Parentheses: 2
+```
+Лексеми `UNKNOWN` не враховуються.
+
+> Вираз краще брати в лапки. Без лапок аргументи склеюються через пробіл (`tokenize 2*x + 3` = `tokenize "2*x + 3"`), але shell може розгорнути `*` чи `(` сам.
+
+### 9. Невідома команда (Unknown command)
 ```bash
 java -cp target/classes solver.app.MathSolver hello 1 2
 # Unknown command: hello
@@ -126,4 +155,6 @@ java -cp target/classes solver.app.MathSolver hello 1 2
 | `manhattan-distance` | `x1 y1 x2 y2` | Манхеттенська відстань між точками |
 | `midpoint` | `x1 y1 x2 y2` | Середина відрізка |
 | `collinear` | `x1 y1 x2 y2 x3 y3` | Перевірка, чи лежать три точки на одній прямій |
+| `tokenize` | `"expr"` | Список токенів: індекс, тип, лексема (C10) |
+| `token-stats` | `"expr"` | Кількість чисел, ідентифікаторів, операторів, дужок (C9) |
 | `validate-expr` | `"expr"` | Перевірка, що всі лексеми виразу розпізнані (C8); синтаксис не перевіряється |
