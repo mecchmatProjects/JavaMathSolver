@@ -101,6 +101,23 @@ public final class Tokenizer {
         return buffer;
     }
 
+    //C8 - correctness check
+    /**
+     * Повертає {@code true} якщо вираз коректний та
+     * повертає {@code false} якщо вираз некоректний
+     *
+     * <p>Вираз важається некоректним якщо хочаб одна лексема має тип {@code UNKNOWN}
+     * або є порожнім
+     */
+    public static Boolean isValid(String expression){
+        String[] lexemes = lexemes(expression);
+        if(lexemes.length == 0) return false;
+        for (String lexeme : lexemes) {
+            if (typeOf(lexeme) == TokenType.UNKNOWN) return false;
+        }
+        return true;
+    }
+
     /**
      * Повертає індекс КІНЦЯ (не включно) лексеми, що починається в позиції
      * {@code start}. Лексема це {@code s.substring(start, end)}.

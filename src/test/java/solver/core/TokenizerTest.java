@@ -456,4 +456,23 @@ class TokenizerTest {
                 new TokenType[] {IDENTIFIER, MINUS, NUMBER},
                 Tokenizer.tokenizeTypes("x1-5"));
     }
+    // ===================================================================
+    // C7 — String[] lexemes
+    // ===================================================================
+
+    @Test
+    void basicValidation(){
+        assertTrue(Tokenizer.isValid("2*x + 3"));
+        assertFalse(Tokenizer.isValid("2..5"));
+        assertFalse(Tokenizer.isValid("x@"));
+        assertFalse(Tokenizer.isValid("3.4.5"));
+        assertTrue(Tokenizer.isValid("2 + + 3"));//syntax is Parser's job
+
+    }
+    @Test
+    void zeroLexemesException(){
+        assertFalse(Tokenizer.isValid(""));
+        assertFalse(Tokenizer.isValid(" "));
+    }
+
 }
