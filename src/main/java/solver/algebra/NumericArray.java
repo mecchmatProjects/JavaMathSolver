@@ -80,6 +80,17 @@ public class NumericArray {
             return new NumericArray(normalized);
         }
 
+        if (Double.isInfinite(range)) {
+            double halfMin = min / 2.0;
+            double halfMax = max / 2.0;
+            double halfRange = halfMax - halfMin;
+
+            for (int i = 0; i < data.length; i++) {
+                normalized[i] = ((data[i] / 2.0) - halfMin) / halfRange;
+            }
+            return new NumericArray(normalized);
+        }
+
         for (int i = 0; i < data.length; i++) {
             normalized[i] = (data[i] - min) / range;
         }
