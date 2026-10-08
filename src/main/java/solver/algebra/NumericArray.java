@@ -119,4 +119,18 @@ public class NumericArray {
     public String toString() {
         return Arrays.toString(data);
     }
+  
+    private static final double EPSILON = 1e-9;
+
+    public int indexOf(double value) {
+        if (data == null) return -1;
+      
+        for (int i = 0; i < data.length; i++) {
+            if (Math.abs(data[i] - value) <= EPSILON) {
+                return i;
+            }
+        }
+        return -1;
+    }
+  
 }
