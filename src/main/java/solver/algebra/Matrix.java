@@ -339,6 +339,187 @@ public class Matrix {
 
     }
 
+    public double[] realEigenvals(){
+        if (rows != cols) {
+            System.out.println("Error: Eigenvalues are defined only for square matrices. Current size: " + rows + "x" + cols);
+            return null;
+        }
+
+        int n = rows;
+
+        double[][] h = new double[n][n];
+        for (int i = 0; i < n; i++){
+            for (int j = 0; j < n; j++){
+                h[i][j] = this.data[i][j];
+            }
+        }
+
+        /// далі описано підхід зведення до форми хессенберга з наступним
+        ///QR-розкладом зі зсувом Вілкінсона та дефляцією.
+        ///Очікувана складність алгоритму O(n^3)
+
+
+        for (int col = 0; col < n -2; col++){
+            int pivotRow = col + 1;
+            double maxVal = Math.abs(h[pivotRow][col]);
+            for (int row = col + 2; row < n; row++) {
+                double curVal = Math.abs(h[row][col]);
+                if (curVal > maxVal) {
+                    maxVal = curVal;
+                    pivotRow = row;
+                }
+            }
+
+            if (maxVal > 1e-12){
+                if (pivotRow != col + 1) {
+                    double[] temp = h[col + 1];
+                    h[col + 1] = h[pivotRow];
+                    h[pivotRow] = temp;
+
+                    for (int r = 0; r < n; r++) {
+                        double t = h[r][col + 1];
+                        h[r][col + 1] = h[r][pivotRow];
+                        h[r][pivotRow] = t;
+                    }
+                }
+
+                for (int row = col + 2; row < n; row++) {
+                    double factor = h[row][col] / h[col + 1][col];
+                    for (int c = col; c < n; c++) {
+                        h[row][c] -= factor * h[col + 1][c];
+                    }
+                    for (int r = 0; r < n; r++) {
+                        h[r][col + 1] += factor * h[r][row];
+                    }
+                }
+            }
+        }
+
+        double[] buffer = new double[n];
+        int count = 0;
+        boolean hasComplex = false;
+        int m = n - 1;
+        final double EPS = 1e-10;
+        int iterations = 0;
+        final int MAX_ITERS = 100 * n;
+
+        while (m >= 0) {
+            if (iterations++ > MAX_ITERS) {
+                System.out.println("Warning: Max iterations reached. Convergence stopped.");
+                break;
+            }
+
+            if (m == 0) {
+                buffer[count++] = h[0][0];
+                break;
+            }
+
+            double pSub = Math.abs(h[m][m - 1]);
+            if (pSub <= EPS * (Math.abs(h[m - 1][m - 1]) + Math.abs(h[m][m]))) {
+                buffer[count++] = h[m][m];
+                m--;
+                iterations = 0;
+                continue;
+            }
+
+            if (m == 1 || Math.abs(h[m - 1][m - 2]) <= EPS * (Math.abs(h[m - 2][m - 2]) + Math.abs(h[m - 1][m - 1]))) {
+                double a = h[m - 1][m - 1];
+                double b = h[m - 1][m];
+                double c = h[m][m - 1];
+                double d = h[m][m];
+
+                double tr = a + d;
+                double det = a * d - b * c;
+                double discr = tr * tr - 4 * det;
+
+                if (discr >= 0) {
+                    double sqrtD = Math.sqrt(discr);
+                    buffer[count++] = (tr + sqrtD) / 2.0;
+                    buffer[count++] = (tr - sqrtD) / 2.0;
+                } else {
+                    hasComplex = true;
+                }
+
+                m -= 2;
+                iterations = 0;
+                continue;
+            }
+
+            // Wilkinson shift
+            double a = h[m - 1][m - 1];
+            double b = h[m - 1][m];
+            double c = h[m][m - 1];
+            double d = h[m][m];
+
+            double tr = a + d;
+            double det = a * d - b * c;
+            double discr = tr * tr - 4 * det;
+
+            double mu = d;
+            if (discr >= 0) {
+                double l1 = (tr + Math.sqrt(discr)) / 2.0;
+                double l2 = (tr - Math.sqrt(discr)) / 2.0;
+                mu = (Math.abs(l1 - d) < Math.abs(l2 - d)) ? l1 : l2;
+            } else {
+                mu = tr / 2.0;
+            }
+
+            // H - mu * I
+            for (int i = 0; i <= m; i++) {
+                h[i][i] -= mu;
+            }
+
+            // Givens Rotations
+            double[] cos = new double[m];
+            double[] sin = new double[m];
+
+            for (int i = 0; i < m; i++) {
+                double xi = h[i][i];
+                double yi = h[i + 1][i];
+                double r = Math.hypot(xi, yi);
+
+                if (r < 1e-14) {
+                    cos[i] = 1.0;
+                    sin[i] = 0.0;
+                } else {
+                    cos[i] = xi / r;
+                    sin[i] = -yi / r;
+                }
+
+                for (int j = i; j <= m; j++) {
+                    double t1 = h[i][j];
+                    double t2 = h[i + 1][j];
+                    h[i][j] = cos[i] * t1 - sin[i] * t2;
+                    h[i + 1][j] = sin[i] * t1 + cos[i] * t2;
+                }
+            }
+
+            for (int i = 0; i < m; i++) {
+                for (int r = 0; r <= Math.min(i + 2, m); r++) {
+                    double t1 = h[r][i];
+                    double t2 = h[r][i + 1];
+                    h[r][i] = cos[i] * t1 - sin[i] * t2;
+                    h[r][i + 1] = sin[i] * t1 + cos[i] * t2;
+                }
+            }
+
+            for (int i = 0; i <= m; i++) {
+                h[i][i] += mu;
+            }
+        }
+
+        if (hasComplex) {
+            System.out.println("Note: Matrix also has complex conjugate eigenvalues that were omitted.");
+        }
+
+        double[] result = new double[count];
+        for (int i = 0; i < count; i++) {
+            result[i] = buffer[i];
+        }
+
+        return result;
+    }
+
 
 
 

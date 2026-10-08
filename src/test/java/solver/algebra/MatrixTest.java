@@ -516,6 +516,145 @@ public class MatrixTest {
         assertNull(x, "Якщо вектор b дорівнює null, метод має повертати null");
     }
 
+    // Просте сортування масиву за зростанням без використання бібліотек
+    private void sort(double[] arr) {
+        if (arr == null) return;
+        for (int i = 0; i < arr.length - 1; i++) {
+            for (int j = 0; j < arr.length - i - 1; j++) {
+                if (arr[j] > arr[j + 1]) {
+                    double temp = arr[j];
+                    arr[j] = arr[j + 1];
+                    arr[j + 1] = temp;
+                }
+            }
+        }
+    }
+
+    @Test
+    void testDiagonalMatrix() {
+        // Діагональна матриця: корені 5, -2, 7
+        double[][] data = {
+                {5.0,  0.0, 0.0},
+                {0.0, -2.0, 0.0},
+                {0.0,  0.0, 7.0}
+        };
+        Matrix m = new Matrix(data);
+        double[] ev = m.realEigenvals();
+
+        assertNotNull(ev);
+        assertEquals(3, ev.length);
+
+        sort(ev);
+        assertEquals(-2.0, ev[0], EPSILON);
+        assertEquals(5.0, ev[1], EPSILON);
+        assertEquals(7.0, ev[2], EPSILON);
+    }
+
+    @Test
+    void testTriangularMatrix() {
+        // Верхньотрикутна матриця: корені на діагоналі 1, 2, 3
+        double[][] data = {
+                {1.0, 4.0, 5.0},
+                {0.0, 2.0, 6.0},
+                {0.0, 0.0, 3.0}
+        };
+        Matrix m = new Matrix(data);
+        double[] ev = m.realEigenvals();
+
+        assertNotNull(ev);
+        assertEquals(3, ev.length);
+
+        sort(ev);
+        assertEquals(1.0, ev[0], EPSILON);
+        assertEquals(2.0, ev[1], EPSILON);
+        assertEquals(3.0, ev[2], EPSILON);
+    }
+
+    @Test
+    void testSymmetric2x2() {
+        // A = [[2, 1], [1, 2]] -> корені 1.0 та 3.0
+        double[][] data = {
+                {2.0, 1.0},
+                {1.0, 2.0}
+        };
+        Matrix m = new Matrix(data);
+        double[] ev = m.realEigenvals();
+
+        assertNotNull(ev);
+        assertEquals(2, ev.length);
+
+        sort(ev);
+        assertEquals(1.0, ev[0], EPSILON);
+        assertEquals(3.0, ev[1], EPSILON);
+    }
+
+    @Test
+    void testGeneral3x3ViaTraceAndDeterminant() {
+        // Симетрична 3x3: корені 8, -1, -1
+        double[][] data = {
+                {3.0, 2.0, 4.0},
+                {2.0, 0.0, 2.0},
+                {4.0, 2.0, 3.0}
+        };
+        Matrix m = new Matrix(data);
+        double[] ev = m.realEigenvals();
+
+        assertNotNull(ev);
+        assertEquals(3, ev.length);
+
+        sort(ev);
+        assertEquals(-1.0, ev[0], EPSILON);
+        assertEquals(-1.0, ev[1], EPSILON);
+        assertEquals(8.0, ev[2], EPSILON);
+
+        // Перевірка інваріантів: сума = tr(A), добуток = det(A)
+        double sum = ev[0] + ev[1] + ev[2];
+        double prod = ev[0] * ev[1] * ev[2];
+        assertEquals(m.trace(), sum, EPSILON);
+        assertEquals(8.0, prod, EPSILON);
+    }
+
+    @Test
+    void testComplexConjugateEigenvaluesOmitted() {
+        // Матриця повороту: корені +/- i (суто комплексні)
+        double[][] data = {
+                {0.0, -1.0},
+                {1.0,  0.0}
+        };
+        Matrix m = new Matrix(data);
+        double[] ev = m.realEigenvals();
+
+        assertNotNull(ev);
+        assertEquals(0, ev.length);
+    }
+
+    @Test
+    void testMixedRealAndComplexEigenvalues() {
+        // Блок 1x1 дає корінь 5.0, блок 2x2 дає +/- i
+        double[][] data = {
+                {5.0, 0.0,  0.0},
+                {0.0, 0.0, -1.0},
+                {0.0, 1.0,  0.0}
+        };
+        Matrix m = new Matrix(data);
+        double[] ev = m.realEigenvals();
+
+        assertNotNull(ev);
+        assertEquals(1, ev.length);
+        assertEquals(5.0, ev[0], EPSILON);
+    }
+
+    @Test
+    void testEigenvaluesNonSquareMatrixReturnsNull() {
+        double[][] data = {
+                {1.0, 2.0, 3.0},
+                {4.0, 5.0, 6.0}
+        };
+        Matrix m = new Matrix(data);
+        double[] ev = m.realEigenvals();
+
+        assertNull(ev);
+    }
 
 
 }
