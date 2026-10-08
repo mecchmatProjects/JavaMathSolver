@@ -132,5 +132,9 @@ public class NumericArray {
         }
         return -1;
     }
+
+    public boolean contains(double value) {
+        return indexOf(value) != -1;
+    }
   
 }
