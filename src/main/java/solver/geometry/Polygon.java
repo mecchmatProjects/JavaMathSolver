@@ -18,43 +18,15 @@ public final class Polygon {
             printError(ERR_INVALID_INPUT);
             return;
         }
-        int count = coords.length / 2;
-        double perimeter = 0;
-        for (int i = 0; i < count; i++) {
-            double x1 = coords[2 * i], y1 = coords[2 * i + 1];
-            double x2 = coords[2 * ((i + 1) % count)], y2 = coords[2 * ((i + 1) % count) + 1];
-            perimeter += Math.hypot(x2 - x1, y2 - y1);
+        Point[] polygon = new Point[coords.length / 2];
+        for (int i = 0; i < polygon.length; i++) {
+            polygon[i] = Point.of(coords[2 * i], coords[2 * i + 1]);
         }
-
-        int initialSign = 0;
-        boolean signConsistent = true;
-        double turningSum = 0;
-        for (int i = 0; i < count; i++) {
-            double x1 = coords[2 * i], y1 = coords[2 * i + 1];
-            double x2 = coords[2 * ((i + 1) % count)], y2 = coords[2 * ((i + 1) % count) + 1];
-            double x3 = coords[2 * ((i + 2) % count)], y3 = coords[2 * ((i + 2) % count) + 1];
-
-            double edge1x = x2 - x1, edge1y = y2 - y1;
-            double edge2x = x3 - x2, edge2y = y3 - y2;
-            double crossProduct = edge1x * edge2y - edge1y * edge2x;
-            double dotProduct = edge1x * edge2x + edge1y * edge2y;
-            double len1 = Math.hypot(edge1x, edge1y);
-            double len2 = Math.hypot(edge2x, edge2y);
-            turningSum += Math.atan2(crossProduct, dotProduct);
-
-            if (len1 * len2 > 0 && Math.abs(crossProduct) <= 1e-9 * (len1 * len2)) {
-                continue;
-            }
-            int sign = crossProduct > 0 ? 1 : -1;
-            if (initialSign == 0) {
-                initialSign = sign;
-            } else if (sign != initialSign) {
-                signConsistent = false;
-                break;
-            }
+        double perimeter = Polygon2D.perimeter(polygon);
+        if (Double.isNaN(perimeter)) {
+            return;
         }
-        boolean turningSumOk = Math.abs(Math.abs(turningSum) - 2 * Math.PI) < 1e-6;
-        boolean isConvex = signConsistent && initialSign != 0 && turningSumOk;
+        boolean isConvex = Polygon2D.isConvex(polygon);
 
         printResult(String.format(Locale.ROOT, "perimeter=%f, convex=%b", perimeter, isConvex));
     }
