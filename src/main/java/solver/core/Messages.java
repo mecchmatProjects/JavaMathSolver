@@ -17,6 +17,9 @@ public final class Messages {
     public static final String ERR_NULL_EXPRESSION = "expression must not be null";
     public static final String ERR_POINTS_EMPTY = "Error: Points array must not be empty";
     public static final String ERR_POINTS_NULL_ELEMENT = "Error: Points array must not contain null";
+    public static final String ERR_POINT_NULL = "Error: Point must not be null";
+    public static final String ERR_POINTS_NOT_FINITE = "Error: Point coordinates must be finite numbers";
+    public static final String ERR_HULL_MIN_POINTS = "Error: Convex hull needs at least 3 points";
     public static final String ERR_POLYGON_MIN_VERTICES = "Error: Polygon needs at least 3 vertices";
     public static final String ERR_POLYGON_NOT_SIMPLE = "Error: Polygon must be simple (no self-intersections)";
     public static final String ERR_POLYGON_NOT_TRIANGULABLE = "Error: Polygon cannot be triangulated";

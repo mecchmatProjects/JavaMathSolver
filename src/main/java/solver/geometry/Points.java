@@ -10,6 +10,10 @@ public final class Points {
 
     // Task G2: distance between two points
     public static double distance(Point a, Point b) {
+        if (a == null || b == null) {
+            printError(ERR_POINT_NULL);
+            return Double.NaN;
+        }
         return Math.hypot(b.x - a.x, b.y - a.y);
     }
 
@@ -44,7 +48,7 @@ public final class Points {
 
     // Task G5: nearest point to p
     public static Point nearest(Point p, Point[] points) {
-        if (!checkNotEmpty(points)) {
+        if (!checkPoint(p) || !checkNotEmpty(points)) {
             return null;
         }
         Point best = points[0];
@@ -69,7 +73,27 @@ public final class Points {
                 printError(ERR_POINTS_NULL_ELEMENT);
                 return false;
             }
+            if (!isFinite(points[i])) {
+                printError(ERR_POINTS_NOT_FINITE);
+                return false;
+            }
         }
         return true;
+    }
+
+    static boolean checkPoint(Point p) {
+        if (p == null) {
+            printError(ERR_POINT_NULL);
+            return false;
+        }
+        if (!isFinite(p)) {
+            printError(ERR_POINTS_NOT_FINITE);
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean isFinite(Point p) {
+        return Double.isFinite(p.x) && Double.isFinite(p.y);
     }
 }

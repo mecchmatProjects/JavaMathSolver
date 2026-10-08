@@ -12,6 +12,7 @@ public final class Polygon2D {
 
     // Task G6: perimeter
     public static double perimeter(Point[] polygon) {
+        polygon = open(polygon);
         if (!check(polygon)) {
             return Double.NaN;
         }
@@ -24,6 +25,7 @@ public final class Polygon2D {
 
     // Task G6: area
     public static double area(Point[] polygon) {
+        polygon = open(polygon);
         if (!check(polygon)) {
             return Double.NaN;
         }
@@ -32,27 +34,32 @@ public final class Polygon2D {
 
     // Task G6: is the polygon convex
     public static boolean isConvex(Point[] polygon) {
+        polygon = open(polygon);
         if (!check(polygon)) {
             return false;
         }
         int n = polygon.length;
         int sign = 0;
         for (int i = 0; i < n; i++) {
-            double c = cross(polygon[i], polygon[(i + 1) % n], polygon[(i + 2) % n]);
-            if (Math.abs(c) <= EPS) {
+            int c = orient(polygon[i], polygon[(i + 1) % n], polygon[(i + 2) % n]);
+            if (c == 0) {
                 continue;
             }
-            if (sign != 0 && (c > 0) != (sign > 0)) {
+            if (sign != 0 && c != sign) {
                 return false;
             }
-            sign = c > 0 ? 1 : -1;
+            sign = c;
         }
         return sign != 0 && isSimple(polygon);
     }
 
     // Task G6: convex hull
     public static Point[] convexHull(Point[] points) {
-        if (!check(points)) {
+        if (!Points.checkNotEmpty(points)) {
+            return null;
+        }
+        if (points.length < 3) {
+            printError(ERR_HULL_MIN_POINTS);
             return null;
         }
         Point[] sorted = points.clone();
@@ -68,13 +75,13 @@ public final class Polygon2D {
         Point[] hull = new Point[2 * sorted.length];
         int k = 0;
         for (int i = 0; i < sorted.length; i++) {
-            while (k >= 2 && cross(hull[k - 2], hull[k - 1], sorted[i]) <= EPS) {
+            while (k >= 2 && orient(hull[k - 2], hull[k - 1], sorted[i]) <= 0) {
                 k--;
             }
             hull[k++] = sorted[i];
         }
         for (int i = sorted.length - 2, lower = k + 1; i >= 0; i--) {
-            while (k >= lower && cross(hull[k - 2], hull[k - 1], sorted[i]) <= EPS) {
+            while (k >= lower && orient(hull[k - 2], hull[k - 1], sorted[i]) <= 0) {
                 k--;
             }
             hull[k++] = sorted[i];
@@ -91,6 +98,7 @@ public final class Polygon2D {
     }
 
     public static boolean isSimple(Point[] polygon) {
+        polygon = open(polygon);
         if (!check(polygon)) {
             return false;
         }
@@ -106,7 +114,7 @@ public final class Polygon2D {
                     Point farA = j == i + 1 ? a1 : a2;
                     Point farB = j == i + 1 ? b2 : b1;
                     double dot = (farA.x - shared.x) * (farB.x - shared.x) + (farA.y - shared.y) * (farB.y - shared.y);
-                    if (Math.abs(cross(farA, shared, farB)) <= EPS && dot > 0) {
+                    if (orient(farA, shared, farB) == 0 && dot > 0) {
                         return false;
                     }
                 } else if (segmentsIntersect(a1, a2, b1, b2)) {
@@ -119,6 +127,7 @@ public final class Polygon2D {
 
     // Task G6: triangulation
     public static Point[][] triangulate(Point[] polygon) {
+        polygon = open(polygon);
         if (!check(polygon)) {
             return null;
         }
@@ -139,9 +148,9 @@ public final class Polygon2D {
                 Point prev = ordered[(i + count - 1) % count];
                 Point cur = ordered[i];
                 Point next = ordered[(i + 1) % count];
-                double c = cross(prev, cur, next);
-                if (Math.abs(c) <= EPS || (c > 0 && noVertexInside(ordered, count, prev, cur, next))) {
-                    if (Math.abs(c) > EPS) {
+                int c = orient(prev, cur, next);
+                if (c == 0 || (c > 0 && noVertexInside(ordered, count, prev, cur, next))) {
+                    if (c != 0) {
                         triangles[triangleCount++] = new Point[]{prev, cur, next};
                     }
                     for (int j = i; j < count - 1; j++) {
@@ -156,7 +165,7 @@ public final class Polygon2D {
                 return null;
             }
         }
-        if (Math.abs(cross(ordered[0], ordered[1], ordered[2])) > EPS) {
+        if (orient(ordered[0], ordered[1], ordered[2]) != 0) {
             triangles[triangleCount++] = new Point[]{ordered[0], ordered[1], ordered[2]};
         }
         Point[][] result = new Point[triangleCount][];
@@ -184,7 +193,8 @@ public final class Polygon2D {
 
     // Task G6: is the given point inside the polygon
     public static boolean contains(Point[] polygon, Point p) {
-        if (!check(polygon)) {
+        polygon = open(polygon);
+        if (!check(polygon) || !Points.checkPoint(p)) {
             return false;
         }
         boolean inside = false;
@@ -220,7 +230,8 @@ public final class Polygon2D {
                 for (int k = 0; k < 3 && clipped.length > 0; k++) {
                     clipped = clipByEdge(clipped, secondTriangles[j][k], secondTriangles[j][(k + 1) % 3]);
                 }
-                if (clipped.length >= 3 && Math.abs(signedArea(clipped)) > EPS) {
+                if (clipped.length >= 3
+                        && Math.abs(signedArea(clipped)) > EPS * Math.abs(signedArea(firstTriangles[i]))) {
                     pieces[pieceCount++] = clipped;
                 }
             }
@@ -238,13 +249,15 @@ public final class Polygon2D {
         for (int i = 0; i < polygon.length; i++) {
             Point prev = polygon[(i + polygon.length - 1) % polygon.length];
             Point cur = polygon[i];
-            double dPrev = cross(a, b, prev);
-            double dCur = cross(a, b, cur);
-            if ((dCur >= -EPS) != (dPrev >= -EPS)) {
-                double t = dPrev / (dPrev - dCur);
+            boolean curIn = orient(a, b, cur) >= 0;
+            boolean prevIn = orient(a, b, prev) >= 0;
+            if (curIn != prevIn) {
+                double dPrev = cross(a, b, prev);
+                double dCur = cross(a, b, cur);
+                double t = dPrev == dCur ? 1 : dPrev / (dPrev - dCur);
                 buffer[count++] = Point.of(prev.x + t * (cur.x - prev.x), prev.y + t * (cur.y - prev.y));
             }
-            if (dCur >= -EPS) {
+            if (curIn) {
                 buffer[count++] = cur;
             }
         }
@@ -272,7 +285,7 @@ public final class Polygon2D {
         for (int i = 0; i < count; i++) {
             Point p = points[i];
             if (p != a && p != b && p != c
-                    && cross(a, b, p) >= -EPS && cross(b, c, p) >= -EPS && cross(c, a, p) >= -EPS) {
+                    && orient(a, b, p) >= 0 && orient(b, c, p) >= 0 && orient(c, a, p) >= 0) {
                 return false;
             }
         }
@@ -280,21 +293,31 @@ public final class Polygon2D {
     }
 
     static boolean onSegment(Point a, Point b, Point p) {
-        return Math.abs(cross(a, b, p)) <= EPS
-                && p.x >= Math.min(a.x, b.x) - EPS && p.x <= Math.max(a.x, b.x) + EPS
-                && p.y >= Math.min(a.y, b.y) - EPS && p.y <= Math.max(a.y, b.y) + EPS;
+        double tol = EPS * Math.hypot(b.x - a.x, b.y - a.y);
+        return orient(a, b, p) == 0
+                && p.x >= Math.min(a.x, b.x) - tol && p.x <= Math.max(a.x, b.x) + tol
+                && p.y >= Math.min(a.y, b.y) - tol && p.y <= Math.max(a.y, b.y) + tol;
     }
 
     static boolean segmentsIntersect(Point p1, Point p2, Point p3, Point p4) {
-        double d1 = cross(p3, p4, p1);
-        double d2 = cross(p3, p4, p2);
-        double d3 = cross(p1, p2, p3);
-        double d4 = cross(p1, p2, p4);
-        if (((d1 > EPS && d2 < -EPS) || (d1 < -EPS && d2 > EPS))
-                && ((d3 > EPS && d4 < -EPS) || (d3 < -EPS && d4 > EPS))) {
+        int d1 = orient(p3, p4, p1);
+        int d2 = orient(p3, p4, p2);
+        int d3 = orient(p1, p2, p3);
+        int d4 = orient(p1, p2, p4);
+        if (d1 * d2 < 0 && d3 * d4 < 0) {
             return true;
         }
         return onSegment(p3, p4, p1) || onSegment(p3, p4, p2) || onSegment(p1, p2, p3) || onSegment(p1, p2, p4);
+    }
+
+    /** Orientation of c relative to a->b with a tolerance relative to the edge lengths: 1 left, -1 right, 0 collinear. */
+    static int orient(Point a, Point b, Point c) {
+        double c0 = cross(a, b, c);
+        double scale = Math.hypot(b.x - a.x, b.y - a.y) * Math.hypot(c.x - a.x, c.y - a.y);
+        if (Math.abs(c0) <= EPS * scale) {
+            return 0;
+        }
+        return c0 > 0 ? 1 : -1;
     }
 
     static double cross(Point a, Point b, Point c) {
@@ -317,6 +340,19 @@ public final class Polygon2D {
             points[i] = points[j];
             points[j] = tmp;
         }
+    }
+
+    /** Drops the closing vertex when the last vertex repeats the first, so closed contours behave like open ones. */
+    static Point[] open(Point[] polygon) {
+        if (polygon == null || polygon.length < 2) {
+            return polygon;
+        }
+        Point first = polygon[0];
+        Point last = polygon[polygon.length - 1];
+        if (first == null || last == null || first.x != last.x || first.y != last.y) {
+            return polygon;
+        }
+        return java.util.Arrays.copyOf(polygon, polygon.length - 1);
     }
 
     static boolean check(Point[] polygon) {

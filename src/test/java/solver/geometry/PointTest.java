@@ -41,7 +41,7 @@ class PointTest {
         Point b = Point.of(1, 2);
         assertNotSame(a, b);
         assertNotEquals(a, b); 
-        a.x = 10;
+        assertEquals(1.0, a.x);
         assertEquals(1.0, b.x);
         assertEquals(2.0, a.y);
     }

@@ -329,4 +329,53 @@ class Polygon2DTest {
         assertNull(Polygon2D.intersection(null, unitSquare()));
         assertNull(Polygon2D.intersection(unitSquare(), bowTie()));
     }
+
+    @Test
+    void predicatesWorkOnTinyScaleTriangle() {
+        Point[] tiny = {Point.of(0, 0), Point.of(1e-5, 0), Point.of(0, 1e-5)};
+        assertTrue(Polygon2D.isConvex(tiny));
+        assertTrue(Polygon2D.isSimple(tiny));
+        assertEquals(1, Polygon2D.triangulate(tiny).length);
+        assertEquals(3, Polygon2D.convexHull(tiny).length);
+        assertTrue(Polygon2D.contains(tiny, Point.of(2e-6, 2e-6)));
+        assertFalse(Polygon2D.contains(tiny, Point.of(1e-5, 1e-5)));
+        assertEquals(1, Polygon2D.intersection(tiny, tiny).length);
+    }
+
+    @Test
+    void nullPointsAreRejectedWithoutException() {
+        Point[] sq = unitSquare();
+        assertFalse(Polygon2D.contains(sq, null));
+        assertTrue(Double.isNaN(Points.distance(null, Point.of(0, 0))));
+        assertTrue(Double.isNaN(Points.distance(Point.of(0, 0), null)));
+        assertNull(Points.nearest(null, sq));
+    }
+
+    @Test
+    void nonFiniteCoordinatesAreRejected() {
+        Point[] bad = {Point.of(0, 0), Point.of(1, 0), Point.of(Double.NaN, 1)};
+        assertTrue(Double.isNaN(Polygon2D.area(bad)));
+        assertNull(Polygon2D.convexHull(bad));
+        assertFalse(Polygon2D.contains(unitSquare(), Point.of(Double.POSITIVE_INFINITY, 0)));
+        assertNull(Points.nearest(Point.of(Double.NaN, 0), unitSquare()));
+        assertNull(Points.centroid(bad));
+    }
+
+    @Test
+    void hullOfFewerThanThreePointsIsRejected() {
+        assertNull(Polygon2D.convexHull(new Point[]{Point.of(0, 0), Point.of(1, 1)}));
+    }
+
+    @Test
+    void closedContourBehavesLikeOpenOne() {
+        Point[] sq = unitSquare();
+        Point[] closed = java.util.Arrays.copyOf(sq, sq.length + 1);
+        closed[sq.length] = Point.of(sq[0].x, sq[0].y);
+        assertTrue(Polygon2D.isSimple(closed));
+        assertTrue(Polygon2D.isConvex(closed));
+        assertEquals(Polygon2D.area(sq), Polygon2D.area(closed), 1e-12);
+        assertEquals(Polygon2D.perimeter(sq), Polygon2D.perimeter(closed), 1e-12);
+        assertEquals(2, Polygon2D.triangulate(closed).length);
+        assertTrue(Polygon2D.contains(closed, Point.of(0.5, 0.5)));
+    }
 }

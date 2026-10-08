@@ -5,13 +5,15 @@ package solver.geometry;
  */
 public final class Point {
 
-    public double x;
-    public double y;
+    public final double x;
+    public final double y;
+
+    private Point(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
 
     public static Point of(double x, double y) {
-        Point point = new Point();
-        point.x = x;
-        point.y = y;
-        return point;
+        return new Point(x, y);
     }
 }
