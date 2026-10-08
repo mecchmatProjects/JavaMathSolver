@@ -386,5 +386,136 @@ public class MatrixTest {
         assertNull(inv, "Обернена матриця не існує для неквадратних матриць");
     }
 
+    private void assertSystemSolution(Matrix a, double[] x, double[] b) {
+        assertNotNull(x, "Розв'язок x не повинен бути null");
+        int n = a.getRows();
+        for (int i = 0; i < n; i++) {
+            double actualB_i = 0.0;
+            for (int j = 0; j < n; j++) {
+                actualB_i += a.get(i, j) * x[j];
+            }
+            assertEquals(b[i], actualB_i, EPSILON,
+                    "Невідповідність у рівнянні номер " + i);
+        }
+    }
+
+    @Test
+    void testSolve2x2Exact() {
+        // 2x + y = 5
+        // x + 3y = 5
+        // Розв'язок: x = 2.0, y = 1.0
+        double[][] aData = {
+                {2.0, 1.0},
+                {1.0, 3.0}
+        };
+        double[] b = {5.0, 5.0};
+
+        Matrix a = new Matrix(aData);
+        double[] x = a.solve(b);
+
+        assertNotNull(x);
+        assertEquals(2, x.length);
+        assertEquals(2.0, x[0], EPSILON);
+        assertEquals(1.0, x[1], EPSILON);
+    }
+
+    @Test
+    void testSolve3x3WithVerification() {
+        // 3x3 система:
+        //  2x -  y +  0z = 1
+        // -1x + 2y -  z = 2
+        //  0x -  y + 2z = 3
+        double[][] aData = {
+                { 2.0, -1.0,  0.0},
+                {-1.0,  2.0, -1.0},
+                { 0.0, -1.0,  2.0}
+        };
+        double[] b = {1.0, 2.0, 3.0};
+
+        Matrix a = new Matrix(aData);
+        double[] x = a.solve(b);
+
+        // Перевіряємо точність підстановкою Ax = b
+        assertSystemSolution(a, x, b);
+    }
+
+    @Test
+    void testSolveRequiresPivoting() {
+        // Перший елемент a[0][0] = 0, тому потрібна перестановка рядків:
+        // 0x + 2y = 4  --> y = 2
+        // 3x - 2y = 2  --> 3x - 4 = 2 --> x = 2
+        double[][] aData = {
+                {0.0, 2.0},
+                {3.0, -2.0}
+        };
+        double[] b = {4.0, 2.0};
+
+        Matrix a = new Matrix(aData);
+        double[] x = a.solve(b);
+
+        assertNotNull(x);
+        assertEquals(2.0, x[0], EPSILON);
+        assertEquals(2.0, x[1], EPSILON);
+    }
+
+    @Test
+    void testSolveSingularMatrixReturnsNull() {
+        // Лінійно залежні рівняння (другий рядок удвічі більший): det = 0
+        double[][] aData = {
+                {1.0, 2.0},
+                {2.0, 4.0}
+        };
+        double[] b = {3.0, 6.0};
+
+        Matrix a = new Matrix(aData);
+        double[] x = a.solve(b);
+
+        assertNull(x, "Для виродженої матриці метод має повертати null");
+    }
+
+    @Test
+    void testSolveNonSquareMatrixReturnsNull() {
+        // Прямокутна матриця 2x3
+        double[][] aData = {
+                {1.0, 2.0, 3.0},
+                {4.0, 5.0, 6.0}
+        };
+        double[] b = {1.0, 2.0};
+
+        Matrix a = new Matrix(aData);
+        double[] x = a.solve(b);
+
+        assertNull(x, "Для неквадратної матриці метод має повертати null");
+    }
+
+    @Test
+    void testSolveDimensionMismatchReturnsNull() {
+        // Розмірність вектора b не збігається з кількістю рядків
+        double[][] aData = {
+                {2.0, 1.0},
+                {1.0, 3.0}
+        };
+        double[] b = {1.0, 2.0, 3.0}; // Довжина 3 замість 2
+
+        Matrix a = new Matrix(aData);
+        double[] x = a.solve(b);
+
+        assertNull(x, "Якщо розмірність b не збігається, метод має повертати null");
+    }
+
+    @Test
+    void testSolveNullVectorReturnsNull() {
+        // Передача null замість вектора
+        double[][] aData = {
+                {1.0, 0.0},
+                {0.0, 1.0}
+        };
+        Matrix a = new Matrix(aData);
+        double[] x = a.solve(null);
+
+        assertNull(x, "Якщо вектор b дорівнює null, метод має повертати null");
+    }
+
+
 
 }

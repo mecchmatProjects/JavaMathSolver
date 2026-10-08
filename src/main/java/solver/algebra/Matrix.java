@@ -267,6 +267,79 @@ public class Matrix {
 
     }
 
+    public double[] solve(double[] b){
+        if (rows != cols){
+            System.out.println("Error: System must have a square coefficient matrix. Current size: " + rows + "x" + cols);
+            return null;
+        }
+        if (b == null || b.length != rows){
+            System.out.println("Error: Vector b dimension (" + (b == null ? 0 : b.length) + ") does not match matrix rows (" + rows + ").");
+            return null;
+        }
+
+        int n = rows;
+
+        double[][] a = new double[n][n];
+        double[] rhs = new double[n];
+
+        for (int i = 0; i < n; i++){
+            for (int j = 0; j < n; j++){
+                a[i][j] = this.data[i][j];
+            }
+            rhs[i] = b[i];
+        }
+
+        final double EPS = 1e-12;
+
+        for (int col = 0; col < n; col++){
+            int pivotRow = col;
+            double maxVal = Math.abs(a[col][col]);
+            for (int row = col + 1; row < n; row++){
+                double currVal = Math.abs(a[row][col]);
+                if (currVal > maxVal){
+                    maxVal = currVal;
+                    pivotRow = row;
+                }
+            }
+
+            if (maxVal < EPS){
+                System.out.println("Error: Matrix is singular or system has no unique solution.");
+                return null;
+            }
+
+            if (pivotRow != col){
+                double[] tempRow = a[col];
+                a[col] = a[pivotRow];
+                a[pivotRow] = tempRow;
+
+                double tempB = rhs[col];
+                rhs[col] = rhs[pivotRow];
+                rhs[pivotRow] = tempB;
+            }
+
+            for (int row = col + 1; row < n; row++){
+                double factor = a[row][col] / a[col][col];
+                for (int k = col + 1; k < n; k++){
+                    a[row][k] -= factor * a[col][k];
+                }
+                rhs[row] -= factor * rhs[col];
+            }
+        }
+
+        double[] x = new double[n];
+        for (int i = n - 1; i >= 0; i--){
+            double sum = rhs[i];
+            for (int j = i + 1; j < n; j++){
+                sum -= a[i][j] * x[j];
+            }
+            x[i] = sum / a[i][i];
+        }
+
+        return x;
+
+    }
+
+
 
 
 
