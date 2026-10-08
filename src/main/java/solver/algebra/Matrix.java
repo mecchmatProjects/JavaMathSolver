@@ -24,6 +24,19 @@ public class Matrix {
         }
     }
 
+
+    public int getRows() {
+        return rows;
+    }
+
+    public int getCols() {
+        return cols;
+    }
+
+    public double get(int i, int j) {
+        return data[i][j];
+    }
+
     // метод множення матриці на скаляр
     public Matrix multiplyByScalar(double scalar){
         Matrix res = new Matrix(rows, cols);
@@ -184,6 +197,74 @@ public class Matrix {
             curr = curr.multiplyMatrix(this);
         }
         return curr.trace();
+    }
+
+    // побудова оберненої матриці методом Гаусса-Йордана, очікувана складність O(n^3)
+    public Matrix inverse(){
+        if (rows != cols){
+            System.out.println("Error: Inverse matrix exists only for square matrixes. Current size: " + rows + "x" + cols);
+            return null;
+        }
+
+        int n = rows;
+
+        //створити розширену матрицю [A | I] розміру n x 2n
+        double[][] augmented = new double[n][2*n];
+        for (int i = 0; i < n; i++){
+            for (int j = 0; j < n; j++) {
+                augmented[i][j] = this.data[i][j];
+            }
+            augmented[i][n+i] = 1.0;
+        }
+        final double EPS = 1e-12;
+
+        for (int col = 0; col < n; col++){
+            int pivotRow = col;
+            double maxVal = Math.abs(augmented[col][col]);
+            for (int row = col + 1; row < n; row++) {
+                double curVal = Math.abs(augmented[row][col]);
+                if (curVal > maxVal) {
+                    maxVal = curVal;
+                    pivotRow = row;
+                }
+            }
+
+            if (maxVal < EPS){
+                System.out.println("Error: Matrix is singular (determinant is zero), inverse cannot be computed.");
+                return null;
+            }
+
+            if (pivotRow != col){
+                double[] temp = augmented[col];
+                augmented[col] = augmented[pivotRow];
+                augmented[pivotRow] = temp;
+            }
+
+            double pivot = augmented[col][col];
+            for (int j = col; j < 2 * n; j++){
+                augmented[col][j] /= pivot;
+            }
+
+            for (int row = 0; row < n; row++){
+                if (row != col){
+                    double factor = augmented[row][col];
+                    if (Math.abs(factor) > EPS){
+                        for (int j = col; j < 2 * n; j++){
+                            augmented[row][j] -= factor * augmented[col][j];
+                        }
+                    }
+                }
+            }
+        }
+        double[][] invData = new double[n][n];
+        for (int i = 0; i < n; i++){
+            for (int j = 0; j < n; j++){
+                invData[i][j] = augmented[i][n+j];
+            }
+        }
+
+        return new Matrix(invData);
+
     }
 
 

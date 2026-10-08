@@ -279,4 +279,112 @@ public class MatrixTest {
     }
 
 
+    // Допоміжний метод для перевірки, чи є матриця одиничною (Identity Matrix)
+    private void assertIdentity(Matrix matrix, int size) {
+        assertNotNull(matrix, "Матриця не повинна бути null");
+        assertEquals(size, matrix.getRows());
+        assertEquals(size, matrix.getCols());
+
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                double expected = (i == j) ? 1.0 : 0.0;
+                assertEquals(expected, matrix.get(i, j), EPSILON,
+                        "Розбіжність у позиції [" + i + "][" + j + "]");
+            }
+        }
+    }
+
+    @Test
+    void testInverse2x2ExplicitValues() {
+        // A = [[4, 7], [2, 6]], det(A) = 24 - 14 = 10
+        // A^(-1) = 1/10 * [[6, -7], [-2, 4]] = [[0.6, -0.7], [-0.2, 0.4]]
+        double[][] data = {
+                {4.0, 7.0},
+                {2.0, 6.0}
+        };
+        Matrix a = new Matrix(data);
+        Matrix inv = a.inverse();
+
+        assertNotNull(inv);
+        assertEquals(0.6, inv.get(0, 0), EPSILON);
+        assertEquals(-0.7, inv.get(0, 1), EPSILON);
+        assertEquals(-0.2, inv.get(1, 0), EPSILON);
+        assertEquals(0.4, inv.get(1, 1), EPSILON);
+    }
+
+    @Test
+    void testInverseIdentityProperty3x3() {
+        // Перевірка фундаментальної алгебраїчної рівності: A * A^(-1) = I
+        double[][] data = {
+                { 2.0, -1.0,  0.0},
+                {-1.0,  2.0, -1.0},
+                { 0.0, -1.0,  2.0}
+        };
+        Matrix a = new Matrix(data);
+        Matrix inv = a.inverse();
+
+        assertNotNull(inv);
+        Matrix product = a.multiplyMatrix(inv);
+        assertIdentity(product, 3);
+    }
+
+    @Test
+    void testInverseWithPivotingRequired() {
+        // Перший елемент a[0][0] = 0, метод зобов'язаний виконати pivoting (обмін рядків)
+        double[][] data = {
+                {0.0, 1.0, 2.0},
+                {1.0, 0.0, 3.0},
+                {4.0, -3.0, 8.0}
+        };
+        Matrix a = new Matrix(data);
+        Matrix inv = a.inverse();
+
+        assertNotNull(inv);
+        Matrix product = a.multiplyMatrix(inv);
+        assertIdentity(product, 3);
+    }
+
+    @Test
+    void testInverseIdentityMatrix() {
+        // Обернена до одиничної є самою одиничною матрицею: I^(-1) = I
+        double[][] data = {
+                {1.0, 0.0, 0.0},
+                {0.0, 1.0, 0.0},
+                {0.0, 0.0, 1.0}
+        };
+        Matrix i = new Matrix(data);
+        Matrix inv = i.inverse();
+
+        assertNotNull(inv);
+        assertIdentity(inv, 3);
+    }
+
+    @Test
+    void testSingularMatrixReturnsNull() {
+        // Рядки лінійно залежні (другий рядок удвічі більший за перший) -> det = 0
+        double[][] data = {
+                {1.0, 2.0},
+                {2.0, 4.0}
+        };
+        Matrix a = new Matrix(data);
+        Matrix inv = a.inverse();
+
+        // Метод має коректно вивести помилку в консоль і повернути null
+        assertNull(inv, "Обернена матриця для виродженої матриці має повертати null");
+    }
+
+    @Test
+    void testNonSquareMatrixReturnsNull() {
+        // Прямокутна матриця 2x3
+        double[][] data = {
+                {1.0, 2.0, 3.0},
+                {4.0, 5.0, 6.0}
+        };
+        Matrix a = new Matrix(data);
+        Matrix inv = a.inverse();
+
+        assertNull(inv, "Обернена матриця не існує для неквадратних матриць");
+    }
+
+
 }
