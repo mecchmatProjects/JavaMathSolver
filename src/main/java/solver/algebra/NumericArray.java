@@ -136,5 +136,17 @@ public class NumericArray {
     public boolean contains(double value) {
         return indexOf(value) != -1;
     }
+
+    public int count(double value) {
+        if (data == null) return 0;
+        
+        int count = 0;
+        for (double v : data) {
+            if (Math.abs(v - value) <= EPSILON) {
+                count++;
+            }
+        }
+        return count;
+    }
   
 }
