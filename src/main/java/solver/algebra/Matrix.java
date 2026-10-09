@@ -1,29 +1,44 @@
 package solver.algebra;
 
-public class Matrix {
-    public int rows;
-    public int cols;
-    public double[][] data;
+import java.util.Arrays;
+import java.util.Objects;
 
-    // конструктор за кількістю рядків та стовпців
-    public Matrix(int rows, int cols){
+public class Matrix {
+    private final int rows;
+    private final int cols;
+    private final double[][] data;
+
+    // Конструктор за кількістю рядків та стовпців
+    public Matrix(int rows, int cols) {
+        if (rows <= 0 || cols <= 0) {
+            throw new IllegalArgumentException("Matrix dimensions must be positive: " + rows + "x" + cols);
+        }
         this.rows = rows;
         this.cols = cols;
         this.data = new double[rows][cols];
     }
 
-    // конструктор за двовимірним масивом
-    public Matrix(double[][] arr){
+    // Конструктор за двовимірним масивом із валідацією прямокутності та захисним копіюванням
+    public Matrix(double[][] arr) {
+        if (arr == null || arr.length == 0 || arr[0] == null || arr[0].length == 0) {
+            throw new IllegalArgumentException("Input array cannot be null or empty");
+        }
         this.rows = arr.length;
         this.cols = arr[0].length;
         this.data = new double[rows][cols];
-        for (int i = 0; i < rows; i++){
-            for (int j = 0; j < cols; j++){
+
+        for (int i = 0; i < rows; i++) {
+            if (arr[i] == null || arr[i].length != cols) {
+                throw new IllegalArgumentException("All matrix rows must have the same length (non-jagged array)");
+            }
+            for (int j = 0; j < cols; j++) {
+                if (Double.isNaN(arr[i][j]) || Double.isInfinite(arr[i][j])) {
+                    throw new IllegalArgumentException("Matrix elements must be finite numbers");
+                }
                 this.data[i][j] = arr[i][j];
             }
         }
     }
-
 
     public int getRows() {
         return rows;
@@ -34,32 +49,44 @@ public class Matrix {
     }
 
     public double get(int i, int j) {
+        if (i < 0 || i >= rows || j < 0 || j >= cols) {
+            throw new IndexOutOfBoundsException("Indices out of bounds: [" + i + "][" + j + "]");
+        }
         return data[i][j];
     }
 
-    // метод множення матриці на скаляр
-    public Matrix multiplyByScalar(double scalar){
+    public double[][] getData() {
+        double[][] copy = new double[rows][cols];
+        for (int i = 0; i < rows; i++) {
+            System.arraycopy(this.data[i], 0, copy[i], 0, cols);
+        }
+        return copy;
+    }
+
+    public Matrix multiplyByScalar(double scalar) {
         Matrix res = new Matrix(rows, cols);
-        for (int i = 0; i < rows; i++){
-            for (int j = 0; j < cols; j++){
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
                 res.data[i][j] = this.data[i][j] * scalar;
             }
         }
         return res;
     }
 
-    // метод множення матриць
-    public Matrix multiplyMatrix(Matrix other){
-        if (this.cols != other.rows){
-            System.out.println("Error: number of columns of the first matrix should be equal to the number of rows of the second matrix");
-            return null;
+    public Matrix multiplyMatrix(Matrix other) {
+        if (other == null) {
+            throw new IllegalArgumentException("Operand matrix cannot be null");
+        }
+        if (this.cols != other.rows) {
+            throw new IllegalArgumentException("Matrix multiplication dimension mismatch: "
+                    + this.cols + " columns != " + other.rows + " rows");
         }
 
         Matrix res = new Matrix(this.rows, other.cols);
-        for (int i = 0; i < this.rows; i++){
-            for (int j = 0; j < other.cols; j++){
-                double sum = 0;
-                for (int k = 0; k < this.cols; k++){
+        for (int i = 0; i < this.rows; i++) {
+            for (int j = 0; j < other.cols; j++) {
+                double sum = 0.0;
+                for (int k = 0; k < this.cols; k++) {
                     sum += this.data[i][k] * other.data[k][j];
                 }
                 res.data[i][j] = sum;
@@ -68,22 +95,19 @@ public class Matrix {
         return res;
     }
 
-    public double determinant(){
-        if (rows != cols){
-            System.out.println("Error: determinant is defined only for square matrices. Current dimensions: " + rows + "x" + cols);
-            return Double.NaN;
+    public double determinant() {
+        if (rows != cols) {
+            throw new IllegalArgumentException("Determinant is defined only for square matrices: " + rows + "x" + cols);
         }
 
         int n = rows;
-
         double[][] a = new double[n][n];
         for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                a[i][j] = this.data[i][j];
-            }
+            System.arraycopy(this.data[i], 0, a[i], 0, n);
         }
+
         double det = 1.0;
-        for (int i = 0; i < n; i++){
+        for (int i = 0; i < n; i++) {
             int pivot = i;
             while (pivot < n && Math.abs(a[pivot][i]) < 1e-9) {
                 pivot++;
@@ -93,16 +117,16 @@ public class Matrix {
                 return 0.0;
             }
 
-            if (pivot != i){
+            if (pivot != i) {
                 double[] temp = a[i];
                 a[i] = a[pivot];
                 a[pivot] = temp;
                 det = -det;
             }
 
-            for (int k = i+1; k<n; k++){
+            for (int k = i + 1; k < n; k++) {
                 double factor = a[k][i] / a[i][i];
-                for (int j = i; j < n; j++){
+                for (int j = i; j < n; j++) {
                     a[k][j] -= factor * a[i][j];
                 }
             }
@@ -111,26 +135,25 @@ public class Matrix {
         return det;
     }
 
-    public double norm2(){
-        double sumOfSquares = 0;
-        for (int i = 0; i < rows; i++){
-            for (int j = 0; j < cols; j++){
+    public double norm2() {
+        double sumOfSquares = 0.0;
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
                 sumOfSquares += this.data[i][j] * this.data[i][j];
             }
         }
         return Math.sqrt(sumOfSquares);
     }
 
-    public double norm(double p){
-        if (p < 1.0){
-            System.out.println("Error: p-norm requires p >= 1");
-            return Double.NaN;
+    public double norm(double p) {
+        if (Double.isNaN(p) || p < 1.0) {
+            throw new IllegalArgumentException("p-norm requires p >= 1.0, but got: " + p);
         }
 
-        if (Double.isInfinite(p)){
+        if (Double.isInfinite(p)) {
             double max = 0.0;
-            for (int i = 0; i < rows; i++){
-                for (int j = 0; j < cols; j++){
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols; j++) {
                     max = Math.max(max, Math.abs(this.data[i][j]));
                 }
             }
@@ -138,21 +161,19 @@ public class Matrix {
         }
 
         double sum = 0.0;
-        for (int i = 0; i < rows; i++){
-            for (int j = 0; j < cols; j++){
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
                 sum += Math.pow(Math.abs(this.data[i][j]), p);
             }
         }
         return Math.pow(sum, 1.0 / p);
     }
 
-    public double trace(int offset){
-        if (offset >= cols || -offset >= rows){
-            System.out.println("Warning: Offset " + offset + " is out of matrix bounds (" + rows + "x" + cols + ").");
+    public double trace(int offset) {
+        if (offset >= cols || -offset >= rows) {
             return 0.0;
         }
         double sum = 0.0;
-
         int startRow = Math.max(0, -offset);
         int startCol = Math.max(0, offset);
         int length = Math.min(rows - startRow, cols - startCol);
@@ -163,29 +184,27 @@ public class Matrix {
         return sum;
     }
 
-    public double trace(){
+    public double trace() {
         return trace(0);
     }
 
-    public double tracePower(int power){
-        if (rows != cols){
-            System.out.println("Error: Power trace requires square matrix.");
-            return Double.NaN;
+    public double tracePower(int power) {
+        if (rows != cols) {
+            throw new IllegalArgumentException("Power trace requires square matrix: " + rows + "x" + cols);
         }
-        if (power < 0){
-            System.out.println("Error: Negative powers are not supported without explicit inversion.");
-            return Double.NaN;
+        if (power < 0) {
+            throw new IllegalArgumentException("Negative powers are not supported: " + power);
         }
         if (power == 0) {
-            return rows; // tr(I_n) = n
+            return rows;
         }
         if (power == 1) {
             return trace();
         }
-        if (power == 2){
+        if (power == 2) {
             double sum = 0.0;
-            for (int i = 0; i < rows; i++){
-                for (int j = 0; j < cols; j++){
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols; j++) {
                     sum += this.data[i][j] * this.data[j][i];
                 }
             }
@@ -193,32 +212,27 @@ public class Matrix {
         }
 
         Matrix curr = this;
-        for (int p = 1; p < power; p++){
+        for (int p = 1; p < power; p++) {
             curr = curr.multiplyMatrix(this);
         }
         return curr.trace();
     }
 
-    // побудова оберненої матриці методом Гаусса-Йордана, очікувана складність O(n^3)
-    public Matrix inverse(){
-        if (rows != cols){
-            System.out.println("Error: Inverse matrix exists only for square matrixes. Current size: " + rows + "x" + cols);
-            return null;
+    public Matrix inverse() {
+        if (rows != cols) {
+            throw new IllegalArgumentException("Inverse matrix exists only for square matrices: " + rows + "x" + cols);
         }
 
         int n = rows;
-
-        //створити розширену матрицю [A | I] розміру n x 2n
-        double[][] augmented = new double[n][2*n];
-        for (int i = 0; i < n; i++){
-            for (int j = 0; j < n; j++) {
-                augmented[i][j] = this.data[i][j];
-            }
-            augmented[i][n+i] = 1.0;
+        double[][] augmented = new double[n][2 * n];
+        for (int i = 0; i < n; i++) {
+            System.arraycopy(this.data[i], 0, augmented[i], 0, n);
+            augmented[i][n + i] = 1.0;
         }
+
         final double EPS = 1e-12;
 
-        for (int col = 0; col < n; col++){
+        for (int col = 0; col < n; col++) {
             int pivotRow = col;
             double maxVal = Math.abs(augmented[col][col]);
             for (int row = col + 1; row < n; row++) {
@@ -229,85 +243,76 @@ public class Matrix {
                 }
             }
 
-            if (maxVal < EPS){
-                System.out.println("Error: Matrix is singular (determinant is zero), inverse cannot be computed.");
-                return null;
+            if (maxVal < EPS) {
+                throw new ArithmeticException("Matrix is singular (determinant is zero), inverse cannot be computed.");
             }
 
-            if (pivotRow != col){
+            if (pivotRow != col) {
                 double[] temp = augmented[col];
                 augmented[col] = augmented[pivotRow];
                 augmented[pivotRow] = temp;
             }
 
             double pivot = augmented[col][col];
-            for (int j = col; j < 2 * n; j++){
+            for (int j = col; j < 2 * n; j++) {
                 augmented[col][j] /= pivot;
             }
 
-            for (int row = 0; row < n; row++){
-                if (row != col){
+            for (int row = 0; row < n; row++) {
+                if (row != col) {
                     double factor = augmented[row][col];
-                    if (Math.abs(factor) > EPS){
-                        for (int j = col; j < 2 * n; j++){
+                    if (Math.abs(factor) > EPS) {
+                        for (int j = col; j < 2 * n; j++) {
                             augmented[row][j] -= factor * augmented[col][j];
                         }
                     }
                 }
             }
         }
+
         double[][] invData = new double[n][n];
-        for (int i = 0; i < n; i++){
-            for (int j = 0; j < n; j++){
-                invData[i][j] = augmented[i][n+j];
-            }
+        for (int i = 0; i < n; i++) {
+            System.arraycopy(augmented[i], n, invData[i], 0, n);
         }
 
         return new Matrix(invData);
-
     }
 
-    public double[] solve(double[] b){
-        if (rows != cols){
-            System.out.println("Error: System must have a square coefficient matrix. Current size: " + rows + "x" + cols);
-            return null;
+    public double[] solve(double[] b) {
+        if (rows != cols) {
+            throw new IllegalArgumentException("System must have a square coefficient matrix: " + rows + "x" + cols);
         }
-        if (b == null || b.length != rows){
-            System.out.println("Error: Vector b dimension (" + (b == null ? 0 : b.length) + ") does not match matrix rows (" + rows + ").");
-            return null;
+        if (b == null || b.length != rows) {
+            throw new IllegalArgumentException("Vector b dimension does not match matrix rows");
         }
 
         int n = rows;
-
         double[][] a = new double[n][n];
         double[] rhs = new double[n];
 
-        for (int i = 0; i < n; i++){
-            for (int j = 0; j < n; j++){
-                a[i][j] = this.data[i][j];
-            }
+        for (int i = 0; i < n; i++) {
+            System.arraycopy(this.data[i], 0, a[i], 0, n);
             rhs[i] = b[i];
         }
 
         final double EPS = 1e-12;
 
-        for (int col = 0; col < n; col++){
+        for (int col = 0; col < n; col++) {
             int pivotRow = col;
             double maxVal = Math.abs(a[col][col]);
-            for (int row = col + 1; row < n; row++){
+            for (int row = col + 1; row < n; row++) {
                 double currVal = Math.abs(a[row][col]);
-                if (currVal > maxVal){
+                if (currVal > maxVal) {
                     maxVal = currVal;
                     pivotRow = row;
                 }
             }
 
-            if (maxVal < EPS){
-                System.out.println("Error: Matrix is singular or system has no unique solution.");
-                return null;
+            if (maxVal < EPS) {
+                throw new ArithmeticException("Matrix is singular or system has no unique solution.");
             }
 
-            if (pivotRow != col){
+            if (pivotRow != col) {
                 double[] tempRow = a[col];
                 a[col] = a[pivotRow];
                 a[pivotRow] = tempRow;
@@ -317,9 +322,9 @@ public class Matrix {
                 rhs[pivotRow] = tempB;
             }
 
-            for (int row = col + 1; row < n; row++){
+            for (int row = col + 1; row < n; row++) {
                 double factor = a[row][col] / a[col][col];
-                for (int k = col + 1; k < n; k++){
+                for (int k = col + 1; k < n; k++) {
                     a[row][k] -= factor * a[col][k];
                 }
                 rhs[row] -= factor * rhs[col];
@@ -327,39 +332,29 @@ public class Matrix {
         }
 
         double[] x = new double[n];
-        for (int i = n - 1; i >= 0; i--){
+        for (int i = n - 1; i >= 0; i--) {
             double sum = rhs[i];
-            for (int j = i + 1; j < n; j++){
+            for (int j = i + 1; j < n; j++) {
                 sum -= a[i][j] * x[j];
             }
             x[i] = sum / a[i][i];
         }
 
         return x;
-
     }
 
-    public double[] realEigenvals(){
+    public double[] realEigenvals() {
         if (rows != cols) {
-            System.out.println("Error: Eigenvalues are defined only for square matrices. Current size: " + rows + "x" + cols);
-            return null;
+            throw new IllegalArgumentException("Eigenvalues are defined only for square matrices: " + rows + "x" + cols);
         }
 
         int n = rows;
-
         double[][] h = new double[n][n];
-        for (int i = 0; i < n; i++){
-            for (int j = 0; j < n; j++){
-                h[i][j] = this.data[i][j];
-            }
+        for (int i = 0; i < n; i++) {
+            System.arraycopy(this.data[i], 0, h[i], 0, n);
         }
 
-        /// далі описано підхід зведення до форми хессенберга з наступним
-        ///QR-розкладом зі зсувом Вілкінсона та дефляцією.
-        ///Очікувана складність алгоритму O(n^3)
-
-
-        for (int col = 0; col < n -2; col++){
+        for (int col = 0; col < n - 2; col++) {
             int pivotRow = col + 1;
             double maxVal = Math.abs(h[pivotRow][col]);
             for (int row = col + 2; row < n; row++) {
@@ -370,7 +365,7 @@ public class Matrix {
                 }
             }
 
-            if (maxVal > 1e-12){
+            if (maxVal > 1e-12) {
                 if (pivotRow != col + 1) {
                     double[] temp = h[col + 1];
                     h[col + 1] = h[pivotRow];
@@ -397,7 +392,6 @@ public class Matrix {
 
         double[] buffer = new double[n];
         int count = 0;
-        boolean hasComplex = false;
         int m = n - 1;
         final double EPS = 1e-10;
         int iterations = 0;
@@ -405,7 +399,6 @@ public class Matrix {
 
         while (m >= 0) {
             if (iterations++ > MAX_ITERS) {
-                System.out.println("Warning: Max iterations reached. Convergence stopped.");
                 break;
             }
 
@@ -436,8 +429,6 @@ public class Matrix {
                     double sqrtD = Math.sqrt(discr);
                     buffer[count++] = (tr + sqrtD) / 2.0;
                     buffer[count++] = (tr - sqrtD) / 2.0;
-                } else {
-                    hasComplex = true;
                 }
 
                 m -= 2;
@@ -445,7 +436,6 @@ public class Matrix {
                 continue;
             }
 
-            // Wilkinson shift
             double a = h[m - 1][m - 1];
             double b = h[m - 1][m];
             double c = h[m][m - 1];
@@ -464,12 +454,10 @@ public class Matrix {
                 mu = tr / 2.0;
             }
 
-            // H - mu * I
             for (int i = 0; i <= m; i++) {
                 h[i][i] -= mu;
             }
 
-            // Givens Rotations
             double[] cos = new double[m];
             double[] sin = new double[m];
 
@@ -508,21 +496,31 @@ public class Matrix {
             }
         }
 
-        if (hasComplex) {
-            System.out.println("Note: Matrix also has complex conjugate eigenvalues that were omitted.");
-        }
+        return Arrays.copyOf(buffer, count);
+    }
 
-        double[] result = new double[count];
-        for (int i = 0; i < count; i++) {
-            result[i] = buffer[i];
-        }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Matrix matrix = (Matrix) o;
+        return rows == matrix.rows && cols == matrix.cols && Arrays.deepEquals(data, matrix.data);
+    }
 
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(rows, cols);
+        result = 31 * result + Arrays.deepHashCode(data);
         return result;
     }
 
-
-
-
-
-
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Matrix ").append(rows).append("x").append(cols).append(":\n");
+        for (int i = 0; i < rows; i++) {
+            sb.append(Arrays.toString(data[i])).append("\n");
+        }
+        return sb.toString();
+    }
 }
