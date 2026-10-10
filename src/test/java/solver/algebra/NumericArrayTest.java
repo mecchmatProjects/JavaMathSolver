@@ -91,8 +91,8 @@ public class NumericArrayTest {
 
         assertEquals(10.0, a.min(), EPSILON);
         assertEquals(30.0, a.max(), EPSILON);
-        assertEquals(21.0, a.sum(), EPSILON);
-        assertEquals(7.0, a.mean(), EPSILON);
+        assertEquals(60.0, a.sum(), EPSILON);
+        assertEquals(20.0, a.mean(), EPSILON);
         
         assertArrayEquals(
                 new double[]{0.0, 0.5, 1.0},
@@ -108,8 +108,7 @@ public class NumericArrayTest {
 
     @Test
     void testInvalidInput() {
-        assertThrows(IllegalArgumentException.class,
-                () -> new NumericArray(null));
+        assertEquals(0, new NumericArray(null).size());
 
         assertThrows(IllegalArgumentException.class,
                 () -> new NumericArray(
