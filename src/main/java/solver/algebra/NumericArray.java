@@ -122,11 +122,16 @@ public class NumericArray {
   
     private static final double EPSILON = 1e-9;
 
+    private boolean equals(double a, double b) {
+        if (Double.compare(a, b) == 0) {
+            return true;
+        }
+        return Math.abs(a - b) <= EPSILON;
+    }
+    
     public int indexOf(double value) {
-        if (data == null) return -1;
-      
         for (int i = 0; i < data.length; i++) {
-            if (Math.abs(data[i] - value) <= EPSILON) {
+            if (equals(data[i], value)) {
                 return i;
             }
         }
@@ -138,11 +143,9 @@ public class NumericArray {
     }
 
     public int count(double value) {
-        if (data == null) return 0;
-        
         int count = 0;
         for (double v : data) {
-            if (Math.abs(v - value) <= EPSILON) {
+            if (equals(v, value)) {
                 count++;
             }
         }
