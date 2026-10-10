@@ -1,16 +1,31 @@
 public class NumericArray {
-    private double[] array;
-
+    private final double[] array;
+    
+    private void validate(double value) {
+        if (Double.isNaN(value) || Double.isInfinite(value)) {
+            throw new IllegalArgumentException("Array elements must be finite numbers");
+        }
+    }
+    
     public NumericArray(double[] array) {
         if (array == null) {
             this.array = new double[0];
         } else {
+            for (double val : array) {
+                validate(val); 
+            }
             this.array = array.clone();
         }
     }
-
+    
     public int size() {
         return array.length;
+    }
+
+    private void validate(double value) {
+        if (Double.isNaN(value) || Double.isInfinite(value)) {
+            throw new IllegalArgumentException("Array elements must be finite numbers");
+        }
     }
 
     public double get(int index) {
@@ -18,6 +33,7 @@ public class NumericArray {
     }
 
     public void set(int index, double value) {
+        validate(value)
         array[index] = value;
     }
 
