@@ -22,18 +22,23 @@ public class NumericArray {
         return array.length;
     }
 
-    private void validate(double value) {
-        if (Double.isNaN(value) || Double.isInfinite(value)) {
-            throw new IllegalArgumentException("Array elements must be finite numbers");
+    private void checkIndex(int index) {
+        if (index < 0 || index >= array.length) {
+            throw new IndexOutOfBoundsException("Index " + index + " is out of bounds for length " + array.length);
         }
     }
 
+
+    
     public double get(int index) {
+        checkIndex(index);
         return array[index];
     }
 
+    
     public void set(int index, double value) {
-        validate(value)
+        checkIndex(index);
+        validate(value);
         array[index] = value;
     }
 
@@ -47,9 +52,14 @@ public class NumericArray {
 
     public double mean() {
         if (array.length == 0) {
-            return 0;
+            throw new IllegalStateException("Array is empty");
         }
-        return sum() / array.length;
+
+        double mean = 0.0;
+        for (int i = 0; i < array.length; i++) {
+            mean += (array[i] - mean) / (i + 1);
+        }
+        return mean;
     }
 
     public double min() {
