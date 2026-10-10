@@ -119,4 +119,37 @@ public class NumericArray {
     public String toString() {
         return Arrays.toString(data);
     }
+  
+    private static final double EPSILON = 1e-9;
+
+    private boolean equals(double a, double b) {
+        if (Double.compare(a, b) == 0) {
+            return true;
+        }
+        return Math.abs(a - b) <= EPSILON;
+    }
+    
+    public int indexOf(double value) {
+        for (int i = 0; i < data.length; i++) {
+            if (equals(data[i], value)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public boolean contains(double value) {
+        return indexOf(value) != -1;
+    }
+
+    public int count(double value) {
+        int count = 0;
+        for (double v : data) {
+            if (equals(v, value)) {
+                count++;
+            }
+        }
+        return count;
+    }
+  
 }
