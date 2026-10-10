@@ -16,10 +16,10 @@ public class MatrixTest {
         Matrix m = new Matrix(data);
         Matrix res = m.multiplyByScalar(2.0);
 
-        assertEquals(2.0, res.data[0][0], EPSILON);
-        assertEquals(4.0, res.data[0][1], EPSILON);
-        assertEquals(6.0, res.data[1][0], EPSILON);
-        assertEquals(8.0, res.data[1][1], EPSILON);
+        assertEquals(2.0, res.get(0, 0), EPSILON);
+        assertEquals(4.0, res.get(0, 1), EPSILON);
+        assertEquals(6.0, res.get(1, 0), EPSILON);
+        assertEquals(8.0, res.get(1, 1), EPSILON);
     }
 
     @Test
@@ -37,12 +37,10 @@ public class MatrixTest {
         Matrix product = m1.multiplyMatrix(m2);
 
         assertNotNull(product);
-        // [1*2 + 2*1, 1*0 + 2*2] = [4, 4]
-        // [3*2 + 4*1, 3*0 + 4*2] = [10, 8]
-        assertEquals(4.0, product.data[0][0], EPSILON);
-        assertEquals(4.0, product.data[0][1], EPSILON);
-        assertEquals(10.0, product.data[1][0], EPSILON);
-        assertEquals(8.0, product.data[1][1], EPSILON);
+        assertEquals(4.0, product.get(0, 0), EPSILON);
+        assertEquals(4.0, product.get(0, 1), EPSILON);
+        assertEquals(10.0, product.get(1, 0), EPSILON);
+        assertEquals(8.0, product.get(1, 1), EPSILON);
     }
 
     @Test
@@ -53,13 +51,11 @@ public class MatrixTest {
                 {2.0, 8.0, 7.0}
         };
         Matrix m = new Matrix(data);
-        // det(A) = -306.0
         assertEquals(-306.0, m.determinant(), EPSILON);
     }
 
     @Test
     void testNorm2Basic() {
-        // Матриця 2x2: елементи 1, 2, 2, 4 -> 1 + 4 + 4 + 16 = 25 -> sqrt(25) = 5.0
         double[][] data = {
                 {1.0, 2.0},
                 {2.0, 4.0}
@@ -70,7 +66,6 @@ public class MatrixTest {
 
     @Test
     void testNorm2WithNegativeValues() {
-        // Перевірка роботи з від'ємними числами: (-3)^2 + 4^2 = 9 + 16 = 25 -> sqrt(25) = 5.0
         double[][] data = {
                 {-3.0, 0.0},
                 {0.0, 4.0}
@@ -81,7 +76,6 @@ public class MatrixTest {
 
     @Test
     void testNormWithP1() {
-        // L_1 entrywise норма: сума абсолютних значень |-1| + |2| + |-3| + |4| = 10.0
         double[][] data = {
                 {-1.0, 2.0},
                 {-3.0, 4.0}
@@ -92,7 +86,6 @@ public class MatrixTest {
 
     @Test
     void testNormConsistencyWithNorm2() {
-        // norm(2.0) має давати точно такий самий результат, як і norm2()
         double[][] data = {
                 {1.5, -2.5},
                 {3.0, 4.2}
@@ -103,7 +96,6 @@ public class MatrixTest {
 
     @Test
     void testNormWithP3() {
-        // L_3 норма: (|1|^3 + |2|^3 + |3|^3)^(1/3) = (1 + 8 + 27)^(1/3) = 36^(1/3) ≈ 3.3019
         double[][] data = {
                 {1.0, -2.0},
                 {3.0, 0.0}
@@ -115,7 +107,6 @@ public class MatrixTest {
 
     @Test
     void testNormInfinity() {
-        // p = Infinity: максимальний за модулем елемент матриці = |-9.5| = 9.5
         double[][] data = {
                 {2.0, -9.5},
                 {7.1, 4.0}
@@ -126,20 +117,17 @@ public class MatrixTest {
 
     @Test
     void testNormInvalidP() {
-        // p < 1 повинно виводити повідомлення та повертати Double.NaN
         double[][] data = {
                 {1.0, 2.0},
                 {3.0, 4.0}
         };
         Matrix m = new Matrix(data);
-        assertTrue(Double.isNaN(m.norm(0.5)));
-        assertTrue(Double.isNaN(m.norm(-1.0)));
+        assertThrows(IllegalArgumentException.class, () -> m.norm(0.5));
+        assertThrows(IllegalArgumentException.class, () -> m.norm(-1.0));
     }
-
 
     @Test
     void testStandardTraceSquareMatrix() {
-        // tr(A) = 5 + (-3) + 8 = 10.0
         double[][] data = {
                 { 5.0,  1.0,  2.0},
                 { 0.0, -3.0,  4.0},
@@ -151,7 +139,6 @@ public class MatrixTest {
 
     @Test
     void testStandardTraceRectangularMatrix() {
-        // Для прямокутної 2x3 береться min(2, 3): a[0][0] + a[1][1] = 1.0 + 5.0 = 6.0
         double[][] data = {
                 {1.0, 2.0, 3.0},
                 {4.0, 5.0, 6.0}
@@ -162,7 +149,6 @@ public class MatrixTest {
 
     @Test
     void testTraceSuperDiagonal() {
-        // offset = +1 (перша наддіагональ): a[0][1] + a[1][2] = 2.0 + 6.0 = 8.0
         double[][] data = {
                 {1.0, 2.0, 3.0},
                 {4.0, 5.0, 6.0},
@@ -174,7 +160,6 @@ public class MatrixTest {
 
     @Test
     void testTraceSubDiagonal() {
-        // offset = -1 (перша піддіагональ): a[1][0] + a[2][1] = 4.0 + 8.0 = 12.0
         double[][] data = {
                 {1.0, 2.0, 3.0},
                 {4.0, 5.0, 6.0},
@@ -186,8 +171,6 @@ public class MatrixTest {
 
     @Test
     void testTraceCornerElements() {
-        // offset = 2 (верхній правий кут a[0][2] = 3.0)
-        // offset = -2 (нижній лівий кут a[2][0] = 7.0)
         double[][] data = {
                 {1.0, 2.0, 3.0},
                 {4.0, 5.0, 6.0},
@@ -200,7 +183,6 @@ public class MatrixTest {
 
     @Test
     void testTraceOffsetOutOfBounds() {
-        // Вихід за межі матриці повинен повертати 0.0
         double[][] data = {
                 {1.0, 2.0},
                 {3.0, 4.0}
@@ -213,7 +195,6 @@ public class MatrixTest {
 
     @Test
     void testTracePowerZero() {
-        // tr(A^0) = tr(I_n) = n = 3
         double[][] data = {
                 {2.0, 1.0, 0.0},
                 {0.0, 3.0, 1.0},
@@ -225,7 +206,6 @@ public class MatrixTest {
 
     @Test
     void testTracePowerOne() {
-        // tr(A^1) = tr(A) = 1.0 + 4.0 = 5.0
         double[][] data = {
                 {1.0, 2.0},
                 {3.0, 4.0}
@@ -236,9 +216,6 @@ public class MatrixTest {
 
     @Test
     void testTracePowerTwo() {
-        // A = [[1, 2], [3, 4]]
-        // A^2 = [[7, 10], [15, 22]] -> tr(A^2) = 7 + 22 = 29.0
-        // Формула оптимізації: 1*1 + 2*3 + 3*2 + 4*4 = 1 + 6 + 6 + 16 = 29.0
         double[][] data = {
                 {1.0, 2.0},
                 {3.0, 4.0}
@@ -249,8 +226,6 @@ public class MatrixTest {
 
     @Test
     void testTracePowerThree() {
-        // A = [[1, 2], [3, 4]]
-        // A^3 = [[37, 54], [81, 118]] -> tr(A^3) = 37 + 118 = 155.0
         double[][] data = {
                 {1.0, 2.0},
                 {3.0, 4.0}
@@ -261,25 +236,21 @@ public class MatrixTest {
 
     @Test
     void testTracePowerInvalidInputs() {
-        // Непрямокутна матриця повинна повертати Double.NaN
         double[][] nonSquare = {
                 {1.0, 2.0, 3.0},
                 {4.0, 5.0, 6.0}
         };
         Matrix mNonSquare = new Matrix(nonSquare);
-        assertTrue(Double.isNaN(mNonSquare.tracePower(2)));
+        assertThrows(IllegalArgumentException.class, () -> mNonSquare.tracePower(2));
 
-        // Від'ємний степінь повинен повертати Double.NaN
         double[][] square = {
                 {1.0, 2.0},
                 {3.0, 4.0}
         };
         Matrix mSquare = new Matrix(square);
-        assertTrue(Double.isNaN(mSquare.tracePower(-1)));
+        assertThrows(IllegalArgumentException.class, () -> mSquare.tracePower(-1));
     }
 
-
-    // Допоміжний метод для перевірки, чи є матриця одиничною (Identity Matrix)
     private void assertIdentity(Matrix matrix, int size) {
         assertNotNull(matrix, "Матриця не повинна бути null");
         assertEquals(size, matrix.getRows());
@@ -296,8 +267,6 @@ public class MatrixTest {
 
     @Test
     void testInverse2x2ExplicitValues() {
-        // A = [[4, 7], [2, 6]], det(A) = 24 - 14 = 10
-        // A^(-1) = 1/10 * [[6, -7], [-2, 4]] = [[0.6, -0.7], [-0.2, 0.4]]
         double[][] data = {
                 {4.0, 7.0},
                 {2.0, 6.0}
@@ -314,7 +283,6 @@ public class MatrixTest {
 
     @Test
     void testInverseIdentityProperty3x3() {
-        // Перевірка фундаментальної алгебраїчної рівності: A * A^(-1) = I
         double[][] data = {
                 { 2.0, -1.0,  0.0},
                 {-1.0,  2.0, -1.0},
@@ -330,7 +298,6 @@ public class MatrixTest {
 
     @Test
     void testInverseWithPivotingRequired() {
-        // Перший елемент a[0][0] = 0, метод зобов'язаний виконати pivoting (обмін рядків)
         double[][] data = {
                 {0.0, 1.0, 2.0},
                 {1.0, 0.0, 3.0},
@@ -346,7 +313,6 @@ public class MatrixTest {
 
     @Test
     void testInverseIdentityMatrix() {
-        // Обернена до одиничної є самою одиничною матрицею: I^(-1) = I
         double[][] data = {
                 {1.0, 0.0, 0.0},
                 {0.0, 1.0, 0.0},
@@ -360,30 +326,23 @@ public class MatrixTest {
     }
 
     @Test
-    void testSingularMatrixReturnsNull() {
-        // Рядки лінійно залежні (другий рядок удвічі більший за перший) -> det = 0
+    void testSingularMatrixThrowsException() {
         double[][] data = {
                 {1.0, 2.0},
                 {2.0, 4.0}
         };
         Matrix a = new Matrix(data);
-        Matrix inv = a.inverse();
-
-        // Метод має коректно вивести помилку в консоль і повернути null
-        assertNull(inv, "Обернена матриця для виродженої матриці має повертати null");
+        assertThrows(ArithmeticException.class, a::inverse);
     }
 
     @Test
-    void testNonSquareMatrixReturnsNull() {
-        // Прямокутна матриця 2x3
+    void testNonSquareMatrixThrowsException() {
         double[][] data = {
                 {1.0, 2.0, 3.0},
                 {4.0, 5.0, 6.0}
         };
         Matrix a = new Matrix(data);
-        Matrix inv = a.inverse();
-
-        assertNull(inv, "Обернена матриця не існує для неквадратних матриць");
+        assertThrows(IllegalArgumentException.class, a::inverse);
     }
 
     private void assertSystemSolution(Matrix a, double[] x, double[] b) {
@@ -401,9 +360,6 @@ public class MatrixTest {
 
     @Test
     void testSolve2x2Exact() {
-        // 2x + y = 5
-        // x + 3y = 5
-        // Розв'язок: x = 2.0, y = 1.0
         double[][] aData = {
                 {2.0, 1.0},
                 {1.0, 3.0}
@@ -421,10 +377,6 @@ public class MatrixTest {
 
     @Test
     void testSolve3x3WithVerification() {
-        // 3x3 система:
-        //  2x -  y +  0z = 1
-        // -1x + 2y -  z = 2
-        //  0x -  y + 2z = 3
         double[][] aData = {
                 { 2.0, -1.0,  0.0},
                 {-1.0,  2.0, -1.0},
@@ -435,15 +387,11 @@ public class MatrixTest {
         Matrix a = new Matrix(aData);
         double[] x = a.solve(b);
 
-        // Перевіряємо точність підстановкою Ax = b
         assertSystemSolution(a, x, b);
     }
 
     @Test
     void testSolveRequiresPivoting() {
-        // Перший елемент a[0][0] = 0, тому потрібна перестановка рядків:
-        // 0x + 2y = 4  --> y = 2
-        // 3x - 2y = 2  --> 3x - 4 = 2 --> x = 2
         double[][] aData = {
                 {0.0, 2.0},
                 {3.0, -2.0}
@@ -459,8 +407,7 @@ public class MatrixTest {
     }
 
     @Test
-    void testSolveSingularMatrixReturnsNull() {
-        // Лінійно залежні рівняння (другий рядок удвічі більший): det = 0
+    void testSolveSingularMatrixThrowsException() {
         double[][] aData = {
                 {1.0, 2.0},
                 {2.0, 4.0}
@@ -468,14 +415,11 @@ public class MatrixTest {
         double[] b = {3.0, 6.0};
 
         Matrix a = new Matrix(aData);
-        double[] x = a.solve(b);
-
-        assertNull(x, "Для виродженої матриці метод має повертати null");
+        assertThrows(ArithmeticException.class, () -> a.solve(b));
     }
 
     @Test
-    void testSolveNonSquareMatrixReturnsNull() {
-        // Прямокутна матриця 2x3
+    void testSolveNonSquareMatrixThrowsException() {
         double[][] aData = {
                 {1.0, 2.0, 3.0},
                 {4.0, 5.0, 6.0}
@@ -483,40 +427,31 @@ public class MatrixTest {
         double[] b = {1.0, 2.0};
 
         Matrix a = new Matrix(aData);
-        double[] x = a.solve(b);
-
-        assertNull(x, "Для неквадратної матриці метод має повертати null");
+        assertThrows(IllegalArgumentException.class, () -> a.solve(b));
     }
 
     @Test
-    void testSolveDimensionMismatchReturnsNull() {
-        // Розмірність вектора b не збігається з кількістю рядків
+    void testSolveDimensionMismatchThrowsException() {
         double[][] aData = {
                 {2.0, 1.0},
                 {1.0, 3.0}
         };
-        double[] b = {1.0, 2.0, 3.0}; // Довжина 3 замість 2
+        double[] b = {1.0, 2.0, 3.0};
 
         Matrix a = new Matrix(aData);
-        double[] x = a.solve(b);
-
-        assertNull(x, "Якщо розмірність b не збігається, метод має повертати null");
+        assertThrows(IllegalArgumentException.class, () -> a.solve(b));
     }
 
     @Test
-    void testSolveNullVectorReturnsNull() {
-        // Передача null замість вектора
+    void testSolveNullVectorThrowsException() {
         double[][] aData = {
                 {1.0, 0.0},
                 {0.0, 1.0}
         };
         Matrix a = new Matrix(aData);
-        double[] x = a.solve(null);
-
-        assertNull(x, "Якщо вектор b дорівнює null, метод має повертати null");
+        assertThrows(IllegalArgumentException.class, () -> a.solve(null));
     }
 
-    // Просте сортування масиву за зростанням без використання бібліотек
     private void sort(double[] arr) {
         if (arr == null) return;
         for (int i = 0; i < arr.length - 1; i++) {
@@ -532,7 +467,6 @@ public class MatrixTest {
 
     @Test
     void testDiagonalMatrix() {
-        // Діагональна матриця: корені 5, -2, 7
         double[][] data = {
                 {5.0,  0.0, 0.0},
                 {0.0, -2.0, 0.0},
@@ -552,7 +486,6 @@ public class MatrixTest {
 
     @Test
     void testTriangularMatrix() {
-        // Верхньотрикутна матриця: корені на діагоналі 1, 2, 3
         double[][] data = {
                 {1.0, 4.0, 5.0},
                 {0.0, 2.0, 6.0},
@@ -572,7 +505,6 @@ public class MatrixTest {
 
     @Test
     void testSymmetric2x2() {
-        // A = [[2, 1], [1, 2]] -> корені 1.0 та 3.0
         double[][] data = {
                 {2.0, 1.0},
                 {1.0, 2.0}
@@ -590,7 +522,6 @@ public class MatrixTest {
 
     @Test
     void testGeneral3x3ViaTraceAndDeterminant() {
-        // Симетрична 3x3: корені 8, -1, -1
         double[][] data = {
                 {3.0, 2.0, 4.0},
                 {2.0, 0.0, 2.0},
@@ -607,7 +538,6 @@ public class MatrixTest {
         assertEquals(-1.0, ev[1], EPSILON);
         assertEquals(8.0, ev[2], EPSILON);
 
-        // Перевірка інваріантів: сума = tr(A), добуток = det(A)
         double sum = ev[0] + ev[1] + ev[2];
         double prod = ev[0] * ev[1] * ev[2];
         assertEquals(m.trace(), sum, EPSILON);
@@ -616,7 +546,6 @@ public class MatrixTest {
 
     @Test
     void testComplexConjugateEigenvaluesOmitted() {
-        // Матриця повороту: корені +/- i (суто комплексні)
         double[][] data = {
                 {0.0, -1.0},
                 {1.0,  0.0}
@@ -630,7 +559,6 @@ public class MatrixTest {
 
     @Test
     void testMixedRealAndComplexEigenvalues() {
-        // Блок 1x1 дає корінь 5.0, блок 2x2 дає +/- i
         double[][] data = {
                 {5.0, 0.0,  0.0},
                 {0.0, 0.0, -1.0},
@@ -645,16 +573,12 @@ public class MatrixTest {
     }
 
     @Test
-    void testEigenvaluesNonSquareMatrixReturnsNull() {
+    void testEigenvaluesNonSquareMatrixThrowsException() {
         double[][] data = {
                 {1.0, 2.0, 3.0},
                 {4.0, 5.0, 6.0}
         };
         Matrix m = new Matrix(data);
-        double[] ev = m.realEigenvals();
-
-        assertNull(ev);
+        assertThrows(IllegalArgumentException.class, m::realEigenvals);
     }
-
-
 }
