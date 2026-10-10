@@ -17,6 +17,9 @@ public class NumericArrayTest {
 
         assertThrows(IllegalStateException.class, () -> a.min());
         assertThrows(IllegalStateException.class, () -> a.max());
+
+        assertEquals(0.0, a.sum(), EPSILON);
+        assertThrows(IllegalStateException.class, () -> a.mean());
     }
 
     @Test
@@ -27,6 +30,8 @@ public class NumericArrayTest {
         assertEquals(5.0, a.get(0), EPSILON);
         assertEquals(5.0, a.min(), EPSILON);
         assertEquals(5.0, a.max(), EPSILON);
+        assertEquals(5.0, a.sum(), EPSILON);
+        assertEquals(5.0, a.mean(), EPSILON);
 
         assertArrayEquals(
                 new double[]{0.0},
@@ -44,6 +49,8 @@ public class NumericArrayTest {
         assertEquals(3, a.size());
         assertEquals(-10.0, a.min(), EPSILON);
         assertEquals(-3.0, a.max(), EPSILON);
+        assertEquals(-18.0, a.sum(), EPSILON);
+        assertEquals(-6.0, a.mean(), EPSILON);
 
         assertArrayEquals(
                 new double[]{5.0 / 7.0, 0.0, 1.0},
@@ -61,6 +68,8 @@ public class NumericArrayTest {
         assertEquals(3, a.size());
         assertEquals(7.0, a.min(), EPSILON);
         assertEquals(7.0, a.max(), EPSILON);
+        assertEquals(21.0, a.sum(), EPSILON);
+        assertEquals(7.0, a.mean(), EPSILON);
 
         assertArrayEquals(
                 new double[]{0.0, 0.0, 0.0},
@@ -82,12 +91,19 @@ public class NumericArrayTest {
 
         assertEquals(10.0, a.min(), EPSILON);
         assertEquals(30.0, a.max(), EPSILON);
-
+        assertEquals(21.0, a.sum(), EPSILON);
+        assertEquals(7.0, a.mean(), EPSILON);
+        
         assertArrayEquals(
                 new double[]{0.0, 0.5, 1.0},
                 a.normalize().toArray(),
                 EPSILON
         );
+
+        a.set(1, 50.0);
+        assertEquals(50.0, a.get(1), EPSILON);
+        assertEquals(90.0, a.sum(), EPSILON); // 10 + 50 + 30
+        assertEquals(30.0, a.mean(), EPSILON);
     }
 
     @Test
