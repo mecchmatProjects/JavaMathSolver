@@ -572,7 +572,7 @@ public class MatrixTest {
         assertEquals(5.0, ev[0], EPSILON);
     }
 
-    @Test
+  @Test
     void testEigenvaluesNonSquareMatrixThrowsException() {
         double[][] data = {
                 {1.0, 2.0, 3.0},
@@ -580,5 +580,17 @@ public class MatrixTest {
         };
         Matrix m = new Matrix(data);
         assertThrows(IllegalArgumentException.class, m::realEigenvals);
+    }
+
+    @Test
+    void testPermutationMatrixEigenvaluesThrowsException() {
+        double[][] data = {
+                {0.0, 1.0, 0.0, 0.0},
+                {0.0, 0.0, 1.0, 0.0},
+                {0.0, 0.0, 0.0, 1.0},
+                {1.0, 0.0, 0.0, 0.0}
+        };
+        Matrix m = new Matrix(data);
+        assertThrows(ArithmeticException.class, m::realEigenvals);
     }
 }
