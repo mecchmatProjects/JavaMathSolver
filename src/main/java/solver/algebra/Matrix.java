@@ -399,7 +399,7 @@ public class Matrix {
 
         while (m >= 0) {
             if (iterations++ > MAX_ITERS) {
-                break;
+                throw new ArithmeticException("Eigenvalues calculation failed to converge");
             }
 
             if (m == 0) {
