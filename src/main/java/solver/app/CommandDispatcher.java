@@ -16,6 +16,9 @@ import static solver.geometry.Intersections.*;
 import static solver.geometry.Polygon.*;
 import static solver.geometry.MonteCarlo.*;
 
+import solver.core.TokenType;
+import solver.core.Tokenizer;
+
 /**
  * CORE-11: диспетчеризація команд.
  */
@@ -264,10 +267,69 @@ public final class CommandDispatcher {
     // C0-b: диспетчеризація текстових команд (аргумент - увесь вираз одним рядком)
     public static void dispatchText(String command, String text) {
         switch (command) {
-            // C10: tokenize, token-stats, validate-expr
+            case "validate-expr":
+                validateExpression(text);
+                break;
+            case "token-stats":
+                printTokenStatistics(text);
+                break;
+            case "tokenize":
+                printTokens(text);
+                break;
             default:
                 printUnknownCommand(command);
                 break;
+        }
+    }
+
+    // C8: "Result: true" або перша нерозпізнана лексема, напр. "Error: Invalid token: 2..5"
+    private static void validateExpression(String text) {
+        if (Tokenizer.isValid(text)) {
+            printResult(true);
+            return;
+        }
+        String[] lexemes = Tokenizer.lexemes(text);
+        TokenType[] types = Tokenizer.tokenizeTypes(text);
+        for (int i = 0; i < types.length; i++) {
+            if (types[i] == TokenType.UNKNOWN) {
+                printError(ERR_INVALID_TOKEN + displayLexeme(lexemes[i]));
+                return;
+            }
+        }
+        // Сюди доходить лише вираз без лексем (порожній / самі пробіли)
+        printError(ERR_NOT_ENOUGH_ARGS);
+    }
+
+    // C9: "Numbers: 2", "Identifiers: 4", "Operators: 4", "Parentheses: 2" (UNKNOWN не рахуються)
+    private static void printTokenStatistics(String text) {
+        int[] stats = Tokenizer.tokenStatistics(text);
+        printLine("Numbers: " + stats[0]);
+        printLine("Identifiers: " + stats[1]);
+        printLine("Operators: " + stats[2]);
+        printLine("Parentheses: " + stats[3]);
+    }
+
+    /**
+     * C10: демо tokenizer — кожна лексема окремим рядком {@code <index>: <TYPE> <lexeme>}.
+     * <pre>
+     * tokenize "2*x^2 + 3*x - 5"
+     * 0: NUMBER 2
+     * 1: MULTIPLY *
+     * 2: IDENTIFIER x
+     * ...
+     * </pre>
+     * Нерозпізнані лексеми теж друкуються (як UNKNOWN): це демонстрація того,
+     * що бачить tokenizer; відхилити вираз — задача {@code validate-expr}.
+     */
+    private static void printTokens(String text) {
+        String[] lexemes = Tokenizer.lexemes(text);
+        if (lexemes.length == 0) {
+            printError(ERR_NOT_ENOUGH_ARGS);
+            return;
+        }
+        TokenType[] types = Tokenizer.tokenizeTypes(text);
+        for (int i = 0; i < lexemes.length; i++) {
+            printLine(i + ": " + types[i] + " " + displayLexeme(lexemes[i]));
         }
     }
 }
