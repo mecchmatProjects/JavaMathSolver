@@ -12,8 +12,8 @@
 src/main/java/solver/
 ├── app/       MathSolver (main), CommandDispatcher, CommandCatalog, HelpPrinter
 ├── core/      Messages, Output, NumberParser, ArgumentValidator, CharClassifier, TokenType, Tokenizer
-├── algebra/   Arithmetic, Equations, NumberTheory, TaylorSeries
-└── geometry/  Distances, Shapes, Triangles, Solids, Intersections, Polygon, MonteCarlo
+├── algebra/   Arithmetic, Equations, NumberTheory, TaylorSeries, NumericArray, BasicStatic, Matrix
+└── geometry/  Distances, Shapes, Triangles, Solids, Intersections, Polygon, MonteCarlo, Point, Points, Polygon2D
 src/test/java/solver/   JUnit 5 тести
 scripts/                регресійні кейси CLI
 ```
@@ -155,6 +155,14 @@ java -cp target/classes solver.app.MathSolver hello 1 2
 | `manhattan-distance` | `x1 y1 x2 y2` | Манхеттенська відстань між точками |
 | `midpoint` | `x1 y1 x2 y2` | Середина відрізка |
 | `collinear` | `x1 y1 x2 y2 x3 y3` | Перевірка, чи лежать три точки на одній прямій |
+| `statistics` | `x1 x2 ...` | Кількість, сума, мінімум, максимум, середнє, дисперсія, СКВ набору чисел (Lab 3, A1–A2) |
+| `normalize` | `x1 x2 ...` | Min-max нормалізація: $x' = (x - \min) / (\max - \min)$ (Lab 3, A4) |
+| `centroid` | `x1 y1 x2 y2 ...` | Центр мас набору точок (Lab 3, G4) |
+| `bounding-box` | `x1 y1 x2 y2 ...` | Мінімальні та максимальні x, y набору точок (Lab 3, G3) |
+| `nearest` | `px py x1 y1 ...` | Найближча до P точка набору (Lab 3, G5) |
+| `polygon-area` | `x1 y1 x2 y2 x3 y3 ...` | Площа простого багатокутника (Lab 3, G6) |
+| `convex-hull` | `x1 y1 x2 y2 x3 y3 ...` | Вершини опуклої оболонки проти годинникової стрілки (Lab 3, G6) |
+| `point-in-polygon` | `px py x1 y1 x2 y2 x3 y3 ...` | Чи лежить точка P у багатокутнику, межа включно (Lab 3, G6) |
 | `tokenize` | `"expr"` | Список токенів: індекс, тип, лексема (C10) |
 | `token-stats` | `"expr"` | Кількість чисел, ідентифікаторів, операторів, дужок (C9) |
 | `validate-expr` | `"expr"` | Перевірка, що всі лексеми виразу розпізнані (C8); синтаксис не перевіряється |

@@ -120,7 +120,21 @@ public final class CommandCatalog {
                 return 8;
 
             case "polygon":
+            case "polygon-area":
+            case "convex-hull":
+            case "point-in-polygon": // + перевірка >= 4 точок (P і 3 вершини) у dispatch
                 return VARIADIC_POLYGON;
+
+            // Lab 3: набори чисел (NumericArray)
+            case "statistics":
+            case "normalize":
+                return VARIADIC_NUMBERS;
+
+            // Lab 3: набори точок (Points)
+            case "centroid":
+            case "bounding-box":
+            case "nearest": // + перевірка >= 2 точок (P і хоча б одна точка набору) у dispatch
+                return VARIADIC_POINTS;
 
             // C0-b: текстові команди (див. getArgKind). Без цього main відсікав їх
             // як Unknown command ще до перевірки ArgKind.TEXT.
