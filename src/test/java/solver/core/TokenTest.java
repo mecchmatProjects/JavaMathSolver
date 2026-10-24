@@ -44,8 +44,8 @@ class TokenTest {
 
     @Test
     void testConstructor_NullLexeme_ThrowsNullPointerException() {
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
+        NullPointerException exception = assertThrows(
+                NullPointerException.class,
                 () -> new Token(TokenType.IDENTIFIER, null)
         );
         assertEquals("lexeme must not be null", exception.getMessage());
