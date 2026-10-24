@@ -34,17 +34,30 @@ class TokenTest {
     //C12 constructor validation
 
     @Test
-    void validationNullTypeException(){
-        assertThrows(
+    void testConstructor_NullType_ThrowsNullPointerException() {
+        NullPointerException exception = assertThrows(
                 NullPointerException.class,
-                () -> new Token(null, "2"));
+                () -> new Token(null, "2")
+        );
+        assertEquals("type must not be null", exception.getMessage());
     }
 
     @Test
-    void validationNullLexemeException(){
-        assertThrows(
-                NullPointerException.class,
-                () -> new Token(TokenType.NUMBER, null));
+    void testConstructor_NullLexeme_ThrowsNullPointerException() {
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> new Token(TokenType.IDENTIFIER, null)
+        );
+        assertEquals("lexeme must not be null", exception.getMessage());
+    }
+
+    @Test
+    void testConstructor_EmptyLexeme_ThrowsIllegalArgumentException() {
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> new Token(TokenType.IDENTIFIER, "")
+        );
+        assertEquals("lexeme must not be empty", exception.getMessage());
     }
 
 }
