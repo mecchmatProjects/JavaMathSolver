@@ -1,6 +1,7 @@
 package solver.core;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
@@ -29,4 +30,21 @@ class TokenTest {
     void numberLexemeStaysText() {
         assertEquals("2", new Token(TokenType.NUMBER, "2").getLexeme());
     }
+
+    //C12 constructor validation
+
+    @Test
+    void validationNullTypeException(){
+        assertThrows(
+                NullPointerException.class,
+                () -> new Token(null, "2"));
+    }
+
+    @Test
+    void validationNullLexemeException(){
+        assertThrows(
+                NullPointerException.class,
+                () -> new Token(TokenType.NUMBER, null));
+    }
+
 }
