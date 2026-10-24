@@ -59,6 +59,26 @@ public class Fraction {
         return new Fraction(newNumerator, newDenominator);
     }
 
+    public Fraction multiply(Fraction other) {
+        long newNumerator = numerator * other.numerator;
+        long newDenominator = denominator * other.denominator;
+
+        return new Fraction(newNumerator, newDenominator);
+    }
+
+    public Fraction divide(Fraction other) {
+        if (other.numerator == 0) {
+            throw new ArithmeticException(
+                    "Ділити на нуль не можна"
+            );
+        }
+
+        long newNumerator = numerator * other.denominator;
+        long newDenominator = denominator * other.numerator;
+
+        return new Fraction(newNumerator, newDenominator);
+    }
+
     @Override
     public String toString() {
         if (denominator == 1) {
