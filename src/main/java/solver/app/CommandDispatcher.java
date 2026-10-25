@@ -16,6 +16,7 @@ import static solver.geometry.Intersections.*;
 import static solver.geometry.Polygon.*;
 import static solver.geometry.MonteCarlo.*;
 
+import solver.core.Token;
 import solver.core.TokenType;
 import solver.core.Tokenizer;
 
@@ -288,11 +289,9 @@ public final class CommandDispatcher {
             printResult(true);
             return;
         }
-        String[] lexemes = Tokenizer.lexemes(text);
-        TokenType[] types = Tokenizer.tokenizeTypes(text);
-        for (int i = 0; i < types.length; i++) {
-            if (types[i] == TokenType.UNKNOWN) {
-                printError(ERR_INVALID_TOKEN + displayLexeme(lexemes[i]));
+        for (Token token : Tokenizer.tokenize(text)) {
+            if (token.getType() == TokenType.UNKNOWN) {
+                printError(ERR_INVALID_TOKEN + displayLexeme(token.getLexeme()));
                 return;
             }
         }
@@ -322,14 +321,13 @@ public final class CommandDispatcher {
      * що бачить tokenizer; відхилити вираз — задача {@code validate-expr}.
      */
     private static void printTokens(String text) {
-        String[] lexemes = Tokenizer.lexemes(text);
-        if (lexemes.length == 0) {
+        Token[] tokens = Tokenizer.tokenize(text);
+        if (tokens.length == 0) {
             printError(ERR_NOT_ENOUGH_ARGS);
             return;
         }
-        TokenType[] types = Tokenizer.tokenizeTypes(text);
-        for (int i = 0; i < lexemes.length; i++) {
-            printLine(i + ": " + types[i] + " " + displayLexeme(lexemes[i]));
+        for (int i = 0; i < tokens.length; i++) {
+            printLine(i + ": " + tokens[i].getType() + " " + displayLexeme(tokens[i].getLexeme()));
         }
     }
 }
