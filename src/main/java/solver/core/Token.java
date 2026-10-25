@@ -8,8 +8,9 @@ public final class Token {
     private final String lexeme;
 
     public Token(TokenType type, String lexeme) {
-        this.type = type;
-        this.lexeme = lexeme;
+        this.type = Objects.requireNonNull(type, "type must not be null");
+        this.lexeme = Objects.requireNonNull(lexeme, "lexeme must not be null");
+        if (lexeme.isEmpty()) {throw new IllegalArgumentException("lexeme must not be empty");}
     }
 
     public TokenType getType() {
