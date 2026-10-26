@@ -629,4 +629,135 @@ class TokenizerTest {
     void nullThrows() {
         assertThrows(IllegalArgumentException.class, () -> Tokenizer.isValid(null));
     }
+
+    // ===================================================================
+    // C15 — Token[]: тип і лексема в одному об'єкті
+    // ===================================================================
+
+    @Test
+    void tokenizeSpecExample() {
+        assertArrayEquals(
+                new Token[] {
+                        new Token(NUMBER, "2"),
+                        new Token(MULTIPLY, "*"),
+                        new Token(IDENTIFIER, "x"),
+                        new Token(PLUS, "+"),
+                        new Token(NUMBER, "3")
+                },
+                Tokenizer.tokenize("2*x + 3"));
+    }
+
+    @Test
+    void tokenizeDemoExampleFromC10() {
+        assertArrayEquals(
+                new Token[] {
+                        new Token(NUMBER, "2"),
+                        new Token(MULTIPLY, "*"),
+                        new Token(IDENTIFIER, "x"),
+                        new Token(POWER, "^"),
+                        new Token(NUMBER, "2"),
+                        new Token(PLUS, "+"),
+                        new Token(NUMBER, "3"),
+                        new Token(MULTIPLY, "*"),
+                        new Token(IDENTIFIER, "x"),
+                        new Token(MINUS, "-"),
+                        new Token(NUMBER, "5")
+                },
+                Tokenizer.tokenize("2*x^2 + 3*x - 5"));
+    }
+
+    @Test
+    void tokenizeFunctionCallShape() {
+        assertArrayEquals(
+                new Token[] {
+                        new Token(IDENTIFIER, "sin"),
+                        new Token(LEFT_PARENTHESIS, "("),
+                        new Token(IDENTIFIER, "x"),
+                        new Token(RIGHT_PARENTHESIS, ")")
+                },
+                Tokenizer.tokenize("sin(x)"));
+    }
+
+    @Test
+    void tokenizeKeepsSignWithNumberLexeme() {
+        // рішення C5 збережено: -5 це один NUMBER, а знак входить у лексему
+        assertArrayEquals(new Token[] {new Token(NUMBER, "-5")}, Tokenizer.tokenize("-5"));
+        assertArrayEquals(
+                new Token[] {
+                        new Token(NUMBER, "3"), new Token(MINUS, "-"), new Token(NUMBER, "5")
+                },
+                Tokenizer.tokenize("3-5"));
+    }
+
+    @Test
+    void tokenizeDecimalKeepsTextNotValue() {
+        // Token описує текст, а не число: "12.5" лишається рядком
+        Token[] tokens = Tokenizer.tokenize("12.5");
+        assertEquals(1, tokens.length);
+        assertEquals(NUMBER, tokens[0].getType());
+        assertEquals("12.5", tokens[0].getLexeme());
+    }
+
+    @Test
+    void tokenizeEmptyAndBlankGiveEmptyArray() {
+        assertEquals(0, Tokenizer.tokenize("").length);
+        assertEquals(0, Tokenizer.tokenize("   ").length);
+        assertEquals(0, Tokenizer.tokenize("\t \t").length);
+    }
+
+    @Test
+    void tokenizeNullThrowsWithMessageFromMessages() {
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class, () -> Tokenizer.tokenize(null));
+        assertEquals(Messages.ERR_NULL_EXPRESSION, ex.getMessage());
+    }
+
+    @Test
+    void tokenizeInvalidLexemesKeepTheirText() {
+        assertArrayEquals(new Token[] {new Token(UNKNOWN, "2..5")}, Tokenizer.tokenize("2..5"));
+        assertArrayEquals(new Token[] {new Token(UNKNOWN, "3.4.5")}, Tokenizer.tokenize("3.4.5"));
+        assertArrayEquals(
+                new Token[] {new Token(IDENTIFIER, "x"), new Token(UNKNOWN, "@")},
+                Tokenizer.tokenize("x@"));
+    }
+
+    @Test
+    void tokenizeResultHasExactLengthAndNoNulls() {
+        // буфер довжини expression.length() не має «протікати» в результат
+        Token[] tokens = Tokenizer.tokenize("2*x + 3");
+        assertEquals(5, tokens.length);
+        for (Token token : tokens) {
+            assertNotNull(token);
+        }
+    }
+
+    @Test
+    void tokenizeNeverProducesEmptyLexeme() {
+        // передумова для валідації конструктора Token (C12)
+        for (String expression : new String[] {
+                "2*x^2 + 3*x - 5", "sin(x) + sqrt(y)", "12.5*x", "2..5", "x@", "3.4.5", "-5", "@@"}) {
+            for (Token token : Tokenizer.tokenize(expression)) {
+                assertFalse(token.getLexeme().isEmpty(), "empty lexeme in: " + expression);
+                assertNotNull(token.getType());
+            }
+        }
+    }
+
+    @Test
+    void wrappersStayConsistentWithTokenize() {
+        // lexemes() і tokenizeTypes() тепер лише розпаковують tokenize()
+        for (String expression : new String[] {
+                "2*x^2 + 3*x - 5", "sin(x) + sqrt(y)", "12.5*x", "2..5", "x@", "3.4.5", "-5", "", "  "}) {
+            Token[] tokens = Tokenizer.tokenize(expression);
+            String[] lexemes = Tokenizer.lexemes(expression);
+            TokenType[] types = Tokenizer.tokenizeTypes(expression);
+
+            assertEquals(tokens.length, lexemes.length, "lexemes length for: " + expression);
+            assertEquals(tokens.length, types.length, "types length for: " + expression);
+            for (int i = 0; i < tokens.length; i++) {
+                assertEquals(tokens[i].getLexeme(), lexemes[i], "lexeme " + i + " of: " + expression);
+                assertEquals(tokens[i].getType(), types[i], "type " + i + " of: " + expression);
+            }
+        }
+    }
 }
