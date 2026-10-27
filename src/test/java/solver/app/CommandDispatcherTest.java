@@ -222,4 +222,93 @@ class CommandDispatcherTest {
         assertEquals("Numbers: 0\nIdentifiers: 1\nOperators: 0\nParentheses: 0",
                 capture(() -> CommandDispatcher.dispatchText("token-stats", "x @ 2..5")));
     }
+
+    // ===================================================================
+    // Lab 3: набори чисел (NumericArray)
+    // ===================================================================
+
+    @Test
+    void statisticsPrintsAllMeasures() {
+        assertEquals(String.join("\n",
+                "Count: 5",
+                "Sum: 20.000000",
+                "Min: 1.000000",
+                "Max: 8.000000",
+                "Mean: 4.000000",
+                "Variance: 6.000000",
+                "StdDev: 2.449490"), dispatch("statistics", 1L, 4L, 2L, 8L, 5L));
+    }
+
+    @Test
+    void statisticsOfSingleValueHasZeroSpread() {
+        String out = dispatch("statistics", 7L);
+        assertTrue(out.startsWith("Count: 1"), out);
+        assertTrue(out.endsWith("StdDev: 0.000000"), out);
+    }
+
+    @Test
+    void statisticsRejectsOverflow() {
+        assertEquals(Messages.ERR_INVALID_INPUT, dispatch("statistics", 1e308, 1e308));
+    }
+
+    @Test
+    void normalizeMapsToUnitInterval() {
+        assertEquals("Result: [0.000000, 0.500000, 1.000000]", dispatch("normalize", 10L, 20L, 30L));
+        assertEquals("Result: [0.000000, 0.000000]", dispatch("normalize", 5L, 5L));
+    }
+
+    // ===================================================================
+    // Lab 3: набори точок і багатокутники (Points, Polygon2D)
+    // ===================================================================
+
+    @Test
+    void centroidOfSquare() {
+        assertEquals("Result: (2.000000, 2.000000)", dispatch("centroid", 0L, 0L, 4L, 0L, 4L, 4L, 0L, 4L));
+        assertEquals("Result: (0.000000, 0.000000)", dispatch("centroid", -1L, -0.0, 1L, -0.0));
+        assertEquals(Messages.ERR_INVALID_INPUT, dispatch("centroid", 1e308, 0L, 1e308, 0L));
+    }
+
+    @Test
+    void boundingBoxOfPointSet() {
+        assertEquals("Result: minX=-2.000000, maxX=4.000000, minY=0.000000, maxY=5.000000",
+                dispatch("bounding-box", 1L, 5L, -2L, 3L, 4L, 0L));
+    }
+
+    @Test
+    void nearestNeedsQueryPointAndSet() {
+        assertEquals("Result: (1.000000, 1.000000)", dispatch("nearest", 0L, 0L, 3L, 4L, 1L, 1L, -2L, 2L));
+        assertEquals(Messages.ERR_NOT_ENOUGH_ARGS, dispatch("nearest", 0L, 0L));
+    }
+
+    @Test
+    void polygonAreaRejectsSelfIntersection() {
+        assertEquals("Result: 6.000000", dispatch("polygon-area", 0L, 0L, 4L, 0L, 4L, 3L));
+        assertEquals(Messages.ERR_POLYGON_NOT_SIMPLE, dispatch("polygon-area", 0L, 0L, 1L, 1L, 1L, 0L, 0L, 1L));
+    }
+
+    @Test
+    void convexHullDropsInnerPoints() {
+        assertEquals("Result: (0.000000, 0.000000) (2.000000, 0.000000) (2.000000, 2.000000) (0.000000, 2.000000)",
+                dispatch("convex-hull", 0L, 0L, 2L, 0L, 1L, 1L, 2L, 2L, 0L, 2L));
+        assertEquals(Messages.ERR_HULL_DEGENERATE, dispatch("convex-hull", 0L, 0L, 1L, 1L, 2L, 2L));
+    }
+
+    @Test
+    void pointInPolygon() {
+        Number[] square = {0L, 0L, 4L, 0L, 4L, 4L, 0L, 4L};
+        assertEquals("Result: true", dispatch("point-in-polygon", concat(1L, 1L, square)));
+        assertEquals("Result: false", dispatch("point-in-polygon", concat(5L, 5L, square)));
+        assertEquals("Result: true", dispatch("point-in-polygon", concat(4L, 2L, square))); // на межі
+        assertEquals(Messages.ERR_NOT_ENOUGH_ARGS, dispatch("point-in-polygon", 1L, 1L, 0L, 0L, 4L, 0L));
+        assertEquals(Messages.ERR_POLYGON_NOT_SIMPLE,
+                dispatch("point-in-polygon", 1L, 1L, 0L, 0L, 1L, 1L, 1L, 0L, 0L, 1L));
+    }
+
+    private static Number[] concat(Number px, Number py, Number[] rest) {
+        Number[] all = new Number[rest.length + 2];
+        all[0] = px;
+        all[1] = py;
+        System.arraycopy(rest, 0, all, 2, rest.length);
+        return all;
+    }
 }

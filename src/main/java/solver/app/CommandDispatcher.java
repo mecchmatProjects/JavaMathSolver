@@ -16,9 +16,15 @@ import static solver.geometry.Intersections.*;
 import static solver.geometry.Polygon.*;
 import static solver.geometry.MonteCarlo.*;
 
+import java.util.Locale;
+
+import solver.algebra.NumericArray;
 import solver.core.Token;
 import solver.core.TokenType;
 import solver.core.Tokenizer;
+import solver.geometry.Point;
+import solver.geometry.Points;
+import solver.geometry.Polygon2D;
 
 /**
  * CORE-11: диспетчеризація команд.
@@ -259,10 +265,191 @@ public final class CommandDispatcher {
                 break;
             }
 
+            // --- ALGEBRA: Lab 3 (NumericArray) ---
+            case "statistics":
+                printStatistics(a);
+                break;
+            case "normalize":
+                printNormalized(a);
+                break;
+
+            // --- GEOMETRY: Lab 3 (Points, Polygon2D) ---
+            case "centroid":
+                printCentroid(a);
+                break;
+            case "bounding-box":
+                printBoundingBox(a);
+                break;
+            case "nearest":
+                printNearest(a);
+                break;
+            case "polygon-area":
+                printPolygonArea(a);
+                break;
+            case "convex-hull":
+                printConvexHull(a);
+                break;
+            case "point-in-polygon":
+                printPointInPolygon(a);
+                break;
+
             default:
                 printUnknownCommand(command);
                 break;
         }
+    }
+
+    // ===================================================================
+    // Lab 3: набори чисел
+    // ===================================================================
+
+    // A1-A2: "statistics 1 4 2 8 5" -> Count / Sum / Min / Max / Mean / Variance / StdDev
+    private static void printStatistics(double[] values) {
+        NumericArray data = new NumericArray(values);
+        double sum = data.sum();
+        double min = data.min();
+        double max = data.max();
+        double mean = data.mean();
+        double variance = data.variance();
+        double std = data.standardDeviation();
+        if (!allFinite(sum, mean, variance, std)) {
+            printError(ERR_INVALID_INPUT);
+            return;
+        }
+        printLine("Count: " + data.size());
+        printLine("Sum: " + fmt(sum));
+        printLine("Min: " + fmt(min));
+        printLine("Max: " + fmt(max));
+        printLine("Mean: " + fmt(mean));
+        printLine("Variance: " + fmt(variance));
+        printLine("StdDev: " + fmt(std));
+    }
+
+    // A4: min-max нормалізація, "normalize 10 20 30" -> [0.000000, 0.500000, 1.000000]
+    private static void printNormalized(double[] values) {
+        double[] normalized = new NumericArray(values).normalize().toArray();
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < normalized.length; i++) {
+            if (i > 0) {
+                sb.append(", ");
+            }
+            sb.append(fmt(normalized[i]));
+        }
+        printResult(sb.append(']').toString());
+    }
+
+    // ===================================================================
+    // Lab 3: набори точок і багатокутники.
+    // Points / Polygon2D самі друкують помилку і повертають null — тоді просто виходимо.
+    // ===================================================================
+
+    // G4: "centroid 0 0 4 0 4 4 0 4" -> (2.000000, 2.000000)
+    private static void printCentroid(double[] coords) {
+        Point c = Points.centroid(toPoints(coords, 0));
+        if (c != null) {
+            printPoint(c);
+        }
+    }
+
+    // G3: "bounding-box 1 5 -2 3 4 0" -> minX=..., maxX=..., minY=..., maxY=...
+    private static void printBoundingBox(double[] coords) {
+        double[] box = Points.boundingBox(toPoints(coords, 0));
+        if (box != null) {
+            printResult(String.format(Locale.ROOT, "minX=%s, maxX=%s, minY=%s, maxY=%s",
+                    fmt(box[0]), fmt(box[1]), fmt(box[2]), fmt(box[3])));
+        }
+    }
+
+    // G5: "nearest px py x1 y1 x2 y2 ..." -> найближча до P точка набору
+    private static void printNearest(double[] coords) {
+        if (coords.length < 4) { // P + хоча б одна точка набору
+            printError(ERR_NOT_ENOUGH_ARGS);
+            return;
+        }
+        Point p = Point.of(coords[0], coords[1]);
+        Point best = Points.nearest(p, toPoints(coords, 2));
+        if (best != null) {
+            printPoint(best);
+        }
+    }
+
+    // G6: площа багатокутника (формула шнурування)
+    private static void printPolygonArea(double[] coords) {
+        Point[] polygon = toPoints(coords, 0);
+        if (!Polygon2D.isSimple(polygon)) { // для "метелика" формула шнурування дає хибне 0
+            printError(ERR_POLYGON_NOT_SIMPLE);
+            return;
+        }
+        double area = Polygon2D.area(polygon);
+        if (!Double.isNaN(area)) {
+            printResult(area);
+        }
+    }
+
+    // G6: опукла оболонка, вершини проти годинникової стрілки: "(x1, y1) (x2, y2) ..."
+    private static void printConvexHull(double[] coords) {
+        Point[] hull = Polygon2D.convexHull(toPoints(coords, 0));
+        if (hull == null) {
+            return;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < hull.length; i++) {
+            if (i > 0) {
+                sb.append(' ');
+            }
+            sb.append(formatPoint(hull[i]));
+        }
+        printResult(sb.toString());
+    }
+
+    // G6: "point-in-polygon px py x1 y1 x2 y2 x3 y3 ..." -> true / false (межа вважається всередині)
+    private static void printPointInPolygon(double[] coords) {
+        if (coords.length < 8) { // P + 3 вершини
+            printError(ERR_NOT_ENOUGH_ARGS);
+            return;
+        }
+        Point p = Point.of(coords[0], coords[1]);
+        Point[] polygon = toPoints(coords, 2);
+        if (!Polygon2D.isSimple(polygon)) {
+            printError(ERR_POLYGON_NOT_SIMPLE);
+            return;
+        }
+        printResult(Polygon2D.contains(polygon, p));
+    }
+
+    // x1 y1 x2 y2 ... -> Point[], починаючи з індексу from (парність перевірена ArgumentValidator)
+    private static Point[] toPoints(double[] coords, int from) {
+        Point[] points = new Point[(coords.length - from) / 2];
+        for (int i = 0; i < points.length; i++) {
+            points[i] = Point.of(coords[from + 2 * i], coords[from + 2 * i + 1]);
+        }
+        return points;
+    }
+
+    private static void printPoint(Point p) {
+        if (!allFinite(p.x, p.y)) {
+            printError(ERR_INVALID_INPUT);
+            return;
+        }
+        printResult(formatPoint(p));
+    }
+
+    private static String formatPoint(Point p) {
+        return "(" + fmt(p.x) + ", " + fmt(p.y) + ")";
+    }
+
+    // Той самий формат, що й printResult(double): %f, без "-0.000000"
+    private static String fmt(double v) {
+        return String.format(Locale.ROOT, "%f", v + 0.0).replace("-0.000000", "0.000000");
+    }
+
+    private static boolean allFinite(double... values) {
+        for (double v : values) {
+            if (!Double.isFinite(v)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     // C0-b: диспетчеризація текстових команд (аргумент - увесь вираз одним рядком)

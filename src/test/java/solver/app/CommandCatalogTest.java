@@ -113,4 +113,17 @@ class CommandCatalogTest {
         assertEquals(ArgumentValidator.UNKNOWN_COMMAND, CommandCatalog.getExpectedArgsCount("ADD"));
         assertEquals(ArgumentValidator.UNKNOWN_COMMAND, CommandCatalog.getExpectedArgsCount(" add"));
     }
+
+    @Test
+    void lab3CommandsUseVariadicModes() {
+        for (String command : new String[] {"statistics", "normalize"}) {
+            assertEquals(CommandCatalog.VARIADIC_NUMBERS, CommandCatalog.getExpectedArgsCount(command), command);
+        }
+        for (String command : new String[] {"centroid", "bounding-box", "nearest"}) {
+            assertEquals(CommandCatalog.VARIADIC_POINTS, CommandCatalog.getExpectedArgsCount(command), command);
+        }
+        for (String command : new String[] {"polygon-area", "convex-hull", "point-in-polygon"}) {
+            assertEquals(CommandCatalog.VARIADIC_POLYGON, CommandCatalog.getExpectedArgsCount(command), command);
+        }
+    }
 }

@@ -31,6 +31,8 @@ public final class HelpPrinter {
         printHelpLine("gcd a b", "greatest common divisor (integers)");
         printHelpLine("factorial n", "n!, 0 <= n <= 20");
         printHelpLine("fibonacci n", "F(n), 0 <= n <= 92");
+        printHelpLine("statistics x1 x2 ...", "count, sum, min, max, mean, variance, std dev");
+        printHelpLine("normalize x1 x2 ...", "min-max normalization to [0, 1]");
 
         System.out.println();
         System.out.println("Taylor series (x eps; alias in brackets):");
@@ -78,6 +80,12 @@ public final class HelpPrinter {
         printHelpLine("squares-intersect x1 y1 s1 x2 y2 s2", "intersection of two squares");
         printHelpLine("rect-bounding-box x1 y1 x2 y2 x3 y3 x4 y4", "bounding box of two rectangles");
         printHelpLine("polygon x1 y1 x2 y2 x3 y3 ...", "perimeter and convexity (>= 3 vertices)");
+        printHelpLine("polygon-area x1 y1 x2 y2 x3 y3 ...", "area of a simple polygon (>= 3 vertices)");
+        printHelpLine("convex-hull x1 y1 x2 y2 x3 y3 ...", "convex hull vertices, counter-clockwise");
+        printHelpLine("point-in-polygon px py x1 y1 x2 y2 ...", "is point P inside the polygon (>= 3 vertices)");
+        printHelpLine("centroid x1 y1 x2 y2 ...", "center of mass of a point set");
+        printHelpLine("bounding-box x1 y1 x2 y2 ...", "min/max x and y of a point set");
+        printHelpLine("nearest px py x1 y1 x2 y2 ...", "point of the set nearest to P");
         printHelpLine("monte-carlo-triangle n", "probability that 3 random sides form a triangle");
 
         System.out.println();
