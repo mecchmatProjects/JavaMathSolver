@@ -162,4 +162,51 @@ public class Polynomial {
         return new Polynomial(res);
     }
 
+    public Polynomial[] divideAndRemainder(Polynomial divisor) {
+        if (divisor == null) {
+            throw new IllegalArgumentException("Divisor polynomial cannot be null");
+        }
+        if (divisor.isZero()) {
+            throw new ArithmeticException("Polynomial division by zero");
+        }
+
+        if (this.degree() < divisor.degree() || this.isZero()) {
+            return new Polynomial[]{
+                    new Polynomial(new double[]{0.0}),
+                    this
+            };
+        }
+
+        double[] rem = this.coeffs.clone();
+        int divisorDeg = divisor.degree();
+        double leadDivisorCoeff = divisor.coeffs[divisorDeg];
+        double[] quot = new double[this.degree() - divisorDeg + 1];
+
+        for (int i = this.degree() - divisorDeg; i >= 0; i--) {
+            if (Math.abs(rem[i + divisorDeg]) < EPSILON) {
+                rem[i + divisorDeg] = 0.0;
+                continue;
+            }
+            double factor = rem[i + divisorDeg] / leadDivisorCoeff;
+            quot[i] = factor;
+            for (int j = 0; j <= divisorDeg; j++) {
+                rem[i + j] -= factor * divisor.coeffs[j];
+            }
+            rem[i + divisorDeg] = 0.0;
+        }
+
+        return new Polynomial[]{
+                new Polynomial(quot),
+                new Polynomial(rem)
+        };
+    }
+
+    public Polynomial divide(Polynomial other) {
+        return divideAndRemainder(other)[0];
+    }
+
+    public Polynomial remainder(Polynomial other) {
+        return divideAndRemainder(other)[1];
+    }
+
 }
