@@ -49,4 +49,16 @@ public class Polynomial {
     public double[] getCoefficients() {
         return coeffs.clone();
     }
+
+    public double evaluate(double x) {
+        if (Double.isNaN(x) || Double.isInfinite(x)) {
+            throw new IllegalArgumentException("Argument x must be a finite number");
+        }
+        double result = 0.0;
+        for (int i = coeffs.length - 1; i >= 0; i--) {
+            result = result * x + coeffs[i];
+        }
+        return result + 0.0;
+    }
+
 }
