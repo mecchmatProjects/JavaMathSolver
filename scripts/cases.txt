@@ -231,3 +231,25 @@ token-stats 2*x + 3*x - sin(x)
 token-stats 2*x + sin(x)
 token-stats x @ 2..5
 token-stats
+
+# Lab 3: набори чисел
+statistics 1 4 2 8 5
+statistics 7
+statistics
+statistics 1 abc
+normalize 10 20 30
+normalize 5 5 5
+
+# Lab 3: набори точок і багатокутники
+centroid 0 0 4 0 4 4 0 4
+centroid 0 0 1
+bounding-box 1 5 -2 3 4 0
+nearest 0 0 3 4 1 1 -2 2
+nearest 0 0
+polygon-area 0 0 4 0 4 3
+polygon-area 0 0 1 1 1 0 0 1
+convex-hull 0 0 2 0 1 1 2 2 0 2
+convex-hull 0 0 1 1 2 2
+point-in-polygon 1 1 0 0 4 0 4 4 0 4
+point-in-polygon 5 5 0 0 4 0 4 4 0 4
+point-in-polygon 1 1 0 0 4 0

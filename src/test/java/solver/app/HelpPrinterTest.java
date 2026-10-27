@@ -101,7 +101,15 @@ class HelpPrinterTest {
             return new String[] {command, "x"};
         }
         if (count == CommandCatalog.VARIADIC_POLYGON) {
-            return new String[] {command, "0", "0", "1", "0", "0", "1"};
+            // 4 вершини: вистачає і для polygon, і для point-in-polygon (P + 3 вершини)
+            return new String[] {command, "0", "0", "4", "0", "4", "4", "0", "4"};
+        }
+        if (count == CommandCatalog.VARIADIC_POINTS) {
+            // 2 точки: вистачає і для centroid, і для nearest (P + 1 точка набору)
+            return new String[] {command, "0", "0", "1", "1"};
+        }
+        if (count == CommandCatalog.VARIADIC_NUMBERS) {
+            return new String[] {command, "1", "2", "3"};
         }
         String[] args = new String[count + 1];
         args[0] = command;
