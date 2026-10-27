@@ -122,4 +122,44 @@ public class Polynomial {
         return new Polynomial(deriv);
     }
 
+    public Polynomial add(Polynomial other) {
+        if (other == null) {
+            throw new IllegalArgumentException("Operand polynomial cannot be null");
+        }
+        int maxLen = Math.max(this.coeffs.length, other.coeffs.length);
+        double[] res = new double[maxLen];
+        for (int i = 0; i < maxLen; i++) {
+            res[i] = this.getCoefficient(i) + other.getCoefficient(i);
+        }
+        return new Polynomial(res);
+    }
+
+    public Polynomial subtract(Polynomial other) {
+        if (other == null) {
+            throw new IllegalArgumentException("Operand polynomial cannot be null");
+        }
+        int maxLen = Math.max(this.coeffs.length, other.coeffs.length);
+        double[] res = new double[maxLen];
+        for (int i = 0; i < maxLen; i++) {
+            res[i] = this.getCoefficient(i) - other.getCoefficient(i);
+        }
+        return new Polynomial(res);
+    }
+
+    public Polynomial multiply(Polynomial other) {
+        if (other == null) {
+            throw new IllegalArgumentException("Operand polynomial cannot be null");
+        }
+        if (this.isZero() || other.isZero()) {
+            return new Polynomial(new double[]{0.0});
+        }
+        double[] res = new double[this.coeffs.length + other.coeffs.length - 1];
+        for (int i = 0; i < this.coeffs.length; i++) {
+            for (int j = 0; j < other.coeffs.length; j++) {
+                res[i + j] += this.coeffs[i] * other.coeffs[j];
+            }
+        }
+        return new Polynomial(res);
+    }
+
 }
