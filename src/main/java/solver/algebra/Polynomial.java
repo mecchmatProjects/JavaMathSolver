@@ -61,4 +61,54 @@ public class Polynomial {
         return result + 0.0;
     }
 
+    public boolean equals(Polynomial other, double eps) {
+        if (other == null) return false;
+        if (this == other) return true;
+        if (this.coeffs.length != other.coeffs.length) return false;
+        for (int i = 0; i < coeffs.length; i++) {
+            if (Math.abs(this.coeffs[i] - other.coeffs[i]) > eps) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Polynomial that = (Polynomial) o;
+        return Arrays.equals(this.coeffs, that.coeffs);
+    }
+
+    @Override
+    public String toString() {
+        if (isZero()) {
+            return "0.0";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = coeffs.length - 1; i >= 0; i--) {
+            double c = coeffs[i];
+            if (Math.abs(c) < EPSILON) continue;
+
+            if (sb.length() > 0) {
+                sb.append(c > 0 ? " + " : " - ");
+            } else if (c < 0) {
+                sb.append("-");
+            }
+
+            double absC = Math.abs(c);
+            if (i == 0 || Math.abs(absC - 1.0) >= EPSILON) {
+                sb.append(absC);
+            }
+            if (i >= 1) {
+                sb.append("x");
+                if (i > 1) {
+                    sb.append("^").append(i);
+                }
+            }
+        }
+        return sb.toString();
+    }
+
 }
