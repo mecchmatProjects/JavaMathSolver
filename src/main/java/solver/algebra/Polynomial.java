@@ -111,4 +111,15 @@ public class Polynomial {
         return sb.toString();
     }
 
+    public Polynomial derivative() {
+        if (coeffs.length <= 1) {
+            return new Polynomial(new double[]{0.0});
+        }
+        double[] deriv = new double[coeffs.length - 1];
+        for (int i = 1; i < coeffs.length; i++) {
+            deriv[i - 1] = coeffs[i] * i;
+        }
+        return new Polynomial(deriv);
+    }
+
 }
