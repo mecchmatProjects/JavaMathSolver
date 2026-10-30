@@ -1,6 +1,6 @@
 package solver.algebra;
 
-public class Fraction {
+public class Fraction implements Comparable<Fraction> {
     private final long numerator;
     private final long denominator;
 
@@ -78,6 +78,42 @@ public class Fraction {
 
         return new Fraction(newNumerator, newDenominator);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof Fraction)) {
+            return false;
+        }
+
+        Fraction other = (Fraction) obj;
+
+        return numerator == other.numerator
+                && denominator == other.denominator;
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(numerator, denominator);
+    }
+
+    @Override
+    public int compareTo(Fraction other) {
+        java.math.BigInteger left =
+                java.math.BigInteger.valueOf(numerator)
+                        .multiply(java.math.BigInteger.valueOf(other.denominator));
+
+        java.math.BigInteger right =
+                java.math.BigInteger.valueOf(other.numerator)
+                        .multiply(java.math.BigInteger.valueOf(denominator));
+
+        return left.compareTo(right);
+    }
+
+
 
     @Override
     public String toString() {
