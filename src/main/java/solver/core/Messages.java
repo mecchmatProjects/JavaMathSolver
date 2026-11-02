@@ -24,6 +24,8 @@ public final class Messages {
     public static final String ERR_POLYGON_NOT_SIMPLE = "Error: Polygon must be simple (no self-intersections)";
     public static final String ERR_POLYGON_NOT_TRIANGULABLE = "Error: Polygon cannot be triangulated";
     public static final String ERR_HULL_DEGENERATE = "Error: Convex hull is degenerate";
+    public static final String ERR_NULL_EXPECTED_TYPE = "Expected token type must not be null";
+    public static final String ERR_UNEXPECTED_TOKEN = "Error: Expected %s but found %s('%s') at position %d";
 
     private Messages() {
     }
