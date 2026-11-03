@@ -70,6 +70,26 @@ public final class TokenStream {
         return position;
     }
 
+    /**
+     * Returns the current token and moves forward if its type is {@code expected}.
+     *
+     * @throws IllegalArgumentException if {@code expected} is null
+     * @throws ParseException           if the current token has another type; the position does not change
+     */
+    public Token consume(TokenType expected) {
+        if (expected == null) {
+            throw new IllegalArgumentException(Messages.ERR_NULL_EXPECTED_TYPE);
+        }
+        Token token = current();
+        if (token.getType() != expected) {
+            throw new ParseException(
+                    String.format(Messages.ERR_UNEXPECTED_TOKEN,
+                            expected, token.getType(), token.getLexeme(), position),
+                    position);
+        }
+        return next();
+    }
+
     private Token tokenAt(int index) {
         if (index >= 0 && index < tokens.length) {
             return tokens[index];
