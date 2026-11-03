@@ -173,4 +173,86 @@ class TokenStreamTest {
         assertEquals(TokenType.EOF, eof.getType());
         assertEquals("<EOF>", eof.getLexeme());
     }
+
+    // ---- C17: peek(int) lookahead ----
+
+    @Test
+    void peekZeroIsTheCurrentToken() {
+        TokenStream stream = new TokenStream(sample());
+        assertEquals(stream.current(), stream.peek(0));
+        stream.next();
+        assertEquals(stream.current(), stream.peek(0));
+    }
+
+    @Test
+    void peekWalksForwardFromTheCurrentPosition() {
+        // приклад із методички: "2 + x * 5", current на 2
+        TokenStream stream = new TokenStream(new Token[] {
+                new Token(TokenType.NUMBER, "2"),
+                new Token(TokenType.PLUS, "+"),
+                new Token(TokenType.IDENTIFIER, "x"),
+                new Token(TokenType.MULTIPLY, "*"),
+                new Token(TokenType.NUMBER, "5")
+        });
+        assertEquals(new Token(TokenType.NUMBER, "2"), stream.peek(0));
+        assertEquals(new Token(TokenType.PLUS, "+"), stream.peek(1));
+        assertEquals(new Token(TokenType.IDENTIFIER, "x"), stream.peek(2));
+        assertEquals(new Token(TokenType.MULTIPLY, "*"), stream.peek(3));
+        assertEquals(new Token(TokenType.NUMBER, "5"), stream.peek(4));
+        assertEquals(EOF, stream.peek(5));
+    }
+
+    @Test
+    void peekIsRelativeToTheCurrentPosition() {
+        TokenStream stream = new TokenStream(sample());
+        stream.next(); // current = "+"
+        assertEquals(new Token(TokenType.PLUS, "+"), stream.peek(0));
+        assertEquals(new Token(TokenType.IDENTIFIER, "x"), stream.peek(1));
+        assertEquals(EOF, stream.peek(2));
+    }
+
+    @Test
+    void peekDoesNotMoveThePosition() {
+        TokenStream stream = new TokenStream(sample());
+        stream.next(); // position = 1
+        for (int offset = 0; offset < 10; offset++) {
+            stream.peek(offset);
+        }
+        assertEquals(1, stream.position());
+        assertEquals(new Token(TokenType.PLUS, "+"), stream.current());
+    }
+
+    @Test
+    void peekPastTheEndReturnsEof() {
+        TokenStream stream = new TokenStream(sample());
+        assertEquals(EOF, stream.peek(3));
+        assertEquals(EOF, stream.peek(100));
+        assertEquals(EOF, stream.peek(Integer.MAX_VALUE)); // position + offset переповнюється
+        assertEquals(0, stream.position());
+    }
+
+    @Test
+    void peekOnEmptyStreamIsAlwaysEof() {
+        TokenStream stream = new TokenStream(new Token[0]);
+        assertEquals(EOF, stream.peek(0));
+        assertEquals(EOF, stream.peek(1));
+    }
+
+    @Test
+    void negativeOffsetIsRejected() {
+        TokenStream stream = new TokenStream(sample());
+        assertThrows(IllegalArgumentException.class, () -> stream.peek(-1));
+        assertThrows(IllegalArgumentException.class, () -> stream.peek(Integer.MIN_VALUE));
+        assertEquals(0, stream.position(), "rejected peek must not move the cursor");
+    }
+
+    @Test
+    void noArgPeekIsPeekOne() {
+        TokenStream stream = new TokenStream(sample());
+        assertEquals(stream.peek(1), stream.peek());
+        stream.next();
+        assertEquals(stream.peek(1), stream.peek());
+        stream.next();
+        assertEquals(stream.peek(1), stream.peek()); // обидва EOF у кінці
+    }
 }

@@ -40,7 +40,22 @@ public final class TokenStream {
 
     /** Returns the token after the current one without moving; EOF past the end. */
     public Token peek() {
-        return tokenAt(position + 1);
+        return peek(1);
+    }
+
+    /**
+     * Looks ahead without moving the cursor: {@code peek(0)} is {@link #current()},
+     * {@code peek(1)} the token after it, and so on. Past the end of the stream
+     * the {@link TokenType#EOF} sentinel is returned instead of an exception.
+     *
+     * @param offset how far ahead to look, counted from the current position
+     * @throws IllegalArgumentException if {@code offset} is negative
+     */
+    public Token peek(int offset) {
+        if (offset < 0) {
+            throw new IllegalArgumentException("Offset must not be negative: " + offset);
+        }
+        return tokenAt(position + offset);
     }
 
     /**
