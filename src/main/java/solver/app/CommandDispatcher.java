@@ -530,10 +530,16 @@ public final class CommandDispatcher {
             return;
         }
         while (stream.hasNext()) {
-            int pos = stream.position();
+            int position = stream.position();
             Token current = stream.next();
-            printLine(pos + ": " + current.getType() + " " + displayLexeme(current.getLexeme())
-                    + "   (next: " + stream.current().toCompactString() + ")");
+            printLine(position + ": " + describe(current)
+                    + "   (next: " + describe(stream.current()) + ")");
         }
     }
+
+    // One format for the current token and for "next": "TYPE lexeme"
+    private static String describe(Token token) {
+        return token.getType() + " " + displayLexeme(token.getLexeme());
+    }
+
 }

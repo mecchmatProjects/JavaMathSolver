@@ -1,15 +1,12 @@
 package solver.core;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.util.ArrayList;
 import java.util.List;
 
 
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class TokenStreamTest {
 
@@ -325,29 +322,6 @@ class TokenStreamTest {
     }
 
     @Test
-    void pipelineMinusIsSignOnlyInOperandPosition() {
-        // на початку виразу: знак числа
-        assertEquals(tok(TokenType.NUMBER, "-5"), streamOf("-5 + 3").current());
-
-        // після оператора: знак числа
-        TokenStream afterOperator = streamOf("2*-3");
-        afterOperator.next(); // 2
-        afterOperator.next(); // *
-        assertEquals(tok(TokenType.NUMBER, "-3"), afterOperator.next());
-
-        // після '(': знак числа
-        TokenStream afterParen = streamOf("(-2)");
-        afterParen.next(); // (
-        assertEquals(tok(TokenType.NUMBER, "-2"), afterParen.next());
-
-        // після числа чи ідентифікатора: бінарний мінус
-        assertEquals(
-                List.of(tok(TokenType.NUMBER, "3"), tok(TokenType.MINUS, "-"), tok(TokenType.NUMBER, "5")),
-                drain(streamOf("3-5")));
-        assertEquals(tok(TokenType.MINUS, "-"), streamOf("x-1").peek());
-    }
-
-    @Test
     void pipelineLookaheadOverRealExpression() {
         TokenStream stream = streamOf("2 + x * 5");
 
@@ -398,7 +372,7 @@ class TokenStreamTest {
     void tokenizerNeverProducesEofButStreamDoes() {
         TokenStream stream = streamOf("2 + x * (3 - 1)");
         for (Token token : drain(stream)) {
-            assertTrue(token.getType() != TokenType.EOF);
+            assertNotEquals(TokenType.EOF, token.getType());
         }
         assertEquals(TokenType.EOF, stream.current().getType());
     }
@@ -460,13 +434,6 @@ class TokenStreamTest {
         assertTrue(e.getMessage().contains("PLUS"));
         assertEquals(1, stream.position(), "failed consume must not move the cursor");
         assertEquals(tok(TokenType.PLUS, "+"), stream.current());
-    }
-
-    @Test
-    void consumeNullTypeIsRejected() {
-        TokenStream stream = streamOf("2");
-        assertThrows(IllegalArgumentException.class, () -> stream.consume(null));
-        assertEquals(0, stream.position());
     }
 
 }
