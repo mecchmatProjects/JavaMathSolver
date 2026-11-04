@@ -27,6 +27,7 @@ public final class CommandCatalog {
             case "tokenize":
             case "token-stats":
             case "validate-expr":
+            case "walk-expr":
                 return ArgKind.TEXT;
             default:
                 return ArgKind.NUMERIC;
@@ -141,6 +142,7 @@ public final class CommandCatalog {
             case "tokenize":
             case "token-stats":
             case "validate-expr":
+            case "walk-expr":
                 return VARIADIC_TEXT;
 
             default:

@@ -126,4 +126,15 @@ class CommandCatalogTest {
             assertEquals(CommandCatalog.VARIADIC_POLYGON, CommandCatalog.getExpectedArgsCount(command), command);
         }
     }
+
+    // ===================================================================
+    // C-19
+    // ===================================================================
+
+    @Test
+    void walkExprIsATextCommand() {
+        assertEquals(CommandCatalog.ArgKind.TEXT, CommandCatalog.getArgKind("walk-expr"));
+        assertEquals(CommandCatalog.VARIADIC_TEXT, CommandCatalog.getExpectedArgsCount("walk-expr"));
+    }
+
 }
