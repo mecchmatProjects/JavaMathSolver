@@ -5,6 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
+import java.util.List;
+
+
 import org.junit.jupiter.api.Test;
 
 class TokenStreamTest {
@@ -255,4 +259,214 @@ class TokenStreamTest {
         stream.next();
         assertEquals(stream.peek(1), stream.peek()); // обидва EOF у кінці
     }
+
+    // =====================================================================
+    // C19: expression -> Tokenizer -> Token[] -> TokenStream
+    // Навігація по справжньому математичному виразу, а не по вручну зібраних токенах.
+    // =====================================================================
+
+    /** Весь конвеєр C19 в одному місці. */
+    private static TokenStream streamOf(String expression) {
+        Token[] tokens = Tokenizer.tokenize(expression);
+        return new TokenStream(tokens);
+    }
+
+    private static Token tok(TokenType type, String lexeme) {
+        return new Token(type, lexeme);
+    }
+
+    /** Читає потік до кінця через hasNext()/next(). */
+    private static List<Token> drain(TokenStream stream) {
+        List<Token> result = new ArrayList<>();
+        while (stream.hasNext()) {
+            result.add(stream.next());
+        }
+        return result;
+    }
+
+    @Test
+    void pipelineWalksMathExpressionInOrder() {
+        TokenStream stream = streamOf("2*x + 3");
+
+        assertEquals(tok(TokenType.NUMBER, "2"), stream.next());
+        assertEquals(tok(TokenType.MULTIPLY, "*"), stream.next());
+        assertEquals(tok(TokenType.IDENTIFIER, "x"), stream.next());
+        assertEquals(tok(TokenType.PLUS, "+"), stream.next());
+        assertEquals(tok(TokenType.NUMBER, "3"), stream.next());
+
+        assertFalse(stream.hasNext());
+        assertEquals(EOF, stream.current());
+        assertEquals(5, stream.position());
+    }
+
+    @Test
+    void pipelineHandlesFunctionCallParenthesesAndPower() {
+        List<Token> expected = List.of(
+                tok(TokenType.IDENTIFIER, "sin"),
+                tok(TokenType.LEFT_PARENTHESIS, "("),
+                tok(TokenType.IDENTIFIER, "x"),
+                tok(TokenType.RIGHT_PARENTHESIS, ")"),
+                tok(TokenType.POWER, "^"),
+                tok(TokenType.NUMBER, "2"));
+        assertEquals(expected, drain(streamOf("sin(x) ^ 2")));
+    }
+
+    @Test
+    void pipelineKeepsDecimalNumberAsOneToken() {
+        TokenStream stream = streamOf("3.14 * r");
+        assertEquals(tok(TokenType.NUMBER, "3.14"), stream.next());
+        assertEquals(tok(TokenType.MULTIPLY, "*"), stream.next());
+        assertEquals(tok(TokenType.IDENTIFIER, "r"), stream.next());
+    }
+
+    @Test
+    void pipelineIgnoresWhitespace() {
+        assertEquals(drain(streamOf("2*x+3")), drain(streamOf("  2 * x   +\t3 ")));
+    }
+
+    @Test
+    void pipelineMinusIsSignOnlyInOperandPosition() {
+        // на початку виразу: знак числа
+        assertEquals(tok(TokenType.NUMBER, "-5"), streamOf("-5 + 3").current());
+
+        // після оператора: знак числа
+        TokenStream afterOperator = streamOf("2*-3");
+        afterOperator.next(); // 2
+        afterOperator.next(); // *
+        assertEquals(tok(TokenType.NUMBER, "-3"), afterOperator.next());
+
+        // після '(': знак числа
+        TokenStream afterParen = streamOf("(-2)");
+        afterParen.next(); // (
+        assertEquals(tok(TokenType.NUMBER, "-2"), afterParen.next());
+
+        // після числа чи ідентифікатора: бінарний мінус
+        assertEquals(
+                List.of(tok(TokenType.NUMBER, "3"), tok(TokenType.MINUS, "-"), tok(TokenType.NUMBER, "5")),
+                drain(streamOf("3-5")));
+        assertEquals(tok(TokenType.MINUS, "-"), streamOf("x-1").peek());
+    }
+
+    @Test
+    void pipelineLookaheadOverRealExpression() {
+        TokenStream stream = streamOf("2 + x * 5");
+
+        assertEquals(tok(TokenType.NUMBER, "2"), stream.peek(0));
+        assertEquals(tok(TokenType.PLUS, "+"), stream.peek(1));
+        assertEquals(tok(TokenType.IDENTIFIER, "x"), stream.peek(2));
+        assertEquals(tok(TokenType.MULTIPLY, "*"), stream.peek(3));
+        assertEquals(tok(TokenType.NUMBER, "5"), stream.peek(4));
+        assertEquals(EOF, stream.peek(5));
+        assertEquals(0, stream.position());
+    }
+
+    @Test
+    void pipelinePeekFollowsTheCursor() {
+        TokenStream stream = streamOf("2 + x");
+
+        stream.next(); // 2
+        assertEquals(tok(TokenType.PLUS, "+"), stream.current());
+        assertEquals(tok(TokenType.IDENTIFIER, "x"), stream.peek());
+
+        stream.next(); // +
+        assertEquals(tok(TokenType.IDENTIFIER, "x"), stream.current());
+        assertEquals(EOF, stream.peek());
+    }
+
+    @Test
+    void pipelineParserStyleLoopVisitsEveryToken() {
+        String expression = "2*x^2 + 3*x - 5";
+        TokenStream stream = streamOf(expression);
+
+        int visited = 0;
+        while (stream.current().getType() != TokenType.EOF) {
+            stream.next();
+            visited++;
+        }
+        assertEquals(Tokenizer.tokenize(expression).length, visited);
+    }
+
+    @Test
+    void pipelineStreamMatchesTokenizerOutputExactly() {
+        String expression = "2*x + sin(x) - 4";
+        Token[] tokens = Tokenizer.tokenize(expression);
+
+        assertEquals(List.of(tokens), drain(new TokenStream(tokens)));
+    }
+
+    @Test
+    void tokenizerNeverProducesEofButStreamDoes() {
+        TokenStream stream = streamOf("2 + x * (3 - 1)");
+        for (Token token : drain(stream)) {
+            assertTrue(token.getType() != TokenType.EOF);
+        }
+        assertEquals(TokenType.EOF, stream.current().getType());
+    }
+
+    @Test
+    void pipelineKeepsUnknownTokensInTheStream() {
+        // tokenizer не відхиляє "@": це UNKNOWN, і потік має його віддати
+        TokenStream stream = streamOf("2 @ 3");
+        assertEquals(tok(TokenType.NUMBER, "2"), stream.next());
+        assertEquals(tok(TokenType.UNKNOWN, "@"), stream.next());
+        assertEquals(tok(TokenType.NUMBER, "3"), stream.next());
+        assertFalse(stream.hasNext());
+    }
+
+    @Test
+    void pipelineResetAllowsSecondPass() {
+        TokenStream stream = streamOf("(2 + x) * 3");
+        List<Token> first = drain(stream);
+
+        stream.reset();
+
+        assertEquals(0, stream.position());
+        assertEquals(first, drain(stream));
+    }
+
+    @Test
+    void pipelineEmptyAndBlankExpressionsGiveEmptyStream() {
+        for (String expression : new String[] {"", "   ", "\t "}) {
+            TokenStream stream = streamOf(expression);
+            assertFalse(stream.hasNext(), "expression: '" + expression + "'");
+            assertEquals(EOF, stream.current());
+            assertEquals(EOF, stream.peek());
+            assertEquals(0, stream.position());
+        }
+    }
+
+    // ---- consume() over a real expression ----
+
+    @Test
+    void consumeFollowsTheShapeOfAnExpression() {
+        TokenStream stream = streamOf("(x)");
+
+        assertEquals(tok(TokenType.LEFT_PARENTHESIS, "("), stream.consume(TokenType.LEFT_PARENTHESIS));
+        assertEquals(tok(TokenType.IDENTIFIER, "x"), stream.consume(TokenType.IDENTIFIER));
+        assertEquals(tok(TokenType.RIGHT_PARENTHESIS, ")"), stream.consume(TokenType.RIGHT_PARENTHESIS));
+        assertEquals(EOF, stream.consume(TokenType.EOF));
+        assertEquals(3, stream.position());
+    }
+
+    @Test
+    void consumeWrongTypeThrowsParseExceptionAndKeepsPosition() {
+        TokenStream stream = streamOf("2 + x");
+        stream.next(); // current = "+"
+
+        ParseException e = assertThrows(ParseException.class, () -> stream.consume(TokenType.IDENTIFIER));
+
+        assertEquals(1, e.getPosition());
+        assertTrue(e.getMessage().contains("IDENTIFIER"));
+        assertTrue(e.getMessage().contains("PLUS"));
+        assertEquals(1, stream.position(), "failed consume must not move the cursor");
+        assertEquals(tok(TokenType.PLUS, "+"), stream.current());
+    }
+
+    @Test
+    void consumeNullTypeIsRejected() {
+        TokenStream stream = streamOf("2");
+        assertThrows(IllegalArgumentException.class, () -> stream.consume(null));
+        assertEquals(0, stream.position());
+    }
+
 }
