@@ -67,4 +67,10 @@ class VariableExpressionTest {
         assertNotEquals(null, x);
         assertNotEquals("x", x);
     }
+
+    @Test
+    void evaluateThrowsWhenVariablesMapIsNull() {
+        Expression x = new VariableExpression("x");
+        assertThrows(IllegalArgumentException.class, () -> x.evaluate(null));
+    }
 }
