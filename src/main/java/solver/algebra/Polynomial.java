@@ -82,9 +82,21 @@ public class Polynomial {
     }
 
     @Override
+    public int hashCode() {
+        return Arrays.hashCode(coeffs);
+    }
+
+    private static String formatCoeff(double val) {
+        if (Math.abs(val - Math.round(val)) < EPSILON) {
+            return String.valueOf(Math.round(val));
+        }
+        return String.valueOf(val);
+    }
+
+    @Override
     public String toString() {
         if (isZero()) {
-            return "0.0";
+            return "0";
         }
         StringBuilder sb = new StringBuilder();
         for (int i = coeffs.length - 1; i >= 0; i--) {
@@ -99,7 +111,7 @@ public class Polynomial {
 
             double absC = Math.abs(c);
             if (i == 0 || Math.abs(absC - 1.0) >= EPSILON) {
-                sb.append(absC);
+                sb.append(formatCoeff(absC));
             }
             if (i >= 1) {
                 sb.append("x");
@@ -209,4 +221,36 @@ public class Polynomial {
         return divideAndRemainder(other)[1];
     }
 
+    /**
+     * Знаходить дійсні корені для поліномів степеня 1 (лінійні) та степеня 2 (квадратні) (Task A8).
+     */
+    public double[] roots() {
+        int deg = degree();
+        if (deg == 0) {
+            return new double[0];
+        }
+        if (deg == 1) {
+            // a1 * x + a0 = 0  =>  x = -a0 / a1
+            return new double[]{-coeffs[0] / coeffs[1]};
+        }
+        if (deg == 2) {
+            // a2 * x^2 + a1 * x + a0 = 0
+            double a = coeffs[2];
+            double b = coeffs[1];
+            double c = coeffs[0];
+            double d = b * b - 4 * a * c;
+
+            if (d < -EPSILON) {
+                return new double[0];
+            }
+            if (Math.abs(d) <= EPSILON) {
+                return new double[]{-b / (2 * a)};
+            }
+            double sqrtD = Math.sqrt(d);
+            double r1 = (-b - sqrtD) / (2 * a);
+            double r2 = (-b + sqrtD) / (2 * a);
+            return new double[]{Math.min(r1, r2), Math.max(r1, r2)};
+        }
+        throw new UnsupportedOperationException("Roots calculation is currently supported only for degree 1 and 2");
+    }
 }
