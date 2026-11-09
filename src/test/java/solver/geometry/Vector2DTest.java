@@ -129,4 +129,9 @@ class Vector2DTest {
     void toStringShowsFields() {
         assertEquals("Vector2D(3.0, -4.0)", Vector2D.of(3, -4).toString());
     }
+
+    @Test
+    void equalVectorsHaveEqualHashCodes() {
+        assertEquals(Vector2D.of(1.5, -2).hashCode(), Vector2D.of(1.5, -2).hashCode());
+    }
 }
