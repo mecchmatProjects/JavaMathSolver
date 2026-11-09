@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PointTest {
 
+    private static final double EPS = 1e-9;
+
     @Test
     void ofStoresXAndYInTheRightFields() {
         Point p = Point.of(3.5, -2.25);
@@ -41,18 +43,10 @@ class PointTest {
         Point b = Point.of(1, 2);
         assertNotSame(a, b);
         assertEquals(a, b);
+        assertEquals(b, a);
         assertEquals(1.0, a.x);
         assertEquals(1.0, b.x);
         assertEquals(2.0, a.y);
-    }
-
-    @Test
-    void pointsWithSameCoordinatesAreEqual() {
-        Point a = Point.of(1.5, -2);
-        Point b = Point.of(1.5, -2);
-        assertNotSame(a, b);
-        assertEquals(a, b);
-        assertEquals(b, a);
     }
 
     @Test
@@ -88,7 +82,7 @@ class PointTest {
 
     @Test
     void pointNaNEqualsNaN() {
-        // Double.compare вважає NaN рівним NaN, тож equals лишається рефлексивним
+        // Double.compare treats NaN as equal to NaN, so equals stays reflexive
         Point a = Point.of(Double.NaN, 0);
         Point b = Point.of(Double.NaN, 0);
         assertEquals(a, b);
@@ -100,13 +94,42 @@ class PointTest {
     }
 
     @Test
-    void computedPointEqualsExpected() {
-        assertEquals(Point.of(2, 2), Point.of(-2, 4).midpoint(Point.of(6, 0)));
+    void toStringShowsFields() {
+        assertEquals("Point(1.0, 2.0)", Point.of(1, 2).toString());
+    }
+
+    // ---------- operations ----------
+
+    @Test
+    void distanceToUsesPythagoras() {
+        assertEquals(5.0, Point.of(0, 0).distanceTo(Point.of(3, 4)), EPS);
+        assertEquals(5.0, Point.of(3, 4).distanceTo(Point.of(0, 0)), EPS);
+    }
+
+    @Test
+    void distanceToSelfIsZero() {
+        Point p = Point.of(-2.5, 7);
+        assertEquals(0.0, p.distanceTo(p));
+    }
+
+    @Test
+    void vectorToGivesDifference() {
+        assertEquals(Vector2D.of(3, -4), Point.of(1, 2).vectorTo(Point.of(4, -2)));
+    }
+
+    @Test
+    void translateMovesByVector() {
         assertEquals(Point.of(3, -2), Point.of(1, 1).translate(Vector2D.of(2, -3)));
     }
 
     @Test
-    void toStringShowsFields() {
-        assertEquals("Point(1.0, 2.0)", Point.of(1, 2).toString());
+    void midpointIsAverage() {
+        assertEquals(Point.of(2, 2), Point.of(-2, 4).midpoint(Point.of(6, 0)));
+    }
+
+    @Test
+    void approxEqualsRespectsTolerance() {
+        assertTrue(Point.of(1, 1).approxEquals(Point.of(1 + 1e-12, 1), EPS));
+        assertFalse(Point.of(1, 1).approxEquals(Point.of(1.1, 1), EPS));
     }
 }

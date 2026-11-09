@@ -1,9 +1,9 @@
 package solver.geometry;
 
+import static solver.geometry.GeoMath.EPS;
+import static solver.geometry.GeoMath.clamp;
 
 public final class Circle {
-
-    private static final double EPS = 1e-9;
 
     private final Point center;
     private final double radius;
@@ -61,8 +61,12 @@ public final class Circle {
     }
 
     public boolean intersects(Circle c) {
-        double d = center.distanceTo(c.center);
-        return d <= radius + c.radius + EPS && d >= Math.abs(radius - c.radius) - EPS;
+        return intersects(center.distanceTo(c.center), radius, c.radius);
+    }
+
+    /** Whether two circles with radii r1, r2 and center distance d have common points. */
+    static boolean intersects(double d, double r1, double r2) {
+        return d <= r1 + r2 + EPS && d >= Math.abs(r1 - r2) - EPS;
     }
 
     public Point[] intersection(Circle c) {
@@ -115,10 +119,6 @@ public final class Circle {
         double alpha = Math.acos(clamp((d * d + r1 * r1 - r2 * r2) / (2 * d * r1)));
         double beta = Math.acos(clamp((d * d + r2 * r2 - r1 * r1) / (2 * d * r2)));
         return r1 * r1 * (alpha - Math.sin(2 * alpha) / 2) + r2 * r2 * (beta - Math.sin(2 * beta) / 2);
-    }
-
-    private static double clamp(double v) {
-        return Math.max(-1.0, Math.min(1.0, v));
     }
 
     @Override

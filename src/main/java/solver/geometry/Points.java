@@ -4,7 +4,7 @@ import static solver.core.Messages.*;
 import static solver.core.Output.*;
 
 /**
- * GEO: робота з масивом точок Point[] (Lab 3, Tasks G2-G5).
+ * GEO: operations on a Point[] array (Lab 3, Tasks G2-G5).
  */
 public final class Points {
 
@@ -14,7 +14,7 @@ public final class Points {
             printError(ERR_POINT_NULL);
             return Double.NaN;
         }
-        return Math.hypot(b.x - a.x, b.y - a.y);
+        return a.distanceTo(b);
     }
 
     // Task G3: bounding box -> {minX, maxX, minY, maxY}
@@ -73,8 +73,7 @@ public final class Points {
                 printError(ERR_POINTS_NULL_ELEMENT);
                 return false;
             }
-            if (!isFinite(points[i])) {
-                printError(ERR_POINTS_NOT_FINITE);
+            if (!checkPoint(points[i])) {
                 return false;
             }
         }
@@ -86,14 +85,10 @@ public final class Points {
             printError(ERR_POINT_NULL);
             return false;
         }
-        if (!isFinite(p)) {
+        if (!Double.isFinite(p.x) || !Double.isFinite(p.y)) {
             printError(ERR_POINTS_NOT_FINITE);
             return false;
         }
         return true;
-    }
-
-    private static boolean isFinite(Point p) {
-        return Double.isFinite(p.x) && Double.isFinite(p.y);
     }
 }
