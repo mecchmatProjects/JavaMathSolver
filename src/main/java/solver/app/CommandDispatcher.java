@@ -13,8 +13,7 @@ import static solver.geometry.Shapes.*;
 import static solver.geometry.Triangles.*;
 import static solver.geometry.Solids.*;
 import static solver.geometry.Intersections.*;
-import static solver.geometry.Polygon.*;
-import static solver.geometry.MonteCarlo.*;
+import static solver.geometry.Polygon2D.processPolygon;
 
 /**
  * CORE-11: диспетчеризація команд.

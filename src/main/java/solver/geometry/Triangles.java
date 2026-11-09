@@ -3,9 +3,10 @@ package solver.geometry;
 import java.util.Locale;
 import static solver.core.Output.*;
 import static solver.core.Messages.*;
+import static solver.geometry.GeoMath.clamp;
 
 /**
- * GEO: трикутники.
+ * GEO: triangles (including a Monte Carlo estimate of the probability to form a triangle).
  */
 public final class Triangles {
 
@@ -134,9 +135,9 @@ public final class Triangles {
             printError(ERR_INVALID_INPUT);
             return;
         }
-        double cosA = Math.min(1.0, Math.max(-1.0, (sideB * sideB + sideC * sideC - sideA * sideA) / (2 * sideB * sideC)));
-        double cosB = Math.min(1.0, Math.max(-1.0, (sideA * sideA + sideC * sideC - sideB * sideB) / (2 * sideA * sideC)));
-        double cosC = Math.min(1.0, Math.max(-1.0, (sideA * sideA + sideB * sideB - sideC * sideC) / (2 * sideA * sideB)));
+        double cosA = clamp((sideB * sideB + sideC * sideC - sideA * sideA) / (2 * sideB * sideC));
+        double cosB = clamp((sideA * sideA + sideC * sideC - sideB * sideB) / (2 * sideA * sideC));
+        double cosC = clamp((sideA * sideA + sideB * sideB - sideC * sideC) / (2 * sideA * sideB));
 
         double radA = Math.acos(cosA);
         double radB = Math.acos(cosB);
@@ -144,5 +145,25 @@ public final class Triangles {
 
         printResult(String.format(Locale.ROOT, "A=%f rad (%f deg), B=%f rad (%f deg), C=%f rad (%f deg)",
                 radA, Math.toDegrees(radA), radB, Math.toDegrees(radB), radC, Math.toDegrees(radC)));
+    }
+
+    // Monte Carlo simulation for triangle probability
+    public static void calculateMonteCarloTriangle(int totalTrials) {
+        calculateMonteCarloTriangle(totalTrials, 42L);
+    }
+
+    public static void calculateMonteCarloTriangle(int totalTrials, long seed) {
+        if (totalTrials <= 0) {
+            printError(ERR_INVALID_INPUT);
+            return;
+        }
+        java.util.Random rnd = new java.util.Random(seed);
+        int validCount = 0;
+        for (int i = 0; i < totalTrials; i++) {
+            if (triangleValid(rnd.nextDouble(), rnd.nextDouble(), rnd.nextDouble())) {
+                validCount++;
+            }
+        }
+        printResult((double) validCount / totalTrials);
     }
 }

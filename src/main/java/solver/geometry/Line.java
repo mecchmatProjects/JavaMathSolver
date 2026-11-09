@@ -1,9 +1,8 @@
 package solver.geometry;
 
+import static solver.geometry.GeoMath.EPS;
 
 public final class Line {
-
-    private static final double EPS = 1e-9;
 
     private final Point point;
     private final Vector2D direction;
