@@ -188,6 +188,11 @@ public final class Polygon2D {
         if (!check(polygon) || !Points.checkPoint(p)) {
             return false;
         }
+        return containsPoint(polygon, p);
+    }
+
+    /** Point-in-polygon test (boundary counts as inside) for an already validated open contour. */
+    static boolean containsPoint(Point[] polygon, Point p) {
         boolean inside = false;
         for (int i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
             Point a = polygon[i];
