@@ -187,4 +187,28 @@ class CircleTest {
     void toStringShowsFields() {
         assertEquals("Circle(Point(0.0, 0.0), r=5.0)", Circle.of(0, 0, 5).toString());
     }
+
+    // ---------- Lab 5: Figure contract and affine transforms ----------
+
+    @Test
+    void perimeterIsCircumference() {
+        assertEquals(2 * Math.PI * 3, Circle.of(0, 0, 3).perimeter(), EPS);
+    }
+
+    @Test
+    void transformsMoveCenterAndScaleRadius() {
+        Circle c = Circle.of(1, 0, 2);
+        assertEquals(Circle.of(4, -1, 2), c.translate(Vector2D.of(3, -1)));
+        Circle rotated = c.rotate(Math.PI, Point.of(0, 0));
+        assertPoint(-1, 0, rotated.center());
+        assertEquals(2.0, rotated.radius(), EPS);
+        Circle scaled = c.scale(-2, Point.of(0, 0));
+        assertPoint(-2, 0, scaled.center());
+        assertEquals(4.0, scaled.radius(), EPS);
+    }
+
+    @Test
+    void equalCirclesHaveEqualHashCodes() {
+        assertEquals(Circle.of(1, 2, 3).hashCode(), Circle.of(1, 2, 3).hashCode());
+    }
 }
