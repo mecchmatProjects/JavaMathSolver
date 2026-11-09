@@ -22,7 +22,7 @@ public final class NumberParser {
         for (int i = 1; i < args.length; i++) {
             Number value = parseNumber(args[i]);
             if (value == null) {
-                printError(ERR_INVALID_NUMBER + args[i]);
+                printError(ERR_INVALID_NUMBER + displayLexeme(args[i]));
                 return null;
             }
             result[i - 1] = value;
@@ -32,6 +32,9 @@ public final class NumberParser {
 
     // Long для цілих у межах long, Double для решти; null, якщо формат некоректний
     public static Number parseNumber(String raw) {
+        if (raw == null) {
+            return null;
+        }
         String token = raw.trim();
         try {
             if (INTEGER_PATTERN.matcher(token).matches()) {
