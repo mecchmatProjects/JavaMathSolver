@@ -12,6 +12,11 @@ public interface Figure {
     /** Shortest distance from the figure to point p (0 if p belongs to the figure). */
     double distanceTo(Point p);
 
+    /** Shortest distance between this figure and any other figure (0 if they touch or overlap). */
+    default double distanceTo(Figure other) {
+        return FigureDistance.between(this, other);
+    }
+
     /** Affine transform: translation by vector v. */
     Figure translate(Vector2D v);
 
