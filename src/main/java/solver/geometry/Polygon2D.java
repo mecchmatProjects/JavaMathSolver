@@ -1,36 +1,15 @@
 package solver.geometry;
 
 import java.util.Arrays;
-import java.util.Locale;
 
 import static solver.core.Messages.*;
 import static solver.core.Output.*;
 import static solver.geometry.GeoMath.*;
 
 /**
- * GEO: polygon as a Point[] array of vertices in traversal order (Lab 3, Task G6)
- * and the CLI command polygon (perimeter and convexity).
+ * GEO: polygon as a Point[] array of vertices in traversal order (Lab 3, Task G6).
  */
 public final class Polygon2D {
-
-    // CLI command "polygon": perimeter and convexity
-    public static void processPolygon(double... coords) {
-        if (coords == null || coords.length < 6 || coords.length % 2 != 0) {
-            printError(ERR_INVALID_INPUT);
-            return;
-        }
-        Point[] polygon = new Point[coords.length / 2];
-        for (int i = 0; i < polygon.length; i++) {
-            polygon[i] = Point.of(coords[2 * i], coords[2 * i + 1]);
-        }
-        double perimeter = perimeter(polygon);
-        if (Double.isNaN(perimeter)) {
-            return;
-        }
-        boolean isConvex = isConvex(polygon);
-
-        printResult(String.format(Locale.ROOT, "perimeter=%f, convex=%b", perimeter, isConvex));
-    }
 
     // Task G6: perimeter
     public static double perimeter(Point[] polygon) {

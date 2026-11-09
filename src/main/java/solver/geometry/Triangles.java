@@ -6,7 +6,7 @@ import static solver.core.Messages.*;
 import static solver.geometry.GeoMath.clamp;
 
 /**
- * GEO: triangles (including a Monte Carlo estimate of the probability to form a triangle).
+ * GEO: triangles.
  */
 public final class Triangles {
 
@@ -147,23 +147,4 @@ public final class Triangles {
                 radA, Math.toDegrees(radA), radB, Math.toDegrees(radB), radC, Math.toDegrees(radC)));
     }
 
-    // Monte Carlo simulation for triangle probability
-    public static void calculateMonteCarloTriangle(int totalTrials) {
-        calculateMonteCarloTriangle(totalTrials, 42L);
-    }
-
-    public static void calculateMonteCarloTriangle(int totalTrials, long seed) {
-        if (totalTrials <= 0) {
-            printError(ERR_INVALID_INPUT);
-            return;
-        }
-        java.util.Random rnd = new java.util.Random(seed);
-        int validCount = 0;
-        for (int i = 0; i < totalTrials; i++) {
-            if (triangleValid(rnd.nextDouble(), rnd.nextDouble(), rnd.nextDouble())) {
-                validCount++;
-            }
-        }
-        printResult((double) validCount / totalTrials);
-    }
 }
