@@ -4,7 +4,7 @@ import static solver.core.Output.*;
 import static solver.core.Messages.*;
 
 /**
- * GEO: метод Монте-Карло для трикутника.
+ * GEO: Monte Carlo method for triangles.
  */
 public final class MonteCarlo {
 
@@ -24,8 +24,7 @@ public final class MonteCarlo {
         java.util.Random rnd = new java.util.Random(seed);
         int validCount = 0;
         for (int i = 0; i < totalTrials; i++) {
-            double sideA = rnd.nextDouble(), sideB = rnd.nextDouble(), sideC = rnd.nextDouble();
-            if (sideA + sideB > sideC && sideA + sideC > sideB && sideB + sideC > sideA) {
+            if (Triangles.triangleValid(rnd.nextDouble(), rnd.nextDouble(), rnd.nextDouble())) {
                 validCount++;
             }
         }
