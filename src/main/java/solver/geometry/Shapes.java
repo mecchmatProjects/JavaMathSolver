@@ -4,7 +4,7 @@ import static solver.core.Output.*;
 import static solver.core.Messages.*;
 
 /**
- * GEO: коло, прямокутник, еліпс.
+ * GEO: circle, rectangle, ellipse.
  */
 public final class Shapes {
 

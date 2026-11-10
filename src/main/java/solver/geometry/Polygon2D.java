@@ -1,14 +1,15 @@
 package solver.geometry;
 
+import java.util.Arrays;
+
 import static solver.core.Messages.*;
 import static solver.core.Output.*;
+import static solver.geometry.GeoMath.*;
 
 /**
- * GEO: багатокутник як масив вершин Point[] у порядку обходу (Lab 3, Task G6).
+ * GEO: polygon as a Point[] array of vertices in traversal order (Lab 3, Task G6).
  */
 public final class Polygon2D {
-
-    static final double EPS = 1e-9;
 
     // Task G6: perimeter
     public static double perimeter(Point[] polygon) {
@@ -18,7 +19,7 @@ public final class Polygon2D {
         }
         double sum = 0;
         for (int i = 0; i < polygon.length; i++) {
-            sum += Points.distance(polygon[i], polygon[(i + 1) % polygon.length]);
+            sum += polygon[i].distanceTo(polygon[(i + 1) % polygon.length]);
         }
         return sum;
     }
@@ -90,11 +91,7 @@ public final class Polygon2D {
             printError(ERR_HULL_DEGENERATE);
             return null;
         }
-        Point[] result = new Point[k - 1];
-        for (int i = 0; i < k - 1; i++) {
-            result[i] = hull[i];
-        }
-        return result;
+        return Arrays.copyOf(hull, k - 1);
     }
 
     public static boolean isSimple(Point[] polygon) {
@@ -113,7 +110,7 @@ public final class Polygon2D {
                     Point shared = j == i + 1 ? a2 : a1;
                     Point farA = j == i + 1 ? a1 : a2;
                     Point farB = j == i + 1 ? b2 : b1;
-                    double dot = (farA.x - shared.x) * (farB.x - shared.x) + (farA.y - shared.y) * (farB.y - shared.y);
+                    double dot = shared.vectorTo(farA).dot(shared.vectorTo(farB));
                     if (orient(farA, shared, farB) == 0 && dot > 0) {
                         return false;
                     }
@@ -153,9 +150,7 @@ public final class Polygon2D {
                     if (c != 0) {
                         triangles[triangleCount++] = new Point[]{prev, cur, next};
                     }
-                    for (int j = i; j < count - 1; j++) {
-                        ordered[j] = ordered[j + 1];
-                    }
+                    System.arraycopy(ordered, i + 1, ordered, i, count - 1 - i);
                     count--;
                     clipped = true;
                 }
@@ -168,11 +163,7 @@ public final class Polygon2D {
         if (orient(ordered[0], ordered[1], ordered[2]) != 0) {
             triangles[triangleCount++] = new Point[]{ordered[0], ordered[1], ordered[2]};
         }
-        Point[][] result = new Point[triangleCount][];
-        for (int i = 0; i < triangleCount; i++) {
-            result[i] = triangles[i];
-        }
-        return result;
+        return Arrays.copyOf(triangles, triangleCount);
     }
 
     // Task G6: affine transformations (translation, scaling, rotation)
@@ -236,11 +227,7 @@ public final class Polygon2D {
                 }
             }
         }
-        Point[][] result = new Point[pieceCount][];
-        for (int i = 0; i < pieceCount; i++) {
-            result[i] = pieces[i];
-        }
-        return result;
+        return Arrays.copyOf(pieces, pieceCount);
     }
 
     static Point[] clipByEdge(Point[] polygon, Point a, Point b) {
@@ -255,17 +242,13 @@ public final class Polygon2D {
                 double dPrev = cross(a, b, prev);
                 double dCur = cross(a, b, cur);
                 double t = dPrev == dCur ? 1 : dPrev / (dPrev - dCur);
-                buffer[count++] = Point.of(prev.x + t * (cur.x - prev.x), prev.y + t * (cur.y - prev.y));
+                buffer[count++] = prev.translate(prev.vectorTo(cur).scale(t));
             }
             if (curIn) {
                 buffer[count++] = cur;
             }
         }
-        Point[] result = new Point[count];
-        for (int i = 0; i < count; i++) {
-            result[i] = buffer[i];
-        }
-        return result;
+        return Arrays.copyOf(buffer, count);
     }
 
     static Point[] transform(Point[] polygon, double a, double b, double c, double d, double e, double f) {
@@ -290,38 +273,6 @@ public final class Polygon2D {
             }
         }
         return true;
-    }
-
-    static boolean onSegment(Point a, Point b, Point p) {
-        double tol = EPS * Math.hypot(b.x - a.x, b.y - a.y);
-        return orient(a, b, p) == 0
-                && p.x >= Math.min(a.x, b.x) - tol && p.x <= Math.max(a.x, b.x) + tol
-                && p.y >= Math.min(a.y, b.y) - tol && p.y <= Math.max(a.y, b.y) + tol;
-    }
-
-    static boolean segmentsIntersect(Point p1, Point p2, Point p3, Point p4) {
-        int d1 = orient(p3, p4, p1);
-        int d2 = orient(p3, p4, p2);
-        int d3 = orient(p1, p2, p3);
-        int d4 = orient(p1, p2, p4);
-        if (d1 * d2 < 0 && d3 * d4 < 0) {
-            return true;
-        }
-        return onSegment(p3, p4, p1) || onSegment(p3, p4, p2) || onSegment(p1, p2, p3) || onSegment(p1, p2, p4);
-    }
-
-    /** Orientation of c relative to a->b with a tolerance relative to the edge lengths: 1 left, -1 right, 0 collinear. */
-    static int orient(Point a, Point b, Point c) {
-        double c0 = cross(a, b, c);
-        double scale = Math.hypot(b.x - a.x, b.y - a.y) * Math.hypot(c.x - a.x, c.y - a.y);
-        if (Math.abs(c0) <= EPS * scale) {
-            return 0;
-        }
-        return c0 > 0 ? 1 : -1;
-    }
-
-    static double cross(Point a, Point b, Point c) {
-        return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
     }
 
     static double signedArea(Point[] polygon) {
@@ -352,7 +303,7 @@ public final class Polygon2D {
         if (first == null || last == null || first.x != last.x || first.y != last.y) {
             return polygon;
         }
-        return java.util.Arrays.copyOf(polygon, polygon.length - 1);
+        return Arrays.copyOf(polygon, polygon.length - 1);
     }
 
     static boolean check(Point[] polygon) {
