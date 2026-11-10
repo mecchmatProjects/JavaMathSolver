@@ -93,6 +93,7 @@ public final class HelpPrinter {
         printHelpLine("tokenize \"expr\"", "list tokens: index, type, lexeme");
         printHelpLine("token-stats \"expr\"", "count numbers, identifiers, operators, parentheses");
         printHelpLine("validate-expr \"expr\"", "check that every token is recognised");
+        printHelpLine("walk-expr \"expr\"", "walk the token stream: position, token, next token");
 
         System.out.println();
         printHelpLine("help", "show this help");
