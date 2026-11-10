@@ -12,7 +12,8 @@
 ```text
 src/main/java/solver/
 ├── app/       MathSolver (main), CommandDispatcher, CommandCatalog, HelpPrinter
-├── core/      Messages, Output, NumberParser, ArgumentValidator, CharClassifier, TokenType, Token, Tokenizer
+├── core/      Messages, Output, NumberParser, ArgumentValidator, CharClassifier, TokenType, Token, Tokenizer, TokenStream, ParseException
+├── parser/    Parser (контракт TokenStream -> Expression)
 ├── algebra/   Arithmetic, Equations, NumberTheory, TaylorSeries, NumericArray, BasicStatic, Matrix
 └── geometry/  Distances, Shapes, Triangles, Solids, Intersections, Polygon, MonteCarlo, Point, Points, Polygon2D
 src/test/java/solver/   JUnit 5 тести
@@ -25,8 +26,9 @@ scripts/                регресійні кейси CLI (cases.txt, regressi
 | `core` | Парсинг чисел, валідація кількості аргументів, вивід результатів і помилок, tokenizer |
 | `algebra` | Арифметика, рівняння, теорія чисел, ряди Тейлора, статистика масивів, матриці |
 | `geometry` | Відстані, фігури, трикутники, тіла обертання, перетини, точки та багатокутники |
+| `parser` | Побудова дерева `Expression` з потоку токенів |
 
-Правило залежностей: `core` не імпортує інші пакети; `algebra` і `geometry` залежать тільки від `core`; `app` бачить усе.
+Правило залежностей: `core` не імпортує інші пакети; `algebra` і `geometry` залежать тільки від `core`; `parser` залежить від `core` і `algebra`; `app` бачить усе.
 
 ## Token model (з версії 0.4)
 Tokenizer повертає масив об'єктів `Token[]` замість двох паралельних масивів `String[]` + `TokenType[]` (Lab 3). Тип і текст лексеми тепер живуть в одному об'єкті й не можуть розсинхронізуватися.
@@ -105,6 +107,28 @@ a.hashCode() == b.hashCode()   // true — контракт equals/hashCode
 | `""`, `"   "` | `[]` (порожній масив) |
 
 Знак `-` входить у лексему числа, лише якщо це початок виразу або перед ним стоїть оператор чи `(`.
+
+### Parser API (C20)
+Архітектурна межа: `Tokenizer` відповідає на питання «які елементи містить текст?», `Parser` — «яка математична структура цих елементів?».
+
+```text
+String -> Tokenizer -> Token[] -> TokenStream -> Parser -> Expression
+```
+
+| Метод | Повертає | Примітка |
+|---|---|---|
+| `parse(TokenStream)` | `Expression` | основний контракт; розбір із поточної позиції потоку |
+| `parse(String)` | `Expression` | обгортка: `Tokenizer.tokenize` + `new TokenStream` |
+
+Поточна поведінка (повний розбір — у наступній версії):
+| Вхід | Результат |
+|---|---|
+| `null` | `IllegalArgumentException` |
+| `""`, `"   "`, потік на `EOF` | `ParseException: Error: Empty expression` |
+| `2 + x@` | `ParseException: Error: Unknown token '@' at position 3` |
+| `2*x^2 + 3*x - 5` | `UnsupportedOperationException: Parser is not implemented yet` |
+
+Перевірка `UNKNOWN` іде через `peek(offset)` і не зсуває курсор потоку. Цільова граматика (EBNF) задокументована в Javadoc класу `Parser`.
 
 ## Спосіб компіляції
 Варіант 1 — Maven (рекомендовано):
