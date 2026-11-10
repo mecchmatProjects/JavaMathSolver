@@ -132,4 +132,30 @@ class PointTest {
         assertTrue(Point.of(1, 1).approxEquals(Point.of(1 + 1e-12, 1), EPS));
         assertFalse(Point.of(1, 1).approxEquals(Point.of(1.1, 1), EPS));
     }
+
+    // ---------- Lab 5: Figure contract and affine transforms ----------
+
+    @Test
+    void rotateAboutCenter() {
+        Point p = Point.of(2, 1).rotate(Math.PI / 2, Point.of(1, 1));
+        assertEquals(1.0, p.x, EPS);
+        assertEquals(2.0, p.y, EPS);
+    }
+
+    @Test
+    void scaleAboutCenter() {
+        assertEquals(Point.of(5, 5), Point.of(3, 3).scale(2, Point.of(1, 1)));
+        assertEquals(Point.of(-1, -1), Point.of(3, 3).scale(-1, Point.of(1, 1)));
+    }
+
+    @Test
+    void pointContainsOnlyCoincidingPoint() {
+        assertTrue(Point.of(1, 2).contains(Point.of(1, 2 + 1e-12)));
+        assertFalse(Point.of(1, 2).contains(Point.of(1, 2.1)));
+    }
+
+    @Test
+    void equalPointsHaveEqualHashCodes() {
+        assertEquals(Point.of(1.5, -2).hashCode(), Point.of(1.5, -2).hashCode());
+    }
 }
