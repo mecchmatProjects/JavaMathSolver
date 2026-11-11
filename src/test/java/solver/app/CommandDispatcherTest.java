@@ -311,4 +311,28 @@ class CommandDispatcherTest {
         System.arraycopy(rest, 0, all, 2, rest.length);
         return all;
     }
+
+    // ===================================================================
+    // C-19
+    // ===================================================================
+
+    @Test
+    void walkExprPrintsEveryTokenWithItsNextToken() {
+        assertEquals(String.join("\n",
+                "0: NUMBER 2   (next: MULTIPLY *)",
+                "1: MULTIPLY *   (next: LEFT_PARENTHESIS ()",
+                "2: LEFT_PARENTHESIS (   (next: IDENTIFIER x)",
+                "3: IDENTIFIER x   (next: RIGHT_PARENTHESIS ))",
+                "4: RIGHT_PARENTHESIS )   (next: EOF <EOF>)"
+                ), capture(() -> CommandDispatcher.dispatchText("walk-expr", "2*(x)")));
+    }
+
+    @Test
+    void walkExprOnEmptyExpressionReportsNotEnoughArguments() {
+        assertEquals("Error: Not enough arguments",
+                capture(() -> CommandDispatcher.dispatchText("walk-expr", "")));
+        assertEquals("Error: Not enough arguments",
+                capture(() -> CommandDispatcher.dispatchText("walk-expr", "   ")));
+    }
+
 }
