@@ -34,4 +34,17 @@ public class ComplexNumber {
     public double abs() {
         return Math.sqrt(real * real + imaginary * imaginary);
     }
+
+    public ComplexNumber divide(ComplexNumber other){
+        double denominator = other.real * other.real + other.imaginary * other.imaginary; // Знаменник: c^2 + d^2
+
+        if (denominator == 0) {
+            throw new ArithmeticException("Ділення на нуль (дільник є нульовим комплексним числом)");
+        }
+
+        double newReal = (this.real * other.real + this.imaginary * other.imaginary) / denominator;
+        double newImaginary = (this.imaginary * other.real - this.real * other.imaginary) / denominator;
+
+        return new ComplexNumber(newReal, newImaginary);
+    }
 }

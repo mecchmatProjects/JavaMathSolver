@@ -64,6 +64,31 @@ public class ComplexNumberTest {
         assertEquals(0.0, result.getImaginary(), DELTA);
     }
 
+    @Test
+    void testDivide() {
+        ComplexNumber a = new ComplexNumber(1, 2); // 1 + 2i
+        ComplexNumber b = new ComplexNumber(3, 4); // 3 + 4i
+
+        // Знаменник: 3^2 + 4^2 = 25
+        // Дійсна частина: (1*3 + 2*4) / 25 = 11 / 25 = 0.44
+        // Уявна частина: (2*3 - 1*4) / 25 = 2 / 25 = 0.08
+        ComplexNumber result = a.divide(b);
+
+        assertEquals(0.44, result.getReal(), DELTA, "Дійсна частина при діленні");
+        assertEquals(0.08, result.getImaginary(), DELTA, "Уявна частина при діленні");
+    }
+
+    @Test
+    void testDivideByZero() {
+        ComplexNumber a = new ComplexNumber(5, -7);
+        ComplexNumber zero = new ComplexNumber(0, 0);
+
+        assertThrows(
+                ArithmeticException.class,
+                () -> a.divide(zero),
+                "Ділення на 0 + 0i має викидати ArithmeticException"
+        );
+    }
 
 
 }
