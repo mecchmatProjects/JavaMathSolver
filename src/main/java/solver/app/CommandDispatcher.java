@@ -20,6 +20,7 @@ import java.util.Locale;
 
 import solver.algebra.NumericArray;
 import solver.core.Token;
+import solver.core.TokenStream;
 import solver.core.TokenType;
 import solver.core.Tokenizer;
 import solver.geometry.Point;
@@ -464,6 +465,9 @@ public final class CommandDispatcher {
             case "tokenize":
                 printTokens(text);
                 break;
+            case "walk-expr":
+                printStreamWalk(text);
+                break;
             default:
                 printUnknownCommand(command);
                 break;
@@ -517,4 +521,25 @@ public final class CommandDispatcher {
             printLine(i + ": " + tokens[i].getType() + " " + displayLexeme(tokens[i].getLexeme()));
         }
     }
+
+    // C19: expression -> Tokenizer -> Token[] -> TokenStream
+    private static void printStreamWalk(String text) {
+        TokenStream stream = new TokenStream(Tokenizer.tokenize(text));
+        if (!stream.hasNext()) {
+            printError(ERR_NOT_ENOUGH_ARGS);
+            return;
+        }
+        while (stream.hasNext()) {
+            int position = stream.position();
+            Token current = stream.next();
+            printLine(position + ": " + describe(current)
+                    + "   (next: " + describe(stream.current()) + ")");
+        }
+    }
+
+    // One format for the current token and for "next": "TYPE lexeme"
+    private static String describe(Token token) {
+        return token.getType() + " " + displayLexeme(token.getLexeme());
+    }
+
 }
