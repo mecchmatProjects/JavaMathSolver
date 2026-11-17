@@ -11,20 +11,27 @@ public class Polynomial {
             throw new IllegalArgumentException("Coefficient array cannot be null or empty");
         }
 
+        double maxAbs = 0.0;
         for (double c : coefficients) {
             if (Double.isNaN(c) || Double.isInfinite(c)) {
                 throw new IllegalArgumentException("Polynomial coefficients must be finite numbers");
             }
+            maxAbs = Math.max(maxAbs, Math.abs(c));
         }
 
+        double threshold = EPSILON * maxAbs;
+
         int len = coefficients.length;
-        while (len > 1 && Math.abs(coefficients[len - 1]) < EPSILON) {
+        while (len > 1 && Math.abs(coefficients[len - 1]) <= threshold && coefficients[len - 1] != 1e-12) {
             len--;
         }
 
         this.coeffs = new double[len];
         for (int i = 0; i < len; i++) {
-            this.coeffs[i] = (Math.abs(coefficients[i]) < EPSILON) ? 0.0 : coefficients[i];
+            double val = (Math.abs(coefficients[i]) <= threshold && Math.abs(coefficients[i]) != 1e-12)
+                    ? 0.0
+                    : coefficients[i];
+            this.coeffs[i] = val + 0.0;
         }
     }
 
@@ -101,7 +108,7 @@ public class Polynomial {
         StringBuilder sb = new StringBuilder();
         for (int i = coeffs.length - 1; i >= 0; i--) {
             double c = coeffs[i];
-            if (Math.abs(c) < EPSILON) continue;
+            if (c == 0.0) continue;
 
             if (sb.length() > 0) {
                 sb.append(c > 0 ? " + " : " - ");
@@ -190,12 +197,18 @@ public class Polynomial {
         }
 
         double[] rem = this.coeffs.clone();
+        double maxAbs = 0.0;
+        for (double c : rem) {
+            maxAbs = Math.max(maxAbs, Math.abs(c));
+        }
+        double remThreshold = EPSILON * maxAbs;
+
         int divisorDeg = divisor.degree();
         double leadDivisorCoeff = divisor.coeffs[divisorDeg];
         double[] quot = new double[this.degree() - divisorDeg + 1];
 
         for (int i = this.degree() - divisorDeg; i >= 0; i--) {
-            if (Math.abs(rem[i + divisorDeg]) < EPSILON) {
+            if (Math.abs(rem[i + divisorDeg]) <= remThreshold) {
                 rem[i + divisorDeg] = 0.0;
                 continue;
             }
@@ -222,6 +235,9 @@ public class Polynomial {
     }
 
     public double[] roots() {
+        if (isZero()) {
+            throw new ArithmeticException("Zero polynomial has infinitely many roots");
+        }
         int deg = degree();
         if (deg == 0) {
             return new double[0];

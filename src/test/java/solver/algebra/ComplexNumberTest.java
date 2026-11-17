@@ -90,5 +90,57 @@ public class ComplexNumberTest {
         );
     }
 
+    @Test
+    void testEqualsAndHashCode() {
+        ComplexNumber a = new ComplexNumber(3, 4);
+        ComplexNumber b = new ComplexNumber(3, 4);
+        ComplexNumber c = new ComplexNumber(3, -4);
+        ComplexNumber d = new ComplexNumber(-3, 4);
 
+        assertEquals(a, a);
+        assertEquals(a, b);
+        assertEquals(b, a);
+        assertEquals(a.hashCode(), b.hashCode());
+
+        assertNotEquals(a, c);
+        assertNotEquals(a, d);
+        assertNotEquals(a, null);
+        assertNotEquals(a, "3.0 + 4.0i");
+    }
+
+    @Test
+    void testToStringFormats() {
+        assertEquals("3.0 + 4.0i", new ComplexNumber(3, 4).toString());
+        assertEquals("3.0 - 4.0i", new ComplexNumber(3, -4).toString());
+        assertEquals("5.0i", new ComplexNumber(0, 5).toString());
+        assertEquals("-5.0i", new ComplexNumber(0, -5).toString());
+        assertEquals("7.0", new ComplexNumber(7, 0).toString());
+        assertEquals("0.0", new ComplexNumber(0, 0).toString());
+    }
+
+    @Test
+    void testNegativeZeroNormalized() {
+        ComplexNumber prod = new ComplexNumber(-1, 0).multiply(new ComplexNumber(-1, 0));
+        ComplexNumber expected = new ComplexNumber(1, 0);
+
+        assertEquals(expected, prod);
+        assertEquals(expected.hashCode(), prod.hashCode());
+        assertEquals(new ComplexNumber(0, 0), new ComplexNumber(-0.0, -0.0));
+    }
+
+    @Test
+    void testDivideLargeNumbersDoesNotOverflow() {
+        ComplexNumber large = new ComplexNumber(1e200, 1e200);
+        ComplexNumber result = large.divide(large);
+
+        assertEquals(1.0, result.getReal(), DELTA);
+        assertEquals(0.0, result.getImaginary(), DELTA);
+    }
+
+    @Test
+    void testNonFiniteComponentsRejected() {
+        assertThrows(IllegalArgumentException.class, () -> new ComplexNumber(Double.NaN, 1.0));
+        assertThrows(IllegalArgumentException.class, () -> new ComplexNumber(1.0, Double.POSITIVE_INFINITY));
+        assertThrows(IllegalArgumentException.class, () -> new ComplexNumber(Double.NEGATIVE_INFINITY, 0.0));
+    }
 }

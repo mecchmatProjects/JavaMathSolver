@@ -7,8 +7,12 @@ public class ComplexNumber {
     private final double imaginary;
 
     public ComplexNumber(double real, double imaginary) {
-        this.real = real;
-        this.imaginary = imaginary;
+        if (Double.isNaN(real) || Double.isInfinite(real)
+                || Double.isNaN(imaginary) || Double.isInfinite(imaginary)) {
+            throw new IllegalArgumentException("Complex number components must be finite numbers");
+        }
+        this.real = real + 0.0;
+        this.imaginary = imaginary + 0.0;
     }
 
     public double getReal() {
@@ -50,12 +54,24 @@ public class ComplexNumber {
         if (other == null) {
             throw new IllegalArgumentException("Divisor complex number cannot be null");
         }
-        double denominator = other.real * other.real + other.imaginary * other.imaginary;
-        if (denominator == 0.0) {
+        double c = other.real;
+        double d = other.imaginary;
+        if (c == 0.0 && d == 0.0) {
             throw new ArithmeticException("Division by zero (divisor is zero complex number)");
         }
-        double newReal = (this.real * other.real + this.imaginary * other.imaginary) / denominator;
-        double newImaginary = (this.imaginary * other.real - this.real * other.imaginary) / denominator;
+        double newReal;
+        double newImaginary;
+        if (Math.abs(c) >= Math.abs(d)) {
+            double r = d / c;
+            double denom = c + d * r;
+            newReal = (this.real + this.imaginary * r) / denom;
+            newImaginary = (this.imaginary - this.real * r) / denom;
+        } else {
+            double r = c / d;
+            double denom = c * r + d;
+            newReal = (this.real * r + this.imaginary) / denom;
+            newImaginary = (this.imaginary * r - this.real) / denom;
+        }
         return new ComplexNumber(newReal, newImaginary);
     }
 

@@ -8,7 +8,10 @@ public class ConstantExpression extends Expression {
     private final double value;
 
     public ConstantExpression(double value) {
-        this.value = value;
+        if (Double.isNaN(value) || Double.isInfinite(value)) {
+            throw new IllegalArgumentException("Constant value must be a finite number");
+        }
+        this.value = value + 0.0;
     }
 
     public double getValue() {

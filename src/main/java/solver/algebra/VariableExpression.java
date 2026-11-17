@@ -10,8 +10,8 @@ public class VariableExpression extends Expression {
     private final String name;
 
     public VariableExpression(String name) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("Variable name must not be empty");
+        if (name == null || !name.matches("[A-Za-z_]\\w*")) {
+            throw new IllegalArgumentException("Invalid variable identifier: " + name);
         }
         this.name = name;
     }

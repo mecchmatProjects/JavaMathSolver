@@ -68,16 +68,16 @@ class PolynomialTest {
         }
 
         @Test
-        @DisplayName("Дуже малий старший коефіцієнт (< 1e-12) відкидається")
+        @DisplayName("Дуже малий старший коефіцієнт (< 1e-12 · maxAbs) відкидається")
         void tinyLeadingCoefficientTrimmed() {
             assertEquals(1, poly(1, 2, 1e-13).degree());
         }
 
         @Test
-        @DisplayName("Дуже малі коефіцієнти (< 1e-12) стають нулем")
+        @DisplayName("Дуже малі коефіцієнти (< 1e-12 · maxAbs) стають нулем")
         void tinyCoefficientsZeroed() {
             Polynomial p = poly(1e-13, 2);
-            assertEquals(0.0, p.getCoefficient(0)); // точне порівняння
+            assertEquals(0.0, p.getCoefficient(0));
             assertEquals(1, p.degree());
         }
 
@@ -92,7 +92,6 @@ class PolynomialTest {
         @Test
         @DisplayName("-0.0 нормалізується до 0.0")
         void negativeZeroNormalized() {
-            // assertEquals(double, double) без delta відрізняє 0.0 від -0.0
             assertEquals(0.0, poly(-0.0, 1).getCoefficient(0));
         }
 
@@ -127,12 +126,11 @@ class PolynomialTest {
         }
 
         @Test
-        @DisplayName("isZero: нулі та практично нулі")
+        @DisplayName("isZero: true для нульового полінома, false для малих ненульових коефіцієнтів")
         void isZeroTrue() {
             assertTrue(poly(0).isZero());
-            assertTrue(poly(0, 0).isZero());
-            assertTrue(poly(1e-13).isZero());
-            assertTrue(poly(1e-13, 1e-13).isZero());
+            assertTrue(poly(0, 0, 0).isZero());
+            assertFalse(poly(1e-13).isZero());
         }
 
         @Test
@@ -212,7 +210,7 @@ class PolynomialTest {
         @Test
         @DisplayName("Результат 0 не буває від'ємним нулем: P(x) = -x при x = 0")
         void noNegativeZero() {
-            assertEquals(0.0, poly(0, -1).evaluate(0)); // точне порівняння
+            assertEquals(0.0, poly(0, -1).evaluate(0));
         }
 
         @Test
@@ -422,9 +420,8 @@ class PolynomialTest {
         @Test
         @DisplayName("Правило добутку: (p·q)' = p'·q + p·q'")
         void productRule() {
-            Polynomial p = poly(1, 2);       // 1 + 2x
-            Polynomial q = poly(3, 0, 1);    // 3 + x²
-            // (p·q) = 3 + 6x + x² + 2x³, похідна 6 + 2x + 6x²
+            Polynomial p = poly(1, 2);
+            Polynomial q = poly(3, 0, 1);
             assertCoefficients(new double[]{6, 2, 6}, p.multiply(q).derivative());
             Polynomial rule = p.derivative().multiply(q).add(p.multiply(q.derivative()));
             assertTrue(p.multiply(q).derivative().equals(rule, EPS));
@@ -636,7 +633,7 @@ class PolynomialTest {
         @DisplayName("Ділення на нульовий поліном → ArithmeticException")
         void divisionByZero() {
             assertThrows(ArithmeticException.class, () -> poly(1, 2).divideAndRemainder(poly(0)));
-            assertThrows(ArithmeticException.class, () -> poly(1, 2).divideAndRemainder(poly(1e-13)));
+            assertThrows(ArithmeticException.class, () -> poly(1, 2).divideAndRemainder(poly(0, 0, 0)));
             assertThrows(ArithmeticException.class, () -> poly(0).divideAndRemainder(poly(0)));
         }
 
@@ -695,10 +692,10 @@ class PolynomialTest {
     class RootsTests {
 
         @Test
-        @DisplayName("Константа та нуль: коренів немає (порожній масив)")
+        @DisplayName("Константа: коренів немає (порожній масив); нуль: ArithmeticException")
         void constants() {
             assertEquals(0, poly(5).roots().length);
-            assertEquals(0, poly(0).roots().length);
+            assertThrows(ArithmeticException.class, () -> poly(0).roots());
         }
 
         @Test
@@ -740,9 +737,8 @@ class PolynomialTest {
         }
 
         @Test
-        @DisplayName("Допуск на дискримінант: |d| ≤ 1e-12 вважається нулем (один корінь)")
+        @DisplayName("Відносний допуск на дискримінант: |d| ≤ 1e-12 · scale вважається нулем")
         void discriminantTolerance() {
-            // d ≈ ±4e-13, тобто в межах допуску
             assertArrayEquals(new double[]{-1}, poly(1 + 1e-13, 2, 1).roots(), 1e-6);
             assertArrayEquals(new double[]{-1}, poly(1 - 1e-13, 2, 1).roots(), 1e-6);
         }
@@ -777,6 +773,23 @@ class PolynomialTest {
                     () -> assertEquals(0.0, poly(0, 3).roots()[0]),
                     () -> assertEquals(0.0, poly(0, 0, 1).roots()[0])
             );
+        }
+
+        @Test
+        @DisplayName("Малі коефіцієнти: {0, 0, 1e-13} зберігає степінь 2, {-1e-13, 0, 1e-13} має корені -1 і 1")
+        void smallCoefficientsRelativeThreshold() {
+            assertEquals(2, poly(0, 0, 1e-13).degree());
+            assertArrayEquals(new double[]{-1, 1}, poly(-1e-13, 0, 1e-13).roots(), 1e-9);
+            assertArrayEquals(new double[]{0.9, 1.1}, poly(0.99e-7, -2e-7, 1e-7).roots(), 1e-9);
+        }
+
+        @Test
+        @DisplayName("Чисельна стабільність: 1e-8x² + x + 1e-8 → -1e8 і -1e-8")
+        void numericallyStableQuadraticRoots() {
+            double[] roots = poly(1e-8, 1, 1e-8).roots();
+            assertEquals(2, roots.length);
+            assertEquals(-1e8, roots[0], 1.0);
+            assertEquals(-1e-8, roots[1], 1e-16);
         }
     }
 }

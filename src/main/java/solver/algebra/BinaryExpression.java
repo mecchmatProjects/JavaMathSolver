@@ -112,13 +112,15 @@ public class BinaryExpression extends Expression {
             int childPrec = binChild.operator.getPrecedence();
             int currentPrec = this.operator.getPrecedence();
 
-            // Ставимо дужки, якщо пріоритет дочірнього виразу нижчий,
-            // або якщо це правий операнд віднімання/ділення однакового пріоритету: a - (b - c)
             if (childPrec < currentPrec || (isRightChild && childPrec == currentPrec && (operator == Operator.SUBTRACT || operator == Operator.DIVIDE))) {
                 return "(" + binChild.toString() + ")";
             }
         }
-        return child.toString();
+        String str = child.toString();
+        if (isRightChild && str.startsWith("-")) {
+            return "(" + str + ")";
+        }
+        return str;
     }
 
     @Override

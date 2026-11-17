@@ -12,11 +12,11 @@ public class Fraction implements Comparable<Fraction> {
             throw new IllegalArgumentException("Denominator cannot be zero");
         }
         if (denominator == Long.MIN_VALUE) {
-            throw new IllegalArgumentException("Denominator cannot be Long.MIN_VALUE");
+            throw new ArithmeticException("Denominator overflow: cannot negate Long.MIN_VALUE");
         }
         if (denominator < 0) {
             if (numerator == Long.MIN_VALUE) {
-                throw new IllegalArgumentException("Numerator overflow when normalizing sign");
+                throw new ArithmeticException("Numerator overflow when normalizing sign");
             }
             numerator = -numerator;
             denominator = -denominator;
@@ -34,7 +34,6 @@ public class Fraction implements Comparable<Fraction> {
     }
 
     private static long gcd(long a, long b) {
-        // Працюємо у від'ємній області, щоб уникнути переповнення при a == Long.MIN_VALUE
         a = a > 0 ? -a : a;
         b = b > 0 ? -b : b;
         while (b != 0) {
@@ -55,28 +54,39 @@ public class Fraction implements Comparable<Fraction> {
 
     public Fraction add(Fraction other) {
         Objects.requireNonNull(other, "Operand fraction cannot be null");
+        long commonGcd = gcd(this.denominator, other.denominator);
+        long leftScale = other.denominator / commonGcd;
+        long rightScale = this.denominator / commonGcd;
+
         long newNumerator = Math.addExact(
-                Math.multiplyExact(this.numerator, other.denominator),
-                Math.multiplyExact(other.numerator, this.denominator)
+                Math.multiplyExact(this.numerator, leftScale),
+                Math.multiplyExact(other.numerator, rightScale)
         );
-        long newDenominator = Math.multiplyExact(this.denominator, other.denominator);
+        long newDenominator = Math.multiplyExact(this.denominator, leftScale);
         return new Fraction(newNumerator, newDenominator);
     }
 
     public Fraction subtract(Fraction other) {
         Objects.requireNonNull(other, "Operand fraction cannot be null");
+        long commonGcd = gcd(this.denominator, other.denominator);
+        long leftScale = other.denominator / commonGcd;
+        long rightScale = this.denominator / commonGcd;
+
         long newNumerator = Math.subtractExact(
-                Math.multiplyExact(this.numerator, other.denominator),
-                Math.multiplyExact(other.numerator, this.denominator)
+                Math.multiplyExact(this.numerator, leftScale),
+                Math.multiplyExact(other.numerator, rightScale)
         );
-        long newDenominator = Math.multiplyExact(this.denominator, other.denominator);
+        long newDenominator = Math.multiplyExact(this.denominator, leftScale);
         return new Fraction(newNumerator, newDenominator);
     }
 
     public Fraction multiply(Fraction other) {
         Objects.requireNonNull(other, "Operand fraction cannot be null");
-        long newNumerator = Math.multiplyExact(this.numerator, other.numerator);
-        long newDenominator = Math.multiplyExact(this.denominator, other.denominator);
+        long g1 = gcd(this.numerator, other.denominator);
+        long g2 = gcd(other.numerator, this.denominator);
+
+        long newNumerator = Math.multiplyExact(this.numerator / g1, other.numerator / g2);
+        long newDenominator = Math.multiplyExact(this.denominator / g2, other.denominator / g1);
         return new Fraction(newNumerator, newDenominator);
     }
 
@@ -85,8 +95,21 @@ public class Fraction implements Comparable<Fraction> {
         if (other.numerator == 0) {
             throw new ArithmeticException("Cannot divide by zero");
         }
-        long newNumerator = Math.multiplyExact(this.numerator, other.denominator);
-        long newDenominator = Math.multiplyExact(this.denominator, other.numerator);
+        long g1 = gcd(this.numerator, other.numerator);
+        long g2 = gcd(other.denominator, this.denominator);
+
+        long numPart = other.numerator / g1;
+        long denPart = other.denominator / g2;
+        if (numPart < 0) {
+            if (numPart == Long.MIN_VALUE || denPart == Long.MIN_VALUE) {
+                throw new ArithmeticException("Overflow when normalizing sign in division");
+            }
+            numPart = -numPart;
+            denPart = -denPart;
+        }
+
+        long newNumerator = Math.multiplyExact(this.numerator / g1, denPart);
+        long newDenominator = Math.multiplyExact(this.denominator / g2, numPart);
         return new Fraction(newNumerator, newDenominator);
     }
 
