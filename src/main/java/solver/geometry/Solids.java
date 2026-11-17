@@ -4,7 +4,7 @@ import static solver.core.Output.*;
 import static solver.core.Messages.*;
 
 /**
- * GEO: обʼєми тіл.
+ * GEO: volumes of solids.
  */
 public final class Solids {
 

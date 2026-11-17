@@ -1,7 +1,7 @@
-# JavaMathSolver 0.3
+# JavaMathSolver 0.5
 
 ## Опис проєкту
-Консольна математична утиліта (CLI) мовою Java, що розробляється в межах лабораторних робіт №1–3. Програма зчитує команду та аргументи з командного рядка (`String[] args`), виконує алгебраїчні та геометричні обчислення, обробляє набори чисел і точок, розбиває математичні вирази на токени та містить вбудовану довідку.
+Консольна математична утиліта (CLI) мовою Java, що розробляється в межах лабораторних робіт №1–5. Програма зчитує команду та аргументи з командного рядка (`String[] args`), виконує алгебраїчні та геометричні обчислення, обробляє набори чисел і точок, розбиває математичні вирази на токени, проходить їх потоком `TokenStream` (основа майбутнього Parser) та містить вбудовану довідку.
 
 ## Вимоги
 * **Java Development Kit (JDK) 17** або вище (`maven.compiler.release` у `pom.xml` — 17).
@@ -12,7 +12,8 @@
 ```text
 src/main/java/solver/
 ├── app/       MathSolver (main), CommandDispatcher, CommandCatalog, HelpPrinter
-├── core/      Messages, Output, NumberParser, ArgumentValidator, CharClassifier, TokenType, Tokenizer
+├── core/      Messages, Output, NumberParser, ArgumentValidator, CharClassifier, TokenType, Token, Tokenizer, TokenStream, ParseException
+├── parser/    Parser (контракт TokenStream -> Expression)
 ├── algebra/   Arithmetic, Equations, NumberTheory, TaylorSeries, NumericArray, BasicStatic, Matrix
 └── geometry/  Distances, Shapes, Triangles, Solids, Intersections, Polygon, MonteCarlo, Point, Points, Polygon2D
 src/test/java/solver/   JUnit 5 тести
@@ -22,11 +23,187 @@ scripts/                регресійні кейси CLI (cases.txt, regressi
 | Пакет | Відповідальність |
 | :--- | :--- |
 | `app` | Точка входу, каталог команд і їх арність, диспетчеризація, довідка |
-| `core` | Парсинг чисел, валідація кількості аргументів, вивід результатів і помилок, tokenizer |
+| `core` | Парсинг чисел, валідація кількості аргументів, вивід результатів і помилок, tokenizer, потік токенів `TokenStream` |
 | `algebra` | Арифметика, рівняння, теорія чисел, ряди Тейлора, статистика масивів, матриці |
 | `geometry` | Відстані, фігури, трикутники, тіла обертання, перетини, точки та багатокутники |
+| `parser` | Побудова дерева `Expression` з потоку токенів |
 
-Правило залежностей: `core` не імпортує інші пакети; `algebra` і `geometry` залежать тільки від `core`; `app` бачить усе.
+Правило залежностей: `core` не імпортує інші пакети; `algebra` і `geometry` залежать тільки від `core`; `parser` залежить від `core` і `algebra`; `app` бачить усе.
+
+## Token model (з версії 0.4)
+Tokenizer повертає масив об'єктів `Token[]` замість двох паралельних масивів `String[]` + `TokenType[]` (Lab 3). Тип і текст лексеми тепер живуть в одному об'єкті й не можуть розсинхронізуватися.
+
+```text
+"2*x + 3" ──► Tokenizer.tokenize ──► Token[]
+                                     ├── NUMBER(2)
+                                     ├── MULTIPLY(*)
+                                     ├── IDENTIFIER(x)
+                                     ├── PLUS(+)
+                                     └── NUMBER(3)
+```
+
+### Клас `Token` (`solver.core.Token`)
+| Член | Опис |
+|---|---|
+| `private final TokenType type` | тип токена (`NUMBER`, `IDENTIFIER`, `PLUS`, `MINUS`, `MULTIPLY`, `DIVIDE`, `POWER`, `LEFT_PARENTHESIS`, `RIGHT_PARENTHESIS`, `UNKNOWN`) |
+| `private final String lexeme` | текст лексеми точно так, як він записаний у виразі |
+| `Token(TokenType type, String lexeme)` | єдиний конструктор, з валідацією (див. нижче) |
+| `getType()`, `getLexeme()` | лише гетери, сетерів немає |
+| `toString()` | повний формат для логів і налагодження |
+| `toCompactString()` | компактний формат |
+| `equals(Object)`, `hashCode()` | логічна рівність |
+
+Клас `final`, поля `final`: токен **незмінний** (immutable) після створення.
+
+### Валідація конструктора
+| Виклик | Результат |
+|---|---|
+| `new Token(NUMBER, "3.14")` | ✅ |
+| `new Token(null, "3.14")` | `NullPointerException: type must not be null` |
+| `new Token(NUMBER, null)` | `NullPointerException: lexeme must not be null` |
+| `new Token(NUMBER, "")` | `IllegalArgumentException: lexeme must not be empty` |
+
+`null` дає `NullPointerException` (через `Objects.requireNonNull`), а некоректне значення дає `IllegalArgumentException`. Це навмисне розділення, а не помилка. Tokenizer ніколи не створює токен із порожньою лексемою.
+
+### Формати виводу
+| Метод | Приклад | Де використовується |
+|---|---|---|
+| `toString()` | `Token{type=NUMBER, lexeme='3.14'}` | логи, налагодження, повідомлення тестів |
+| `toCompactString()` | `NUMBER(3.14)` | короткий запис у документації та тестах |
+| CLI `tokenize` | `0: NUMBER 3.14` | формат C10 без змін з версії 0.3 (`<index>: <TYPE> <lexeme>`) |
+
+### Логічна рівність (`equals` / `hashCode`)
+Два токени рівні, якщо в них **однаковий тип і однакова лексема**:
+```java
+Token a = new Token(TokenType.NUMBER, "2");
+Token b = new Token(TokenType.NUMBER, "2");
+
+a == b        // false — це два різні об'єкти в пам'яті
+a.equals(b)   // true  — логічно це один і той самий токен
+a.hashCode() == b.hashCode()   // true — контракт equals/hashCode
+```
+* `==` порівнює посилання, `equals` порівнює вміст.
+* Лексеми порівнюються як **текст**, а не як числа: `NUMBER(2)` ≠ `NUMBER(2.0)`, `NUMBER(007)` ≠ `NUMBER(7)`.
+* Позиція токена у виразі не зберігається й на рівність не впливає: усі `x` у `x + x` рівні.
+* `equals(null)` повертає `false`, а не кидає виняток. Тому токени коректно працюють у `HashSet` / `HashMap` і з `Arrays.equals`.
+
+### API `Tokenizer`
+| Метод | Повертає | Примітка |
+|---|---|---|
+| `tokenize(String)` | `Token[]` | основний метод (C15) |
+| `lexemes(String)` | `String[]` | обгортка: лексеми з `tokenize` (сумісність з Lab 3) |
+| `tokenizeTypes(String)` | `TokenType[]` | обгортка: типи з `tokenize` (сумісність з Lab 3) |
+| `isValid(String)` | `boolean` | `true`, якщо вираз непорожній і без `UNKNOWN` (C8) |
+| `tokenStatistics(String)` | `int[4]` | числа, ідентифікатори, оператори, дужки (C9) |
+
+Правила розбиття не змінилися порівняно з 0.3:
+| Вираз | `Token[]` |
+|---|---|
+| `-5 * (x - 3.14)` | `NUMBER(-5) MULTIPLY(*) LEFT_PARENTHESIS(() IDENTIFIER(x) MINUS(-) NUMBER(3.14) RIGHT_PARENTHESIS())` |
+| `3 - -5` | `NUMBER(3) MINUS(-) NUMBER(-5)` |
+| `x-1` | `IDENTIFIER(x) MINUS(-) NUMBER(1)` |
+| `2x` | `NUMBER(2) IDENTIFIER(x)` |
+| `2..5 + x@` | `UNKNOWN(2..5) PLUS(+) IDENTIFIER(x) UNKNOWN(@)` |
+| `""`, `"   "` | `[]` (порожній масив) |
+
+Знак `-` входить у лексему числа, лише якщо це початок виразу або перед ним стоїть оператор чи `(`.
+
+---
+
+## TokenStream & Parser API (з версії 0.5)
+Конвеєр обробки виразу. `Tokenizer` відповідає на питання «які елементи містить текст?», `Parser` — «яка математична структура цих елементів?».
+
+```text
+"2 + x * 5"
+    │  Tokenizer.tokenize            (core, C15)
+    ▼
+Token[]  NUMBER(2) PLUS(+) IDENTIFIER(x) MULTIPLY(*) NUMBER(5)
+    │  new TokenStream(tokens)       (core, C16–C19)
+    ▼
+TokenStream  ── position ──► 0  1  2  3  4  │ EOF
+    │  parser.parse(stream)          (parser, C20)
+    ▼
+Expression                           (algebra, A11–A15)
+```
+
+### Клас `TokenStream` (`solver.core.TokenStream`)
+Курсор, що рухається лише вперед, над масивом `Token[]`. Масив копіюється в конструкторі, тому зміни вихідного масиву на потік не впливають.
+
+| Метод | Повертає | Рухає курсор | Примітка |
+|---|---|---|---|
+| `TokenStream(Token[])` | — | — | `null`-масив або `null`-елемент → `IllegalArgumentException` |
+| `current()` | `Token` | ні | токен на `position`; за межами → `EOF` |
+| `peek()` | `Token` | ні | те саме, що `peek(1)` |
+| `peek(int offset)` | `Token` | ні | `peek(0) == current()`; за межами → `EOF`; `offset < 0` → `IllegalArgumentException` (C17) |
+| `next()` | `Token` | так, на 1 | повертає **старий** поточний токен (як `Iterator.next()`); на кінці → `EOF`, курсор стоїть |
+| `hasNext()` | `boolean` | ні | `true`, поки лишився хоч один реальний токен (`EOF` не рахується) |
+| `reset()` | — | на 0 | дозволяє пройти потік ще раз |
+| `position()` | `int` | ні | 0-based; у кінці дорівнює кількості токенів |
+| `consume(TokenType)` | `Token` | так, якщо тип збігся | інакше `ParseException`, курсор стоїть (C18) |
+
+Приклад lookahead із методички (курсор на `2`):
+```text
+2 + x * 5
+^
+current()  → NUMBER(2)
+peek(1)    → PLUS(+)
+peek(2)    → IDENTIFIER(x)
+peek(3)    → MULTIPLY(*)
+peek(4)    → NUMBER(5)
+peek(5)    → EOF(<EOF>)
+```
+
+### Кінець потоку: `TokenType.EOF`
+* `EOF` — сентинел, який створює **лише** `TokenStream`; `Tokenizer` його ніколи не повертає.
+* За межами потоку `current()`, `peek(k)`, `next()` повертають `Token{type=EOF, lexeme='<EOF>'}` замість `null` чи `ArrayIndexOutOfBoundsException`.
+* Parser перевіряє кінець виразу як `current().getType() == TokenType.EOF` або `consume(TokenType.EOF)`.
+
+| Ситуація | Поведінка |
+|---|---|
+| порожній вираз (`""`, `"   "`) | потік без токенів: `hasNext() == false`, `current()` → `EOF`, `position() == 0` |
+| `next()` на кінці | повертає `EOF`, `position()` не перевищує кількість токенів |
+| `consume(EOF)` на кінці | повертає `EOF`, курсор не рухається |
+| `peek(Integer.MAX_VALUE)` | `EOF`, без переповнення індексу |
+| `UNKNOWN`-токени | лишаються в потоці; відкидає їх Parser, а не `TokenStream` |
+
+### `ParseException` (`solver.core.ParseException`)
+Unchecked-виняток (`RuntimeException`) з позицією токена (`getPosition()`), де виявлено помилку.
+
+| Джерело | Формат повідомлення | Приклад |
+|---|---|---|
+| `consume` | `Error: Expected <TYPE> but found <TYPE>('<lexeme>') at position <n>` | `Error: Expected NUMBER but found IDENTIFIER('x') at position 2` |
+| `Parser` — порожній вираз | `Error: Empty expression` | `parse("   ")` |
+| `Parser` — невідомий токен | `Error: Unknown token '<lexeme>' at position <n>` | `parse("2 + x@")` → позиція 3 |
+
+### Parser API (C20)
+`solver.parser.Parser` фіксує контракт майбутнього розбору; повна реалізація — у наступній лабораторній.
+
+| Метод | Повертає | Примітка |
+|---|---|---|
+| `parse(TokenStream)` | `Expression` | основний контракт; розбір із поточної позиції потоку |
+| `parse(String)` | `Expression` | обгортка: `Tokenizer.tokenize` + `new TokenStream` |
+
+Поточна поведінка:
+| Вхід | Результат |
+|---|---|
+| `null` | `IllegalArgumentException` |
+| `""`, `"   "`, потік на `EOF` | `ParseException: Error: Empty expression` |
+| `2 + x@` | `ParseException: Error: Unknown token '@' at position 3` |
+| `2*x^2 + 3*x - 5` | `UnsupportedOperationException: Parser is not implemented yet` |
+
+Перевірка `UNKNOWN` іде через `peek(offset)` і не зсуває курсор потоку. Цільова граматика (EBNF) — у Javadoc класу `Parser`:
+```text
+expression = term   { ("+" | "-") term } ;
+term       = power  { ("*" | "/") power } ;
+power      = unary  [ "^" power ] ;
+unary      = [ "-" ] unary | primary ;
+primary    = NUMBER | IDENTIFIER [ "(" expression ")" ] | "(" expression ")" ;
+```
+
+### Відомі обмеження (для Lab 6)
+* Унарний мінус перед числом входить у лексему (`-5` → `NUMBER(-5)`), а перед змінною чи дужкою — ні (`-x` → `MINUS(-) IDENTIFIER(x)`). Parser має обробляти обидва варіанти.
+* `2x` дає `NUMBER(2) IDENTIFIER(x)` без оператора: неявне множення Parser не підтримуватиме, такий вираз буде синтаксичною помилкою.
+* `Parser.parse` поки не будує `Expression`: потрібні `ConstantExpression`, `VariableExpression`, `BinaryExpression` (Algebra, A12–A14).
 
 ## Спосіб компіляції
 Варіант 1 — Maven (рекомендовано):
@@ -58,7 +235,7 @@ java -cp target/classes solver.app.MathSolver help
 Запуск без аргументів виводить версію та підказку:
 ```bash
 java -cp target/classes solver.app.MathSolver
-# JavaMathSolver v0.3
+# JavaMathSolver v0.5
 # Use 'help' to see available commands.
 ```
 
@@ -85,8 +262,8 @@ powershell -ExecutionPolicy Bypass -File scripts\regression.ps1 -Cp target\class
 * Числовий результат завжди друкується як `Result: <число>` з 6 знаками після крапки: `Result: 5.000000`. Від'ємний нуль виводиться як `0.000000`.
 * Цілочисельні результати (`gcd`, `factorial`, `fibonacci`, `circle-segment`) друкуються без дробової частини: `Result: 6`.
 * Логічні результати: `Result: true` / `Result: false`.
-* Команди з кількома значеннями (`statistics`, `tokenize`, `token-stats`) друкують кожне значення окремим рядком без префікса `Result:`.
-* Вираз для `tokenize`, `token-stats`, `validate-expr` краще брати в лапки. Без лапок аргументи склеюються через пробіл (`tokenize 2*x + 3` = `tokenize "2*x + 3"`), але shell може сам розгорнути `*` чи `(`.
+* Команди з кількома значеннями (`statistics`, `tokenize`, `token-stats`, `walk-expr`) друкують кожне значення окремим рядком без префікса `Result:`.
+* Вираз для `tokenize`, `token-stats`, `validate-expr`, `walk-expr` краще брати в лапки. Без лапок аргументи склеюються через пробіл (`tokenize 2*x + 3` = `tokenize "2*x + 3"`), але shell може сам розгорнути `*` чи `(`.
 
 ## Повідомлення про помилки
 
@@ -196,7 +373,8 @@ java -cp target/classes solver.app.MathSolver validate-expr "2..5"
 ```
 Перевіряються лише лексеми; синтаксис (`sin(x`, `2 + + 3`) — задача майбутнього Parser.
 
-### 9. Розбиття виразу на токени (tokenize, C10)
+### 9. Розбиття виразу на токени (tokenize, C10 / C15)
+Кожен рядок — це один `Token` з масиву `Tokenizer.tokenize(...)`: індекс, `getType()`, `getLexeme()`.
 ```bash
 java -cp target/classes solver.app.MathSolver tokenize "2*x^2 + 3*x - 5"
 # 0: NUMBER 2
@@ -213,7 +391,17 @@ java -cp target/classes solver.app.MathSolver tokenize "2*x^2 + 3*x - 5"
 ```
 Нерозпізнані лексеми показуються як `UNKNOWN` (`tokenize "1 + 2..5 @"` → `2: UNKNOWN 2..5`, `3: UNKNOWN @`); керівні символи — у видимій формі (`\n`).
 
-### 10. Статистика токенів (token-stats, C9)
+### 10. Прохід потоком токенів (walk-expr, C19)
+Демонстрація `TokenStream`: на кожному кроці друкується `position`, токен, який повернув `next()`, і новий `current()`.
+```bash
+java -cp target/classes solver.app.MathSolver walk-expr "2 + x"
+# 0: NUMBER 2   (next: PLUS +)
+# 1: PLUS +   (next: IDENTIFIER x)
+# 2: IDENTIFIER x   (next: EOF <EOF>)
+```
+Останній рядок завжди вказує на `EOF`. Токени `UNKNOWN` показуються, а не відкидаються (`walk-expr "1 + 2..5 @"` → `2: UNKNOWN 2..5   (next: UNKNOWN @)`). Порожній вираз → `Error: Not enough arguments`.
+
+### 11. Статистика токенів (token-stats, C9)
 ```bash
 java -cp target/classes solver.app.MathSolver token-stats "2*x + 3*x - sin(x)"
 # Numbers: 2
@@ -221,9 +409,9 @@ java -cp target/classes solver.app.MathSolver token-stats "2*x + 3*x - sin(x)"
 # Operators: 4
 # Parentheses: 2
 ```
-Лексеми `UNKNOWN` не враховуються.
+Лексеми `UNKNOWN` не враховуються. Операторів тут 4 (`*`, `+`, `*`, `-`); у методичці Lab 3 для цього прикладу помилково вказано 3.
 
-### 11. Помилкові виклики
+### 12. Помилкові виклики
 ```bash
 java -cp target/classes solver.app.MathSolver hello 1 2
 # Unknown command: hello
@@ -343,10 +531,11 @@ java -cp target/classes solver.app.MathSolver add 5
 | `convex-hull` | `x1 y1 x2 y2 x3 y3 ...` | Вершини опуклої оболонки проти годинникової стрілки (G6) |
 | `point-in-polygon` | `px py x1 y1 x2 y2 x3 y3 ...` | Чи лежить точка P у багатокутнику, межа включно (G6) |
 
-### Математичні вирази: tokenizer (Lab 3)
+### Математичні вирази: tokenizer і потік токенів (Lab 3–5)
 
 | Команда | Аргументи | Опис операції |
 | :--- | :--- | :--- |
-| `tokenize` | `"expr"` | Список токенів: індекс, тип, лексема (C10) |
+| `tokenize` | `"expr"` | Список токенів `Token[]`: індекс, тип, лексема (C10, C15) |
 | `token-stats` | `"expr"` | Кількість чисел, ідентифікаторів, операторів, дужок (C9) |
 | `validate-expr` | `"expr"` | Перевірка, що всі лексеми виразу розпізнані (C8); синтаксис не перевіряється |
+| `walk-expr` | `"expr"` | Прохід `TokenStream`: позиція, токен, наступний токен до `EOF` (C19) |

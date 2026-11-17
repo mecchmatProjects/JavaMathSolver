@@ -226,6 +226,12 @@ tokenize sin(x) + sqrt(y)
 tokenize -5 * (x - 3.14)
 tokenize 1 + 2..5 @
 tokenize
+# C19: walk-expr
+walk-expr 2 + x
+walk-expr 2*x^2 + 3*x - 5
+walk-expr sin(x)^2
+walk-expr 1 + 2..5 @
+walk-expr
 # C9: token-stats
 token-stats 2*x + 3*x - sin(x)
 token-stats 2*x + sin(x)

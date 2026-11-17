@@ -5,7 +5,7 @@ import static solver.core.Output.*;
 import static solver.core.Messages.*;
 
 /**
- * GEO: периметр і опуклість багатокутника.
+ * GEO: polygon perimeter and convexity (CLI command polygon).
  */
 public final class Polygon {
 

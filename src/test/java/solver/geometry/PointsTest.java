@@ -3,18 +3,11 @@ package solver.geometry;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static solver.geometry.TestPoints.pts;
 
 class PointsTest {
 
     private static final double DELTA = 1e-9;
-
-    private static Point[] pts(double... xy) {
-        Point[] points = new Point[xy.length / 2];
-        for (int i = 0; i < points.length; i++) {
-            points[i] = Point.of(xy[2 * i], xy[2 * i + 1]);
-        }
-        return points;
-    }
 
     // ---------- distance ----------
 
