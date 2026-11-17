@@ -99,6 +99,11 @@ public final class Vector2D {
     }
 
     @Override
+    public int hashCode() {
+        return 31 * Double.hashCode(x) + Double.hashCode(y);
+    }
+
+    @Override
     public String toString() {
         return "Vector2D(" + x + ", " + y + ")";
     }

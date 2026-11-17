@@ -3,7 +3,7 @@ package solver.geometry;
 import static solver.geometry.GeoMath.EPS;
 import static solver.geometry.GeoMath.clamp;
 
-public final class Circle {
+public final class Circle implements AreaFigure {
 
     private final Point center;
     private final double radius;
@@ -32,6 +32,7 @@ public final class Circle {
         return radius;
     }
 
+    @Override
     public double area() {
         return Math.PI * radius * radius;
     }
@@ -40,10 +41,16 @@ public final class Circle {
         return 2 * Math.PI * radius;
     }
 
+    @Override
+    public double perimeter() {
+        return circumference();
+    }
+
     public double diameter() {
         return 2 * radius;
     }
 
+    @Override
     public boolean contains(Point p) {
         return center.distanceTo(p) <= radius + EPS;
     }
@@ -52,6 +59,7 @@ public final class Circle {
         return Math.abs(center.distanceTo(p) - radius) <= EPS;
     }
 
+    @Override
     public double distanceTo(Point p) {
         return Math.max(0.0, center.distanceTo(p) - radius);
     }
@@ -122,6 +130,21 @@ public final class Circle {
     }
 
     @Override
+    public Circle translate(Vector2D v) {
+        return new Circle(center.translate(v), radius);
+    }
+
+    @Override
+    public Circle rotate(double angle, Point c) {
+        return new Circle(center.rotate(angle, c), radius);
+    }
+
+    @Override
+    public Circle scale(double factor, Point c) {
+        return new Circle(center.scale(factor, c), radius * Math.abs(factor));
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -131,6 +154,11 @@ public final class Circle {
         }
         Circle other = (Circle) o;
         return center.equals(other.center) && Double.compare(radius, other.radius) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * center.hashCode() + Double.hashCode(radius);
     }
 
     @Override

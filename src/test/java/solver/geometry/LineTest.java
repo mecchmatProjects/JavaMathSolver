@@ -158,4 +158,36 @@ class LineTest {
         assertEquals("Line(Point(0.0, 0.0), dir=Vector2D(1.0, 1.0))",
                 Line.through(Point.of(0, 0), Point.of(1, 1)).toString());
     }
+
+    // ---------- Lab 5: Figure contract and affine transforms ----------
+
+    @Test
+    void translateKeepsDirection() {
+        Line moved = Line.through(Point.of(0, 0), Point.of(1, 1)).translate(Vector2D.of(0, 2));
+        assertTrue(moved.contains(Point.of(1, 3)));
+        assertEquals(Vector2D.of(1, 1), moved.direction());
+    }
+
+    @Test
+    void rotateAboutCenter() {
+        Line xAxis = Line.through(Point.of(0, 0), Point.of(1, 0));
+        Line rotated = xAxis.rotate(Math.PI / 2, Point.of(2, 0));
+        assertTrue(rotated.contains(Point.of(2, 5)));
+        assertTrue(rotated.isPerpendicularTo(xAxis));
+    }
+
+    @Test
+    void scaleMovesLineAwayFromCenter() {
+        Line line = Line.through(Point.of(0, 1), Point.of(1, 1));
+        Line scaled = line.scale(3, Point.of(0, 0));
+        assertTrue(scaled.contains(Point.of(7, 3)));
+        assertTrue(scaled.isParallelTo(line));
+        assertThrows(IllegalArgumentException.class, () -> line.scale(0, Point.of(0, 0)));
+    }
+
+    @Test
+    void equalLinesHaveEqualHashCodes() {
+        assertEquals(Line.through(Point.of(0, 0), Point.of(1, 2)).hashCode(),
+                Line.through(Point.of(0, 0), Point.of(1, 2)).hashCode());
+    }
 }

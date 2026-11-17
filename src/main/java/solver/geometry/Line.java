@@ -2,7 +2,7 @@ package solver.geometry;
 
 import static solver.geometry.GeoMath.EPS;
 
-public final class Line {
+public final class Line implements Figure {
 
     private final Point point;
     private final Vector2D direction;
@@ -56,10 +56,12 @@ public final class Line {
         return direction.y / direction.x;
     }
 
+    @Override
     public double distanceTo(Point p) {
         return Math.abs(direction.cross(Vector2D.between(point, p))) / direction.length();
     }
 
+    @Override
     public boolean contains(Point p) {
         return distanceTo(p) <= EPS;
     }
@@ -95,6 +97,25 @@ public final class Line {
     }
 
     @Override
+    public Line translate(Vector2D v) {
+        return new Line(point.translate(v), direction);
+    }
+
+    @Override
+    public Line rotate(double angle, Point center) {
+        return new Line(point.rotate(angle, center), direction.rotate(angle));
+    }
+
+    /** Homothety keeps the direction of a line; factor 0 would collapse it into a point. */
+    @Override
+    public Line scale(double factor, Point center) {
+        if (factor == 0 || !Double.isFinite(factor)) {
+            throw new IllegalArgumentException("Scale factor must be finite and non-zero: " + factor);
+        }
+        return new Line(point.scale(factor, center), direction);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -104,6 +125,11 @@ public final class Line {
         }
         Line other = (Line) o;
         return point.equals(other.point) && direction.equals(other.direction);
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * point.hashCode() + direction.hashCode();
     }
 
     @Override
