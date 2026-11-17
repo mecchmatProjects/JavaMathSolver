@@ -233,17 +233,18 @@ public class Polynomial {
             double a = coeffs[2];
             double b = coeffs[1];
             double c = coeffs[0];
-            double d = b * b - 4 * a * c;
+            double d = b * b - 4.0 * a * c;
+            double scale = Math.max(b * b, Math.abs(4.0 * a * c));
 
-            if (d < -EPSILON) {
+            if (d < -EPSILON * scale) {
                 return new double[0];
             }
-            if (Math.abs(d) <= EPSILON) {
-                return new double[]{(-b / (2 * a)) + 0.0};
+            if (Math.abs(d) <= EPSILON * scale) {
+                return new double[]{(-b / (2.0 * a)) + 0.0};
             }
-            double sqrtD = Math.sqrt(d);
-            double r1 = ((-b - sqrtD) / (2 * a)) + 0.0;
-            double r2 = ((-b + sqrtD) / (2 * a)) + 0.0;
+            double q = -0.5 * (b + Math.copySign(Math.sqrt(d), b));
+            double r1 = (q / a) + 0.0;
+            double r2 = (c / q) + 0.0;
             return new double[]{Math.min(r1, r2), Math.max(r1, r2)};
         }
         throw new UnsupportedOperationException("Roots calculation is currently supported only for degree 1 and 2");
