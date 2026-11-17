@@ -221,20 +221,15 @@ public class Polynomial {
         return divideAndRemainder(other)[1];
     }
 
-    /**
-     * Знаходить дійсні корені для поліномів степеня 1 (лінійні) та степеня 2 (квадратні) (Task A8).
-     */
     public double[] roots() {
         int deg = degree();
         if (deg == 0) {
             return new double[0];
         }
         if (deg == 1) {
-            // a1 * x + a0 = 0  =>  x = -a0 / a1
-            return new double[]{-coeffs[0] / coeffs[1]};
+            return new double[]{(-coeffs[0] / coeffs[1]) + 0.0};
         }
         if (deg == 2) {
-            // a2 * x^2 + a1 * x + a0 = 0
             double a = coeffs[2];
             double b = coeffs[1];
             double c = coeffs[0];
@@ -244,11 +239,11 @@ public class Polynomial {
                 return new double[0];
             }
             if (Math.abs(d) <= EPSILON) {
-                return new double[]{-b / (2 * a)};
+                return new double[]{(-b / (2 * a)) + 0.0};
             }
             double sqrtD = Math.sqrt(d);
-            double r1 = (-b - sqrtD) / (2 * a);
-            double r2 = (-b + sqrtD) / (2 * a);
+            double r1 = ((-b - sqrtD) / (2 * a)) + 0.0;
+            double r2 = ((-b + sqrtD) / (2 * a)) + 0.0;
             return new double[]{Math.min(r1, r2), Math.max(r1, r2)};
         }
         throw new UnsupportedOperationException("Roots calculation is currently supported only for degree 1 and 2");

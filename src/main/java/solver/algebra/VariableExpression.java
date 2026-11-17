@@ -20,17 +20,17 @@ public class VariableExpression extends Expression {
         return name;
     }
 
-@Override
-public double evaluate(Map<String, Double> variables) {
-    if (variables == null) {
-        throw new IllegalArgumentException("Variables map must not be null");
+    @Override
+    public double evaluate(Map<String, Double> variables) {
+        if (variables == null) {
+            throw new IllegalArgumentException("Variables map must not be null");
+        }
+        Double value = variables.get(name);
+        if (value == null) {
+            throw new IllegalArgumentException("No value provided for variable: " + name);
+        }
+        return value;
     }
-    Double value = variables.get(name);
-    if (value == null) {
-        throw new IllegalArgumentException("No value provided for variable: " + name);
-    }
-    return value;
-}
 
     @Override
     public String toString() {

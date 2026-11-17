@@ -91,7 +91,7 @@ public class BinaryExpression extends Expression {
             case MULTIPLY:
                 return leftVal * rightVal;
             case DIVIDE:
-                if (Math.abs(rightVal) < 1e-12) {
+                if (rightVal == 0.0) {
                     throw new ArithmeticException("Division by zero in expression evaluation");
                 }
                 return leftVal / rightVal;
@@ -99,7 +99,6 @@ public class BinaryExpression extends Expression {
                 throw new IllegalStateException("Unknown operator: " + operator);
         }
     }
-
     @Override
     public String toString() {
         String leftStr = formatChild(left, false);
