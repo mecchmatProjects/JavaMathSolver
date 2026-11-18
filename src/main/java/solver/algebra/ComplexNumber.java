@@ -15,6 +15,14 @@ public class ComplexNumber {
         this.imaginary = imaginary + 0.0;
     }
 
+    private static ComplexNumber ofArithmeticResult(double real, double imaginary) {
+        if (Double.isNaN(real) || Double.isInfinite(real)
+                || Double.isNaN(imaginary) || Double.isInfinite(imaginary)) {
+            throw new ArithmeticException("Complex number arithmetic overflow");
+        }
+        return new ComplexNumber(real, imaginary);
+    }
+
     public double getReal() {
         return real;
     }
@@ -27,14 +35,14 @@ public class ComplexNumber {
         if (other == null) {
             throw new IllegalArgumentException("Operand complex number cannot be null");
         }
-        return new ComplexNumber(this.real + other.real, this.imaginary + other.imaginary);
+        return ofArithmeticResult(this.real + other.real, this.imaginary + other.imaginary);
     }
 
     public ComplexNumber subtract(ComplexNumber other) {
         if (other == null) {
             throw new IllegalArgumentException("Operand complex number cannot be null");
         }
-        return new ComplexNumber(this.real - other.real, this.imaginary - other.imaginary);
+        return ofArithmeticResult(this.real - other.real, this.imaginary - other.imaginary);
     }
 
     public ComplexNumber multiply(ComplexNumber other) {
@@ -43,7 +51,7 @@ public class ComplexNumber {
         }
         double newReal = this.real * other.real - this.imaginary * other.imaginary;
         double newImaginary = this.real * other.imaginary + this.imaginary * other.real;
-        return new ComplexNumber(newReal, newImaginary);
+        return ofArithmeticResult(newReal, newImaginary);
     }
 
     public double abs() {
@@ -72,7 +80,7 @@ public class ComplexNumber {
             newReal = (this.real * r + this.imaginary) / denom;
             newImaginary = (this.imaginary * r - this.real) / denom;
         }
-        return new ComplexNumber(newReal, newImaginary);
+        return ofArithmeticResult(newReal, newImaginary);
     }
 
     @Override

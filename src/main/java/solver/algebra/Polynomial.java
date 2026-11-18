@@ -11,27 +11,20 @@ public class Polynomial {
             throw new IllegalArgumentException("Coefficient array cannot be null or empty");
         }
 
-        double maxAbs = 0.0;
         for (double c : coefficients) {
             if (Double.isNaN(c) || Double.isInfinite(c)) {
                 throw new IllegalArgumentException("Polynomial coefficients must be finite numbers");
             }
-            maxAbs = Math.max(maxAbs, Math.abs(c));
         }
 
-        double threshold = EPSILON * maxAbs;
-
         int len = coefficients.length;
-        while (len > 1 && Math.abs(coefficients[len - 1]) <= threshold && coefficients[len - 1] != 1e-12) {
+        while (len > 1 && coefficients[len - 1] == 0.0) {
             len--;
         }
 
         this.coeffs = new double[len];
         for (int i = 0; i < len; i++) {
-            double val = (Math.abs(coefficients[i]) <= threshold && Math.abs(coefficients[i]) != 1e-12)
-                    ? 0.0
-                    : coefficients[i];
-            this.coeffs[i] = val + 0.0;
+            this.coeffs[i] = coefficients[i] + 0.0;
         }
     }
 

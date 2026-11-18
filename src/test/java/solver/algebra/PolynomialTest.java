@@ -68,17 +68,12 @@ class PolynomialTest {
         }
 
         @Test
-        @DisplayName("Дуже малий старший коефіцієнт (< 1e-12 · maxAbs) відкидається")
-        void tinyLeadingCoefficientTrimmed() {
-            assertEquals(1, poly(1, 2, 1e-13).degree());
-        }
-
-        @Test
-        @DisplayName("Дуже малі коефіцієнти (< 1e-12 · maxAbs) стають нулем")
-        void tinyCoefficientsZeroed() {
-            Polynomial p = poly(1e-13, 2);
-            assertEquals(0.0, p.getCoefficient(0));
-            assertEquals(1, p.degree());
+        @DisplayName("Малі ненульові коефіцієнти зберігаються без обнулення")
+        void smallNonZeroCoefficientsPreserved() {
+            assertEquals(2, poly(-1e13, 0, 1).degree());
+            assertArrayEquals(new double[]{-Math.sqrt(1e13), Math.sqrt(1e13)}, poly(-1e13, 0, 1).roots(), 1e-6);
+            assertEquals(2, poly(1, 2, 1e-13).degree());
+            assertEquals(1e-13, poly(1e-13, 2).getCoefficient(0));
         }
 
         @Test
