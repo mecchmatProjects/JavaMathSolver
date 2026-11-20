@@ -11,26 +11,17 @@ public class Fraction implements Comparable<Fraction> {
         if (denominator == 0) {
             throw new IllegalArgumentException("Denominator cannot be zero");
         }
-        if (denominator == Long.MIN_VALUE) {
-            throw new ArithmeticException("Denominator overflow: cannot negate Long.MIN_VALUE");
+        BigInteger n = BigInteger.valueOf(numerator);
+        BigInteger d = BigInteger.valueOf(denominator);
+        BigInteger divisor = n.gcd(d);
+        n = n.divide(divisor);
+        d = d.divide(divisor);
+        if (d.signum() < 0) {
+            n = n.negate();
+            d = d.negate();
         }
-        if (denominator < 0) {
-            if (numerator == Long.MIN_VALUE) {
-                throw new ArithmeticException("Numerator overflow when normalizing sign");
-            }
-            numerator = -numerator;
-            denominator = -denominator;
-        }
-
-        if (numerator == 0) {
-            this.numerator = 0;
-            this.denominator = 1;
-            return;
-        }
-
-        long divisor = gcd(numerator, denominator);
-        this.numerator = numerator / divisor;
-        this.denominator = denominator / divisor;
+        this.numerator = n.longValueExact();
+        this.denominator = d.longValueExact();
     }
 
     private static long gcd(long a, long b) {
