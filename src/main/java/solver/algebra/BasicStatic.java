@@ -2,6 +2,12 @@ package solver.algebra;
 
 public class BasicStatic {
 
+    private static final double EPS = 1e-9;
+
+    private static boolean isZero(double value) {
+        return Math.abs(value) <= EPS;
+    }
+
     private static double calculateSquaredDiffs(double[] array) {
         double mean = 0.0;
         double sumSquaredDiffs = 0.0;
@@ -33,7 +39,7 @@ public class BasicStatic {
     ///стандартне відхилення - генеральне
     public static double standardDeviation(double[] array) {
         double v = variance(array);
-        if (v <= 0.0) {
+        if (isZero(v) || v < 0.0) {
             return 0.0;
         }
 
@@ -43,7 +49,7 @@ public class BasicStatic {
     ///стандартне відхилення - вибіркове
     public static double sampleStandardDeviation(double[] array) {
         double v = sampleVariance(array);
-        if (v <= 0.0) {
+        if (isZero(v) || v < 0.0) {
             return 0.0;
         }
         return Math.sqrt(v);
