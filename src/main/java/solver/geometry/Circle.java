@@ -92,7 +92,8 @@ public final class Circle implements AreaFigure {
         double h2 = radius * radius - a * a;
         Vector2D u = Vector2D.between(center, c.center).scale(1 / d);
         Point base = center.translate(u.scale(a));
-        if (h2 <= EPS * Math.max(1.0, radius * radius)) {
+        if (Math.abs(d - (radius + c.radius)) <= EPS
+                || Math.abs(d - Math.abs(radius - c.radius)) <= EPS) {
             return new Point[]{base};
         }
         Vector2D offset = u.perpendicular().scale(Math.sqrt(h2));
@@ -106,7 +107,7 @@ public final class Circle implements AreaFigure {
             return new Point[0];
         }
         double h2 = radius * radius - dist * dist;
-        if (h2 <= EPS * Math.max(1.0, radius * radius)) {
+        if (Math.abs(dist - radius) <= EPS) {
             return new Point[]{foot};
         }
         Vector2D offset = line.direction().normalize().scale(Math.sqrt(h2));
