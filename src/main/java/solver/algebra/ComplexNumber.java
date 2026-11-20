@@ -3,17 +3,6 @@ package solver.algebra;
 import java.util.Objects;
 
 public class ComplexNumber {
-
-    private static final double EPS = 1e-9;
-
-    private static boolean equal(double a, double b) {
-        return Math.abs(a - b) <= EPS;
-    }
-
-    private static boolean isZero(double value) {
-        return Math.abs(value) <= EPS;
-    }
-
     private final double real;
     private final double imaginary;
 
@@ -75,7 +64,7 @@ public class ComplexNumber {
         }
         double c = other.real;
         double d = other.imaginary;
-        if (isZero(c) && isZero(d)) {
+        if (c == 0.0 && d == 0.0) {
             throw new ArithmeticException("Division by zero (divisor is zero complex number)");
         }
         double newReal;
@@ -99,7 +88,7 @@ public class ComplexNumber {
         if (imaginary == 0.0) {
             return String.valueOf(real);
         }
-        if (isZero(real)) {
+        if (real == 0.0) {
             return imaginary + "i";
         }
         return imaginary > 0
@@ -112,8 +101,8 @@ public class ComplexNumber {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ComplexNumber that = (ComplexNumber) o;
-        return equal(that.real, real)
-                && equal(that.imaginary, imaginary);
+        return Double.compare(that.real, real) == 0
+                && Double.compare(that.imaginary, imaginary) == 0;
     }
 
     @Override
