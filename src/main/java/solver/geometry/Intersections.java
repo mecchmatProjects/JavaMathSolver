@@ -3,9 +3,10 @@ package solver.geometry;
 import java.util.Locale;
 import static solver.core.Output.*;
 import static solver.core.Messages.*;
+import static solver.geometry.GeoMath.EPS;
 
 /**
- * GEO: перетини та обмежувальні прямокутники.
+ * GEO: intersections and bounding rectangles.
  */
 public final class Intersections {
 
@@ -20,21 +21,21 @@ public final class Intersections {
         }
         double yMax = yMin + lengthC * lengthC;
         double discr = radius * radius - lineX * lineX;
-        if (discr < -1e-9) {
+        if (discr < -EPS) {
             printResult(0);
             return;
         }
-        if (Math.abs(discr) <= 1e-9) {
-            int count = (0 >= yMin - 1e-9 && 0 <= yMax + 1e-9) ? 1 : 0;
+        if (Math.abs(discr) <= EPS) {
+            int count = (0 >= yMin - EPS && 0 <= yMax + EPS) ? 1 : 0;
             printResult(count);
             return;
         }
         double y = Math.sqrt(discr);
         int count = 0;
-        if (y >= yMin - 1e-9 && y <= yMax + 1e-9) {
+        if (y >= yMin - EPS && y <= yMax + EPS) {
             count++;
         }
-        if (-y >= yMin - 1e-9 && -y <= yMax + 1e-9) {
+        if (-y >= yMin - EPS && -y <= yMax + EPS) {
             count++;
         }
         printResult(count);
@@ -47,7 +48,7 @@ public final class Intersections {
             return;
         }
         double dist = Math.abs(lineA * centerX + lineB * centerY + lineC) / Math.hypot(lineA, lineB);
-        if (Math.abs(dist - radius) < 1e-9) {
+        if (Math.abs(dist - radius) < EPS) {
             printResult("One point of tangency");
         } else if (dist < radius) {
             printResult("Two points of intersection");
@@ -62,9 +63,7 @@ public final class Intersections {
             printError(ERR_INVALID_INPUT);
             return;
         }
-        double dist = Math.hypot(x2 - x1, y2 - y1);
-        boolean intersects = (dist <= r1 + r2 + 1e-9 && dist >= Math.abs(r1 - r2) - 1e-9);
-        printResult(intersects);
+        printResult(Circle.intersects(Point.of(x1, y1).distanceTo(Point.of(x2, y2)), r1, r2));
     }
 
     // Task 17: Intersection of two squares
