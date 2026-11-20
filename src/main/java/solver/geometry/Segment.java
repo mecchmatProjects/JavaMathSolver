@@ -154,7 +154,10 @@ public final class Segment implements Figure {
         if (onB) {
             return b;
         }
-        return line.intersection(toLine());
+        Vector2D d = line.direction();
+        double sideA = d.cross(line.point().vectorTo(a));
+        double sideB = d.cross(line.point().vectorTo(b));
+        return a.translate(toVector().scale(sideA / (sideA - sideB)));
     }
 
     private static Point singleCommonPoint(Point[] candidates, Segment s1, Segment s2) {
