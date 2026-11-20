@@ -9,6 +9,12 @@ import java.util.Objects;
  */
 public class BinaryExpression extends Expression {
 
+    private static final double EPS = 1e-9;
+
+    private static boolean isZero(double value) {
+        return Math.abs(value) <= EPS;
+    }
+
     public enum Operator {
         ADD("+", 1),
         SUBTRACT("-", 1),
@@ -91,7 +97,7 @@ public class BinaryExpression extends Expression {
             case MULTIPLY:
                 return leftVal * rightVal;
             case DIVIDE:
-                if (rightVal == 0.0) {
+                if (isZero(rightVal)) {
                     throw new ArithmeticException("Division by zero in expression evaluation");
                 }
                 return leftVal / rightVal;
