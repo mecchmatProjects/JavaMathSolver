@@ -65,6 +65,7 @@ public class Matrix {
         return data[i][j];
     }
 
+    @SuppressWarnings("unused")
     public double[][] getData() {
         double[][] copy = new double[rows][cols];
         for (int i = 0; i < rows; i++) {
@@ -245,18 +246,23 @@ public class Matrix {
         }
 
         // Бінарне піднесення матриці до степеня: O(n^3 * log(power))
-        Matrix result = null;
         Matrix base = this;
         int exp = power;
 
+        while ((exp & 1) == 0) {
+            base = base.multiplyMatrix(base);
+            exp >>= 1;
+        }
+
+        Matrix result = base;
+        exp >>= 1;
+
         while (exp > 0) {
+            base = base.multiplyMatrix(base);
             if ((exp & 1) == 1) {
-                result = (result == null) ? base : result.multiplyMatrix(base);
+                result = result.multiplyMatrix(base);
             }
             exp >>= 1;
-            if (exp > 0) {
-                base = base.multiplyMatrix(base);
-            }
         }
 
         return result.trace();
