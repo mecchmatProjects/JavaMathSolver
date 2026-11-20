@@ -4,9 +4,19 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class Matrix {
+    private static final double EPS = 1e-12;
+
     private final int rows;
     private final int cols;
     private final double[][] data;
+
+    private static boolean equal(double a, double b) {
+        return Math.abs(a - b) <= EPS;
+    }
+
+    private static boolean isZero(double value) {
+        return Math.abs(value) <= EPS;
+    }
 
     // Конструктор за кількістю рядків та стовпців
     public Matrix(int rows, int cols) {
@@ -55,6 +65,7 @@ public class Matrix {
         return data[i][j];
     }
 
+    @SuppressWarnings("unused")
     public double[][] getData() {
         double[][] copy = new double[rows][cols];
         for (int i = 0; i < rows; i++) {
@@ -84,12 +95,14 @@ public class Matrix {
 
         Matrix res = new Matrix(this.rows, other.cols);
         for (int i = 0; i < this.rows; i++) {
-            for (int j = 0; j < other.cols; j++) {
-                double sum = 0.0;
-                for (int k = 0; k < this.cols; k++) {
-                    sum += this.data[i][k] * other.data[k][j];
+            for (int k = 0; k < this.cols; k++) {
+                double aIk = this.data[i][k];
+                if (isZero(aIk)) {
+                    continue;
                 }
-                res.data[i][j] = sum;
+                for (int j = 0; j < other.cols; j++) {
+                    res.data[i][j] += aIk * other.data[k][j];
+                }
             }
         }
         return res;
@@ -109,11 +122,16 @@ public class Matrix {
         double det = 1.0;
         for (int i = 0; i < n; i++) {
             int pivot = i;
-            while (pivot < n && Math.abs(a[pivot][i]) < 1e-9) {
-                pivot++;
+            double maxVal = Math.abs(a[i][i]);
+            for (int row = i + 1; row < n; row++) {
+                double curVal = Math.abs(a[row][i]);
+                if (curVal > maxVal) {
+                    maxVal = curVal;
+                    pivot = row;
+                }
             }
 
-            if (pivot == n) {
+            if (isZero(maxVal)) {
                 return 0.0;
             }
 
@@ -124,13 +142,15 @@ public class Matrix {
                 det = -det;
             }
 
+            double pivotVal = a[i][i];
+            det *= pivotVal;
+
             for (int k = i + 1; k < n; k++) {
-                double factor = a[k][i] / a[i][i];
-                for (int j = i; j < n; j++) {
+                double factor = a[k][i] / pivotVal;
+                for (int j = i + 1; j < n; j++) {
                     a[k][j] -= factor * a[i][j];
                 }
             }
-            det *= a[i][i];
         }
         return det;
     }
@@ -158,6 +178,20 @@ public class Matrix {
                 }
             }
             return max;
+        }
+
+        if (equal(p, 1.0)) {
+            double sum = 0.0;
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols; j++) {
+                    sum += Math.abs(this.data[i][j]);
+                }
+            }
+            return sum;
+        }
+
+        if (equal(p, 2.0)) {
+            return norm2();
         }
 
         double sum = 0.0;
@@ -211,11 +245,27 @@ public class Matrix {
             return sum;
         }
 
-        Matrix curr = this;
-        for (int p = 1; p < power; p++) {
-            curr = curr.multiplyMatrix(this);
+        // Бінарне піднесення матриці до степеня: O(n^3 * log(power))
+        Matrix base = this;
+        int exp = power;
+
+        while ((exp & 1) == 0) {
+            base = base.multiplyMatrix(base);
+            exp >>= 1;
         }
-        return curr.trace();
+
+        Matrix result = base;
+        exp >>= 1;
+
+        while (exp > 0) {
+            base = base.multiplyMatrix(base);
+            if ((exp & 1) == 1) {
+                result = result.multiplyMatrix(base);
+            }
+            exp >>= 1;
+        }
+
+        return result.trace();
     }
 
     public Matrix inverse() {
@@ -230,8 +280,6 @@ public class Matrix {
             augmented[i][n + i] = 1.0;
         }
 
-        final double EPS = 1e-12;
-
         for (int col = 0; col < n; col++) {
             int pivotRow = col;
             double maxVal = Math.abs(augmented[col][col]);
@@ -243,7 +291,7 @@ public class Matrix {
                 }
             }
 
-            if (maxVal < EPS) {
+            if (isZero(maxVal)) {
                 throw new ArithmeticException("Matrix is singular (determinant is zero), inverse cannot be computed.");
             }
 
@@ -261,7 +309,7 @@ public class Matrix {
             for (int row = 0; row < n; row++) {
                 if (row != col) {
                     double factor = augmented[row][col];
-                    if (Math.abs(factor) > EPS) {
+                    if (!isZero(factor)) {
                         for (int j = col; j < 2 * n; j++) {
                             augmented[row][j] -= factor * augmented[col][j];
                         }
@@ -295,8 +343,6 @@ public class Matrix {
             rhs[i] = b[i];
         }
 
-        final double EPS = 1e-12;
-
         for (int col = 0; col < n; col++) {
             int pivotRow = col;
             double maxVal = Math.abs(a[col][col]);
@@ -308,7 +354,7 @@ public class Matrix {
                 }
             }
 
-            if (maxVal < EPS) {
+            if (isZero(maxVal)) {
                 throw new ArithmeticException("Matrix is singular or system has no unique solution.");
             }
 
@@ -324,6 +370,9 @@ public class Matrix {
 
             for (int row = col + 1; row < n; row++) {
                 double factor = a[row][col] / a[col][col];
+                if (isZero(factor)) {
+                    continue;
+                }
                 for (int k = col + 1; k < n; k++) {
                     a[row][k] -= factor * a[col][k];
                 }
@@ -365,7 +414,7 @@ public class Matrix {
                 }
             }
 
-            if (maxVal > 1e-12) {
+            if (maxVal > EPS) {
                 if (pivotRow != col + 1) {
                     double[] temp = h[col + 1];
                     h[col + 1] = h[pivotRow];
@@ -393,7 +442,7 @@ public class Matrix {
         double[] buffer = new double[n];
         int count = 0;
         int m = n - 1;
-        final double EPS = 1e-10;
+        final double QR_EPS = 1e-10;
         int iterations = 0;
         final int MAX_ITERS = 100 * n;
 
@@ -408,14 +457,14 @@ public class Matrix {
             }
 
             double pSub = Math.abs(h[m][m - 1]);
-            if (pSub <= EPS * (Math.abs(h[m - 1][m - 1]) + Math.abs(h[m][m]))) {
+            if (pSub <= QR_EPS * (Math.abs(h[m - 1][m - 1]) + Math.abs(h[m][m]))) {
                 buffer[count++] = h[m][m];
                 m--;
                 iterations = 0;
                 continue;
             }
 
-            if (m == 1 || Math.abs(h[m - 1][m - 2]) <= EPS * (Math.abs(h[m - 2][m - 2]) + Math.abs(h[m - 1][m - 1]))) {
+            if (m == 1 || Math.abs(h[m - 1][m - 2]) <= QR_EPS * (Math.abs(h[m - 2][m - 2]) + Math.abs(h[m - 1][m - 1]))) {
                 double a = h[m - 1][m - 1];
                 double b = h[m - 1][m];
                 double c = h[m][m - 1];
@@ -445,7 +494,7 @@ public class Matrix {
             double det = a * d - b * c;
             double discr = tr * tr - 4 * det;
 
-            double mu = d;
+            double mu;
             if (discr >= 0) {
                 double l1 = (tr + Math.sqrt(discr)) / 2.0;
                 double l2 = (tr - Math.sqrt(discr)) / 2.0;
