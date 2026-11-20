@@ -25,7 +25,7 @@ public class ConstantExpression extends Expression {
 
     @Override
     public String toString() {
-        if (value == (long) value) {
+        if (value < Long.MAX_VALUE && value == (long) value) {
             return String.format("%d", (long) value);
         } else {
             return String.format("%s", value);
