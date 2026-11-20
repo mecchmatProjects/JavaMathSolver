@@ -3,8 +3,16 @@ package solver.algebra;
 import java.util.Arrays;
 
 public class Polynomial {
-    private static final double EPSILON = 1e-12;
+    private static final double EPSILON = 1e-15;
     private final double[] coeffs;
+
+    private static boolean equal(double a, double b) {
+        return Math.abs(a - b) <= EPSILON;
+    }
+
+    private static boolean isZero(double value) {
+        return Math.abs(value) <= EPSILON;
+    }
 
     public Polynomial(double[] coefficients) {
         if (coefficients == null || coefficients.length == 0) {
@@ -18,7 +26,7 @@ public class Polynomial {
         }
 
         int len = coefficients.length;
-        while (len > 1 && coefficients[len - 1] == 0.0) {
+        while (len > 1 && isZero(coefficients[len - 1])) {
             len--;
         }
 
@@ -33,7 +41,7 @@ public class Polynomial {
     }
 
     public boolean isZero() {
-        return coeffs.length == 1 && coeffs[0] == 0.0;
+        return coeffs.length == 1 && isZero(coeffs[0]);
     }
 
     public double getCoefficient(int power) {
@@ -87,7 +95,7 @@ public class Polynomial {
     }
 
     private static String formatCoeff(double val) {
-        if (Math.abs(val - Math.round(val)) < EPSILON) {
+        if (equal(val, Math.round(val))) {
             return String.valueOf(Math.round(val));
         }
         return String.valueOf(val);
@@ -101,7 +109,7 @@ public class Polynomial {
         StringBuilder sb = new StringBuilder();
         for (int i = coeffs.length - 1; i >= 0; i--) {
             double c = coeffs[i];
-            if (c == 0.0) continue;
+            if (isZero(c)) continue;
 
             if (sb.length() > 0) {
                 sb.append(c > 0 ? " + " : " - ");
@@ -110,7 +118,7 @@ public class Polynomial {
             }
 
             double absC = Math.abs(c);
-            if (i == 0 || Math.abs(absC - 1.0) >= EPSILON) {
+            if (i == 0 || !equal(absC, 1.0)) {
                 sb.append(formatCoeff(absC));
             }
             if (i >= 1) {
@@ -194,14 +202,14 @@ public class Polynomial {
         for (double c : rem) {
             maxAbs = Math.max(maxAbs, Math.abs(c));
         }
-        double remThreshold = EPSILON * maxAbs;
+        double remThreshold = 1e-12 * maxAbs;
 
         int divisorDeg = divisor.degree();
         double leadDivisorCoeff = divisor.coeffs[divisorDeg];
         double[] quot = new double[this.degree() - divisorDeg + 1];
 
         for (int i = this.degree() - divisorDeg; i >= 0; i--) {
-            if (Math.abs(rem[i + divisorDeg]) <= remThreshold) {
+            if (isZero(rem[i + divisorDeg]) || Math.abs(rem[i + divisorDeg]) <= remThreshold) {
                 rem[i + divisorDeg] = 0.0;
                 continue;
             }
@@ -245,10 +253,10 @@ public class Polynomial {
             double d = b * b - 4.0 * a * c;
             double scale = Math.max(b * b, Math.abs(4.0 * a * c));
 
-            if (d < -EPSILON * scale) {
+            if (d < -1e-12 * scale) {
                 return new double[0];
             }
-            if (Math.abs(d) <= EPSILON * scale) {
+            if (Math.abs(d) <= 1e-12 * scale) {
                 return new double[]{(-b / (2.0 * a)) + 0.0};
             }
             double q = -0.5 * (b + Math.copySign(Math.sqrt(d), b));

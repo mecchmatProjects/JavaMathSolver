@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 class PolynomialTest {
 
-    private static final double EPS = 1e-9;
+    private static final double EPS = 1e-13;
 
     private static Polynomial poly(double... coefficients) {
         return new Polynomial(coefficients);
