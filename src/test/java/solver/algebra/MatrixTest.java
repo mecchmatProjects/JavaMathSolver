@@ -593,4 +593,27 @@ public class MatrixTest {
         Matrix m = new Matrix(data);
         assertThrows(ArithmeticException.class, m::realEigenvals);
     }
+
+    @Test
+    void testDeterminantZeroOnDiagonal() {
+        Matrix m = new Matrix(new double[][]{{0.0, 1.0}, {1.0, 0.0}});
+        assertEquals(-1.0, m.determinant(), EPSILON);
+    }
+
+    @Test
+    void testTracePowerLargeExponent() {
+        Matrix identity = new Matrix(new double[][]{
+                {1.0, 0.0, 0.0},
+                {0.0, 1.0, 0.0},
+                {0.0, 0.0, 1.0}
+        });
+        assertEquals(3.0, identity.tracePower(1_000_000), EPSILON);
+    }
+
+    @Test
+    void testMultiplyMatrixSmallValues() {
+        Matrix a = new Matrix(new double[][]{{1e-13}});
+        Matrix b = new Matrix(new double[][]{{1e13}});
+        assertEquals(1.0, a.multiplyMatrix(b).get(0, 0), EPSILON);
+    }
 }
