@@ -65,7 +65,6 @@ public class Matrix {
         return data[i][j];
     }
 
-    @SuppressWarnings("unused")
     public double[][] getData() {
         double[][] copy = new double[rows][cols];
         for (int i = 0; i < rows; i++) {
@@ -97,7 +96,7 @@ public class Matrix {
         for (int i = 0; i < this.rows; i++) {
             for (int k = 0; k < this.cols; k++) {
                 double aIk = this.data[i][k];
-                if (isZero(aIk)) {
+                if (aIk == 0.0) {
                     continue;
                 }
                 for (int j = 0; j < other.cols; j++) {
