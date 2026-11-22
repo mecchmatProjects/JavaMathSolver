@@ -616,4 +616,14 @@ public class MatrixTest {
         Matrix b = new Matrix(new double[][]{{1e13}});
         assertEquals(1.0, a.multiplyMatrix(b).get(0, 0), EPSILON);
     }
+
+    @Test
+    void testSolveSmallFactorNotSkipped() {
+        double[][] a = {{1.0, 1e13}, {1e-13, 2.0}};
+        double[] b = {1.0, 1.0};
+        double[] x = new Matrix(a).solve(b);
+        for (int i = 0; i < 2; i++) {
+            assertEquals(b[i], a[i][0] * x[0] + a[i][1] * x[1], 1e-6);
+        }
+    }
 }

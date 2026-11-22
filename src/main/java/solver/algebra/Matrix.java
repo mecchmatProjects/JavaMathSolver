@@ -308,7 +308,7 @@ public class Matrix {
             for (int row = 0; row < n; row++) {
                 if (row != col) {
                     double factor = augmented[row][col];
-                    if (!isZero(factor)) {
+                    if (factor != 0.0) {
                         for (int j = col; j < 2 * n; j++) {
                             augmented[row][j] -= factor * augmented[col][j];
                         }
@@ -369,7 +369,7 @@ public class Matrix {
 
             for (int row = col + 1; row < n; row++) {
                 double factor = a[row][col] / a[col][col];
-                if (isZero(factor)) {
+                if (factor == 0.0) {
                     continue;
                 }
                 for (int k = col + 1; k < n; k++) {
