@@ -8,6 +8,17 @@ public class NumericArray {
     private final double[] data;
     private static final double EPSILON = 1e-9;
 
+    private static boolean equal(double a, double b) {
+        if (Double.compare(a, b) == 0) {
+            return true;
+        }
+        return Math.abs(a - b) <= EPSILON;
+    }
+
+    private static boolean isZero(double value) {
+        return Math.abs(value) <= EPSILON;
+    }
+
     private static void validateValue(double value) {
         if (Double.isNaN(value) || Double.isInfinite(value)) {
             throw new IllegalArgumentException("Array elements must be finite numbers");
@@ -120,7 +131,7 @@ public class NumericArray {
         double range = maxVal - minVal;
         double[] normalized = new double[data.length];
 
-        if (range == 0.0) {
+        if (isZero(range)) {
             Arrays.fill(normalized, 0.0);
             return new NumericArray(normalized);
         }
@@ -149,10 +160,7 @@ public class NumericArray {
 
     // Task A3: пошук і підрахунок
     private boolean floatEquals(double a, double b) {
-        if (Double.compare(a, b) == 0) {
-            return true;
-        }
-        return Math.abs(a - b) <= EPSILON;
+        return equal(a, b);
     }
 
     public int indexOf(double value) {

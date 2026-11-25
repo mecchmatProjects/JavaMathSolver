@@ -50,12 +50,36 @@ public final class Tokenizer {
      *
      * @throws IllegalArgumentException якщо {@code expression == null}
      */
-    public static String[] lexemes(String expression){
+    public static String[] lexemes(String expression) {
+        Token[] tokens = tokenize(expression);
+        String[] result = new String[tokens.length];
+        for (int i = 0; i < tokens.length; i++) {
+            result[i] = tokens[i].getLexeme();
+        }
+        return result;
+    }
+
+    // C15: String -> Token[], "2*x + 3" -> [NUMBER(2), MULTIPLY(*), IDENTIFIER(x), PLUS(+), NUMBER(3)]
+
+    /**
+     * Розбиває вираз на токени: кожен {@link Token} несе і тип, і текст лексеми.
+     *
+     * <p>Це первинний метод tokenizer-а. Правила розбиття ті самі, що описані
+     * в {@link #lexemes}, а правила визначення типу — ті, що в {@link #tokenizeTypes};
+     * обидва методи тепер лише розпаковують результат цього.
+     *
+     * <p>Тип обчислюється в тому ж проході, що й лексема: він однаково потрібен
+     * для контекстного правила знака мінуса, тому окремого проходу класифікації
+     * більше немає.
+     *
+     * @throws IllegalArgumentException якщо {@code expression == null}
+     */
+    public static Token[] tokenize(String expression) {
         if (expression == null) {
             throw new IllegalArgumentException(Messages.ERR_NULL_EXPRESSION);
         }
         // Токенів не більше, ніж символів: кожна лексема займає хоча б 1 символ.
-        String[] buffer = new String[expression.length()];
+        Token[] buffer = new Token[expression.length()];
         int count = 0;
         // Крок циклу це не i++, а перехід на кінець поточної лексеми.
         // continue теж виконує крок, тому пробіл просто пропускається.
@@ -72,8 +96,9 @@ public final class Tokenizer {
             }
 
             String lexeme = expression.substring(i, end);
-            buffer[count++] = lexeme;
-            previous = typeOf(lexeme);
+            TokenType type = typeOf(lexeme);
+            buffer[count++] = new Token(type, lexeme);
+            previous = type;
         }
         return Arrays.copyOf(buffer, count);
     }
@@ -91,15 +116,12 @@ public final class Tokenizer {
      * @throws IllegalArgumentException якщо {@code expression == null}
      */
     public static TokenType[] tokenizeTypes(String expression) {
-        String[] lexemes = lexemes(expression);
-
-        TokenType[] buffer = new TokenType[lexemes.length];
-
-        for (int i = 0; i < lexemes.length; i++) {
-            buffer[i] = typeOf(lexemes[i]);
+        Token[] tokens = tokenize(expression);
+        TokenType[] result = new TokenType[tokens.length];
+        for (int i = 0; i < tokens.length; i++) {
+            result[i] = tokens[i].getType();
         }
-
-        return buffer;
+        return result;
     }
 
     // C8: перевірка коректності на рівні лексем
@@ -113,12 +135,12 @@ public final class Tokenizer {
      * @throws IllegalArgumentException якщо {@code expression == null}
      */
     public static boolean isValid(String expression) {
-        TokenType[] types = tokenizeTypes(expression);
-        if (types.length == 0) {
+        Token[] tokens = tokenize(expression);
+        if (tokens.length == 0) {
             return false;
         }
-        for (TokenType type : types) {
-            if (type == TokenType.UNKNOWN) {
+        for (Token token : tokens) {
+            if (token.getType() == TokenType.UNKNOWN) {
                 return false;
             }
         }
@@ -137,10 +159,10 @@ public final class Tokenizer {
      * Лексеми типу {@code UNKNOWN} не враховуються.
      */
     public static int[] tokenStatistics(String expression) {
-        String[] lexemes = lexemes(expression);
+        Token[] tokens = tokenize(expression);
         int[] stats = new int[4];
-        for (String lexeme : lexemes) {
-            switch (typeOf(lexeme)) {
+        for (Token token : tokens) {
+            switch (token.getType()) {
                 case NUMBER -> stats[0]++;
                 case IDENTIFIER -> stats[1]++;
                 case PLUS, MINUS, MULTIPLY, DIVIDE, POWER -> stats[2]++;

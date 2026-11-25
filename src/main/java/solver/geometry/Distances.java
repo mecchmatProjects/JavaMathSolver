@@ -4,7 +4,7 @@ import java.util.Locale;
 import static solver.core.Output.*;
 
 /**
- * GEO: відстані, середина відрізка, колінеарність, чверть.
+ * GEO: distances, midpoint, collinearity, quadrant.
  */
 public final class Distances {
 
@@ -25,22 +25,19 @@ public final class Distances {
     }
 
     public static void calculateMidpoint(double x1, double y1, double x2, double y2) {
-        double midX = (x1 + x2) / 2;
-        double midY = (y1 + y2) / 2;
-        printResult(String.format(Locale.ROOT, "(%f, %f)", midX, midY));
+        Point mid = Point.of(x1, y1).midpoint(Point.of(x2, y2));
+        printResult(String.format(Locale.ROOT, "(%f, %f)", mid.x, mid.y));
     }
 
     public static void calculateCollinear(double x1, double y1, double x2, double y2, double x3, double y3) {
-        double crossProduct = (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1);
-        double len1 = Math.hypot(x2 - x1, y2 - y1);
-        double len2 = Math.hypot(x3 - x1, y3 - y1);
-        double len3 = Math.hypot(x3 - x2, y3 - y2);
-        if (len1 == 0 || len2 == 0 || len3 == 0) {
+        Point a = Point.of(x1, y1);
+        Point b = Point.of(x2, y2);
+        Point c = Point.of(x3, y3);
+        if (a.distanceTo(b) == 0 || a.distanceTo(c) == 0 || b.distanceTo(c) == 0) {
             printResult(true);
             return;
         }
-        double scale = len1 * len2;
-        printResult(Math.abs(crossProduct) <= 1e-9 * scale);
+        printResult(GeoMath.orient(a, b, c) == 0);
     }
 
     public static void calculateQuadrant(double x, double y) {

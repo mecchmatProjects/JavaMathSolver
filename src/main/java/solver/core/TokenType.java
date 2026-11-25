@@ -11,7 +11,10 @@ public enum TokenType {
     POWER,
     LEFT_PARENTHESIS,
     RIGHT_PARENTHESIS,
-    UNKNOWN;
+    UNKNOWN,
+
+    /** End-of-stream sentinel. Produced only by TokenStream, never by Tokenizer. */
+    EOF;
 
     public static TokenType operatorType(char c) {
         switch (c) {
