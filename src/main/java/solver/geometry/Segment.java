@@ -70,12 +70,13 @@ public final class Segment implements Figure {
     /** The point of the segment closest to p (projection clamped to [a, b]). */
     public Point closestPointTo(Point p) {
         Vector2D ab = toVector();
-        double len2 = ab.lengthSquared();
-        if (len2 == 0) {
+        double scale = Math.max(Math.abs(ab.x), Math.abs(ab.y));
+        if (scale == 0) {
             return a;
         }
-        double t = Math.max(0.0, Math.min(1.0, a.vectorTo(p).dot(ab) / len2));
-        return a.translate(ab.scale(t));
+        Vector2D unit = Vector2D.of(ab.x / scale, ab.y / scale).normalize();
+        double projectedLength = Math.max(0.0, Math.min(ab.length(), a.vectorTo(p).dot(unit)));
+        return a.translate(unit.scale(projectedLength));
     }
 
     /** Collinearity: whether p lies on the line through this segment. */
