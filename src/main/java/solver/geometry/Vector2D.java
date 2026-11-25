@@ -72,10 +72,16 @@ public final class Vector2D {
     }
 
     public double angleTo(Vector2D o) {
-        if (lengthSquared() == 0 || o.lengthSquared() == 0) {
+        double scale = Math.max(Math.abs(x), Math.abs(y));
+        double otherScale = Math.max(Math.abs(o.x), Math.abs(o.y));
+        if (scale == 0 || otherScale == 0) {
             throw new ArithmeticException("Angle with zero vector is undefined");
         }
-        return Math.atan2(Math.abs(cross(o)), dot(o));
+        double ax = x / scale;
+        double ay = y / scale;
+        double bx = o.x / otherScale;
+        double by = o.y / otherScale;
+        return Math.atan2(Math.abs(ax * by - ay * bx), ax * bx + ay * by);
     }
 
     public boolean isParallelTo(Vector2D o, double eps) {
